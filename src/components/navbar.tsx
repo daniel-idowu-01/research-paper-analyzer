@@ -25,9 +25,11 @@ import {
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { usePathname } from "next/navigation";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -59,15 +61,23 @@ export function Navbar() {
                   <span>Demo Paper</span>
                 </Link>
                 <Link
-                  href="#"
+                  href="/my-papers"
                   className="flex items-center gap-2 text-sm"
                   onClick={() => setIsOpen(false)}
                 >
                   <History className="w-4 h-4" />
-                  <span>Recent Papers</span>
+                  <span>My Papers</span>
                 </Link>
                 <Link
-                  href="#"
+                  href="/profile"
+                  className="flex items-center gap-2 text-sm"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <User className="w-4 h-4" />
+                  <span>Profile</span>
+                </Link>
+                <Link
+                  href="/settings"
                   className="flex items-center gap-2 text-sm"
                   onClick={() => setIsOpen(false)}
                 >
@@ -85,19 +95,25 @@ export function Navbar() {
         <nav className="hidden md:flex items-center gap-6">
           <Link
             href="/demo"
-            className="text-sm font-medium transition-colors hover:text-primary"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname === "/demo" ? "text-primary" : ""
+            }`}
           >
             Demo Paper
           </Link>
           <Link
-            href="#"
-            className="text-sm font-medium transition-colors hover:text-primary"
+            href="/my-papers"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname === "/my-papers" ? "text-primary" : ""
+            }`}
           >
-            Recent Papers
+            My Papers
           </Link>
           <Link
-            href="#"
-            className="text-sm font-medium transition-colors hover:text-primary"
+            href="/settings"
+            className={`text-sm font-medium transition-colors hover:text-primary ${
+              pathname === "/settings" ? "text-primary" : ""
+            }`}
           >
             Settings
           </Link>
