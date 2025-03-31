@@ -93,7 +93,7 @@ export function Navbar() {
             <span className="text-lg font-semibold">Research Analyzer</span>
           </Link>
         </div>
-        <nav className="hidden md:flex items-center gap-6">
+        {/* <nav className="hidden md:flex items-center gap-6">
           <Link
             href="/demo"
             className={`text-sm font-medium transition-colors hover:text-primary ${
@@ -118,7 +118,7 @@ export function Navbar() {
           >
             Settings
           </Link>
-        </nav>
+        </nav> */}
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
