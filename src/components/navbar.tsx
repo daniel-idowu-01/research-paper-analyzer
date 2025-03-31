@@ -25,11 +25,12 @@ import {
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -182,22 +183,34 @@ export function Navbar() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => router.push("/profile")}
+                >
                   <User className="w-4 h-4 mr-2" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => router.push("/my-papers")}
+                >
                   <FileText className="w-4 h-4 mr-2" />
                   <span>My Papers</span>
                   <Badge className="ml-auto">12</Badge>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => router.push("/settings")}
+                >
                   <Settings className="w-4 h-4 mr-2" />
                   <span>Settings</span>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500">
+              <DropdownMenuItem
+                className="cursor-pointer text-red-500 focus:text-red-500"
+                onClick={() => router.push("/logout")}
+              >
                 <LogOut className="w-4 h-4 mr-2" />
                 <span>Log out</span>
               </DropdownMenuItem>
