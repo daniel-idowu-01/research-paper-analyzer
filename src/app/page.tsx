@@ -1,3 +1,8 @@
+"use client";
+
+import type React from "react";
+
+import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,10 +12,105 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileUp, Search, Sparkles } from "lucide-react";
+import { FileUp, Search, Sparkles, FileText } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const [isDragging, setIsDragging] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!isDragging) {
+        setIsDragging(true);
+      }
+    },
+    [isDragging]
+  );
+
+  const validateFile = (file: File): boolean => {
+    // Check file type
+    if (file.type !== "application/pdf") {
+      setError("Only PDF files are supported");
+      return false;
+    }
+
+    // Check file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File size exceeds 10MB limit");
+      return false;
+    }
+
+    setError(null);
+    return true;
+  };
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (validateFile(droppedFile)) {
+        setFile(droppedFile);
+        handleFileUpload(droppedFile);
+      }
+    }
+  }, []);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile = e.target.files[0];
+      if (validateFile(selectedFile)) {
+        setFile(selectedFile);
+        handleFileUpload(selectedFile);
+      }
+    }
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true);
+
+    try {
+      // In a real application, you would upload the file to your server here
+      // For this demo, we'll simulate a file upload with a timeout
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // After successful "upload", redirect to the demo page
+      // In a real app, you might pass the file ID or other parameters
+      router.push("/demo");
+    } catch (error) {
+      console.error("Upload failed:", error);
+      setError("Failed to upload file. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 mx-auto">
       <div className="space-y-6 text-center">
@@ -31,15 +131,60 @@ export default function Home() {
           <CardDescription>Supported formats: PDF (max 10MB)</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg border-gray-200 dark:border-gray-800">
-            <FileUp className="w-12 h-12 mb-4 text-gray-500" />
-            <p className="mb-2 text-sm font-medium">
-              Drag and drop your file here or click to browse
-            </p>
-            <p className="text-xs text-gray-500">
-              Your document will be processed securely
-            </p>
-            <Button className="mt-4">Select PDF</Button>
+          <div
+            className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg transition-colors ${
+              isDragging
+                ? "border-primary bg-primary/5"
+                : file
+                ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                : "border-gray-200 dark:border-gray-800"
+            }`}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            {file ? (
+              <>
+                <FileText className="w-12 h-12 mb-4 text-green-500" />
+                <p className="mb-2 text-sm font-medium">{file.name}</p>
+                <p className="text-xs text-gray-500">
+                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </>
+            ) : (
+              <>
+                <FileUp className="w-12 h-12 mb-4 text-gray-500" />
+                <p className="mb-2 text-sm font-medium">
+                  Drag and drop your file here or click to browse
+                </p>
+                <p className="text-xs text-gray-500">
+                  Your document will be processed securely
+                </p>
+              </>
+            )}
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              accept=".pdf"
+              className="hidden"
+            />
+
+            <Button
+              className="mt-4"
+              onClick={handleButtonClick}
+              disabled={isUploading}
+            >
+              {isUploading
+                ? "Uploading..."
+                : file
+                ? "Change File"
+                : "Select PDF"}
+            </Button>
+
+            {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
