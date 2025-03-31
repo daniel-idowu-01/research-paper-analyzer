@@ -1,3 +1,6 @@
+"use client";
+
+import { useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+//import { toast } from "@/components/ui/use-toast";
 import {
   ArrowLeft,
   BookOpen,
@@ -19,11 +23,186 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+interface Paper {
+  title: string;
+  authors: string[];
+  publishedDate: string;
+  topics: string[];
+  summary: string;
+  keyFindings: {
+    primary: string;
+    methodology: string;
+    applications: string;
+  };
+  performanceMetrics: {
+    model: string;
+    accuracy: string;
+    parameters: string;
+    trainingTime: string;
+  }[];
+  references: {
+    id: number;
+    citation: string;
+    citedBy: number;
+    impactFactor: number;
+  }[];
+}
+
+const paperData: Paper = {
+  title: "Advances in Neural Information Processing Systems",
+  authors: ["J. Smith", "A. Johnson", "M. Williams"],
+  publishedDate: "June 2023",
+  topics: ["Machine Learning", "Neural Networks", "Deep Learning"],
+  summary:
+    "This paper introduces a novel approach to neural network architecture...",
+  keyFindings: {
+    primary: "The proposed attention mechanism achieves 93.7% accuracy...",
+    methodology:
+      "Novel sparse attention patterns reduce quadratic complexity...",
+    applications:
+      "The method enables deployment on resource-constrained devices...",
+  },
+  performanceMetrics: [
+    {
+      model: "Proposed Method",
+      accuracy: "93.7%",
+      parameters: "45M",
+      trainingTime: "18 hours",
+    },
+    {
+      model: "Previous SOTA",
+      accuracy: "92.3%",
+      parameters: "62M",
+      trainingTime: "28 hours",
+    },
+    {
+      model: "Baseline",
+      accuracy: "89.1%",
+      parameters: "38M",
+      trainingTime: "15 hours",
+    },
+  ],
+  references: [
+    {
+      id: 1,
+      citation:
+        'Smith, J., Johnson, A., et al. (2022). "Advances in Attention Mechanisms for Computer Vision."',
+      citedBy: 128,
+      impactFactor: 9.2,
+    },
+    // ... other references
+  ],
+};
+
+const PaperDetailsCard = ({ paper }: { paper: Paper }) => (
+  <Card>
+    <CardHeader className="pb-3">
+      <CardTitle>Paper Details</CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-4">
+      <div>
+        <h3 className="mb-1 text-sm font-medium">Title</h3>
+        <p className="text-sm text-gray-500">{paper.title}</p>
+      </div>
+      <div>
+        <h3 className="mb-1 text-sm font-medium">Authors</h3>
+        <p className="text-sm text-gray-500">{paper.authors.join(", ")}</p>
+      </div>
+      <div>
+        <h3 className="mb-1 text-sm font-medium">Published</h3>
+        <p className="text-sm text-gray-500">{paper.publishedDate}</p>
+      </div>
+      <div>
+        <h3 className="mb-1 text-sm font-medium">Topics</h3>
+        <div className="flex flex-wrap gap-2">
+          {paper.topics.map((topic) => (
+            <Badge key={topic} variant="secondary">
+              {topic}
+            </Badge>
+          ))}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const ActionButtons = () => {
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = "/api/download-paper";
+    link.setAttribute("download", "research-paper.pdf");
+    link.click();
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Research Paper",
+          text: "Check out this interesting research paper",
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        //toast({ title: "Link copied to clipboard!" });
+      }
+    } catch (err) {
+      console.error("Sharing failed:", err);
+      //toast({ title: "Failed to share", variant: "destructive" });
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2 pt-2">
+      <Button
+        size="sm"
+        variant="outline"
+        className="w-full"
+        onClick={handleDownload}
+      >
+        <Download className="w-4 h-4 mr-2" />
+        Download
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        className="w-full"
+        onClick={handleShare}
+      >
+        <Share2 className="w-4 h-4 mr-2" />
+        Share
+      </Button>
+    </div>
+  );
+};
+
 export default function DemoPage() {
+  const copyToClipboard = useCallback(async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      //toast({ title: "Link copied to clipboard!" });
+    } catch (err) {
+      console.error("Could not copy text: ", err);
+      // Fallback method
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      //toast({ title: "Link copied to clipboard!" });
+    }
+  }, []);
+
+  const memoizedPaperDetails = useMemo(
+    () => <PaperDetailsCard paper={paperData} />,
+    []
+  );
+
   return (
     <div className="container flex flex-col min-h-screen px-4 py-6 mx-auto">
       <div className="flex items-center mb-6">
-        <Link href="/">
+        <Link href="/" aria-label="Go back">
           <Button variant="ghost" size="icon" className="mr-2">
             <ArrowLeft className="w-4 h-4" />
           </Button>
@@ -34,47 +213,9 @@ export default function DemoPage() {
       <div className="grid gap-6 md:grid-cols-[300px_1fr]">
         {/* Sidebar */}
         <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle>Paper Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="mb-1 text-sm font-medium">Title</h3>
-                <p className="text-sm text-gray-500">
-                  Advances in Neural Information Processing Systems
-                </p>
-              </div>
-              <div>
-                <h3 className="mb-1 text-sm font-medium">Authors</h3>
-                <p className="text-sm text-gray-500">
-                  J. Smith, A. Johnson, M. Williams
-                </p>
-              </div>
-              <div>
-                <h3 className="mb-1 text-sm font-medium">Published</h3>
-                <p className="text-sm text-gray-500">June 2023</p>
-              </div>
-              <div>
-                <h3 className="mb-1 text-sm font-medium">Topics</h3>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">Machine Learning</Badge>
-                  <Badge variant="secondary">Neural Networks</Badge>
-                  <Badge variant="secondary">Deep Learning</Badge>
-                </div>
-              </div>
-              <div className="flex gap-2 pt-2">
-                <Button size="sm" variant="outline" className="w-full">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
-                </Button>
-                <Button size="sm" variant="outline" className="w-full">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {memoizedPaperDetails}
+
+          <ActionButtons />
 
           <Card>
             <CardHeader className="pb-3">
@@ -87,12 +228,15 @@ export default function DemoPage() {
                   className="pl-8"
                   type="search"
                   placeholder="Search terms..."
+                  aria-label="Search within paper"
                 />
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Main Content - Rest of your tabs content remains similar but would also benefit from component extraction */}
+        {/* ... */}
         {/* Main Content */}
         <div className="space-y-6">
           <Tabs defaultValue="summary">
