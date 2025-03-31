@@ -122,7 +122,7 @@ export default function MyPapersPage() {
   );
 
   return (
-    <div className="container py-10">
+    <div className="container px-4 py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold">My Papers</h1>
         <Button onClick={() => router.push("/")}>

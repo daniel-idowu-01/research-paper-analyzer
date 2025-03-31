@@ -46,7 +46,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container py-10">
+    <div className="container px-4 py-10">
       <h1 className="mb-6 text-3xl font-bold">Profile</h1>
 
       <div className="grid gap-6 md:grid-cols-[300px_1fr]">
