@@ -1,9 +1,14 @@
 "use client";
-
+import Link from "next/link";
 import type React from "react";
-
 import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { calculatePasswordStrength } from "@/lib/helpers";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Card,
   CardContent,
@@ -12,11 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { calculatePasswordStrength } from "@/lib/helpers";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
 import {
   AlertCircle,
   CheckCircle,
@@ -24,20 +24,18 @@ import {
   Loader2,
   LockKeyhole,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ResetPasswordPage() {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isTokenValid, setIsTokenValid] = useState<boolean | null>(null);
-  const [isTokenChecking, setIsTokenChecking] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams?.get("token");
+  const [password, setPassword] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isTokenChecking, setIsTokenChecking] = useState(true);
+  const [isTokenValid, setIsTokenValid] = useState<boolean | null>(null);
 
   // Simulate token validation
   useEffect(() => {
