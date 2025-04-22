@@ -114,7 +114,7 @@ export default function SignupPage() {
     !agreedToTerms;
 
   return (
-    <div className="container flex flex-col items-center justify-center px-4 py-5">
+    <div className="container flex flex-col items-center justify-center px-4 py-7">
       <div className="flex items-center mb-5">
         <FileText className="w-6 h-6 mr-2" />
         <h1 className="text-2xl font-bold">Research Analyzer</h1>
@@ -204,11 +204,11 @@ export default function SignupPage() {
               >
                 I agree to the
                 <Link href="#" className=" hover:underline">
-                  terms of service
+                  Terms of Service
                 </Link>
                 and
                 <Link href="#" className=" hover:underline">
-                  privacy policy
+                  Privacy Policy
                 </Link>
               </Label>
             </div>
