@@ -23,8 +23,10 @@ import { AlertCircle, FileText, Github, Loader2 } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
+  const [data, setData] = useState("");
+  const [error, setError] = useState("");
+  const { loading, sendRequest } = useApi();
   const [rememberMe, setRememberMe] = useState(false);
-  const { data, loading, error, sendRequest } = useApi();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -41,10 +43,7 @@ export default function SignupPage() {
 
     // Basic validation
     if (!formData.email || !formData.password) {
-      toast({
-        title: "Invalid Fields",
-        description: "Please fill in all fields",
-      });
+      setError("Please fill in all fields");
       return;
     }
 
@@ -54,19 +53,13 @@ export default function SignupPage() {
         password: formData.password,
       });
 
-      setTimeout(() => {
-        toast({
-          title: "Success",
-          description: "Login successful!",
-        });
+      setData("Login successful!");
 
+      setTimeout(() => {
         router.push("/");
       }, 2000);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-      });
+      setError(error?.message || "Server error");
       return;
     }
   };
@@ -95,6 +88,13 @@ export default function SignupPage() {
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="w-4 h-4" />
               <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {data && (
+            <Alert variant="success" className="mb-4">
+              <AlertCircle className="w-4 h-4" />
+              <AlertDescription>{data}</AlertDescription>
             </Alert>
           )}
 
