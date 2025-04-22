@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Google } from "@/components/ui/google";
+import { useUserStore } from "@/stores/user-store";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -23,6 +24,7 @@ import { AlertCircle, FileText, Github, Loader2 } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { setUser } = useUserStore();
   const [data, setData] = useState("");
   const [error, setError] = useState("");
   const { loading, sendRequest } = useApi();
@@ -48,10 +50,12 @@ export default function SignupPage() {
     }
 
     try {
-      await sendRequest("/api/auth/login", "POST", {
+      const response = await sendRequest("/api/auth/login", "POST", {
         email: formData.email,
         password: formData.password,
       });
+
+      setUser(response.user)
 
       setData("Login successful!");
 

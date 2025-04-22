@@ -1,7 +1,13 @@
 "use client";
-
 import Link from "next/link";
+import { useApi } from "@/hooks/use-api";
+import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useUserStore } from "@/stores/user-store";
+import { usePathname, useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +17,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Bell,
   BookOpen,
@@ -22,17 +27,32 @@ import {
   Settings,
   User,
 } from "lucide-react";
-import { useState } from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
-import { usePathname, useRouter } from "next/navigation";
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
   const router = useRouter();
+  const pathname = usePathname();
+  const { sendRequest } = useApi();
+  const [isOpen, setIsOpen] = useState(false);
+  const { user, setUser, clearUser } = useUserStore();
 
-  const isAuthenticated = false;
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await sendRequest("/api/auth/me", "GET");
+        if (response.authenticated) {
+          setUser(response.user);
+        } else {
+          clearUser();
+        }
+      } catch (error) {
+        clearUser();
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const isAuthenticated = !!user;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
