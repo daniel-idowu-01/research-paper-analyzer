@@ -53,6 +53,7 @@ export default function SignupPage() {
       const response = await sendRequest("/api/auth/login", "POST", {
         email: formData.email,
         password: formData.password,
+        rememberMe
       });
 
       setUser(response.user)

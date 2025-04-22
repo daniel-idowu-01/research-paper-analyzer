@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import logger from "@/lib/logger";
 import { cookies } from "next/headers";
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
   try {
     logger.info("Login request received...");
     await connectDB();
-    const { email, password } = await req.json();
+    const { email, password, rememberMe } = await req.json();
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
+      { expiresIn: rememberMe ? "30d" : "1d" }
     );
 
     if (!token) {
