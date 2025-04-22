@@ -25,7 +25,9 @@ import { AlertCircle, FileText, Github, Loader2 } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { data, loading, error, sendRequest } = useApi();
+  const [data, setData] = useState("");
+  const [error, setError] = useState("");
+  const { loading, sendRequest } = useApi();
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -44,26 +46,17 @@ export default function SignupPage() {
 
     // Basic validation
     if (!formData.name || !formData.email || !formData.password) {
-      toast({
-        title: "Invalid Fields",
-        description: "Please fill in all fields",
-      });
+      setError("Please fill in all fields");
       return;
     }
 
     if (!agreedToTerms) {
-      toast({
-        title: "Agreement Required",
-        description: "You must agree to the terms and conditions",
-      });
+      setError("You must agree to the terms and conditions");
       return;
     }
 
     if (passwordStrength < 50) {
-      toast({
-        title: "Invalid password",
-        description: "Please choose a stronger password",
-      });
+      setError("Please choose a stronger password");
       return;
     }
 
@@ -74,19 +67,13 @@ export default function SignupPage() {
         password: formData.password,
       });
 
-      setTimeout(() => {
-        toast({
-          title: "Success",
-          description: "Account created successfully!",
-        });
+      setData("Account created successfully!");
 
+      setTimeout(() => {
         router.push("/auth/login");
       }, 2000);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-      });
+      setError(error?.message || "Server error");
       return;
     }
   };
@@ -134,6 +121,13 @@ export default function SignupPage() {
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="w-4 h-4" />
               <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {data && (
+            <Alert variant="success" className="mb-4">
+              <AlertCircle className="w-4 h-4" />
+              <AlertDescription>{data}</AlertDescription>
             </Alert>
           )}
 

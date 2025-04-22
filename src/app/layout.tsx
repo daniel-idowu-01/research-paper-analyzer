@@ -1,7 +1,8 @@
-import type React from "react";
 import "@/app/globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import type React from "react";
 import { Navbar } from "@/components/navbar";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata = {
   title: "Research Paper Analyzer",
@@ -27,6 +28,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
           </div>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

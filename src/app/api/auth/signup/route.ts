@@ -9,16 +9,16 @@ export async function POST(req: Request) {
   try {
     logger.info("Signup request received...");
     await connectDB();
-    const { firstName, lastName, email, password } = await req.json();
+    const { name, email, password } = await req.json();
 
-    if (!firstName || !lastName || !email || !password) {
+    if (!name || !email || !password) {
       return NextResponse.json(
         { message: "All fields are required" },
         { status: 400 }
       );
     }
 
-    if (firstName.length < 3 || lastName.length < 3) {
+    if (name.length < 3) {
       return NextResponse.json(
         {
           message: "Your first name or last name should more than 2 characters",
@@ -55,9 +55,7 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
-      name: `${firstName} ${lastName}`,
-      firstName,
-      lastName,
+      name,
       email,
       password: hashedPassword,
     });
