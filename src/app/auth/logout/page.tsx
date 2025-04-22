@@ -1,7 +1,9 @@
 "use client";
-
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { LogIn, CheckCircle, AlertCircle, Info } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -10,13 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LogIn, CheckCircle, AlertCircle, Info } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function LogoutPage() {
-  const [countdown, setCountdown] = useState(5);
   const router = useRouter();
+  const [countdown, setCountdown] = useState(5);
 
   // Simulate logout process
   useEffect(() => {
