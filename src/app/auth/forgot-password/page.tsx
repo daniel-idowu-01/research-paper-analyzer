@@ -1,9 +1,13 @@
 "use client";
-
+import Link from "next/link";
 import type React from "react";
-
 import { useState } from "react";
+import { toast } from "@/lib/toast";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, ArrowLeft, FileText, Loader2, Mail } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,24 +16,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, ArrowLeft, FileText, Loader2, Mail } from "lucide-react";
-import Link from "next/link";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Basic validation
     if (!email) {
-      setError("Please enter your email address");
+      toast({
+        title: "Empty Fields",
+        description: "Please enter your email address",
+      });
       return;
     }
 
@@ -43,9 +45,11 @@ export default function ForgotPasswordPage() {
 
       // Simulate successful submission
       setIsSubmitted(true);
-    } catch (err) {
-      // Handle error
-      setError("An error occurred. Please try again.");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+      });
     } finally {
       setIsLoading(false);
     }
