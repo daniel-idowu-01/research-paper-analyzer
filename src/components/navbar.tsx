@@ -192,7 +192,7 @@ export function Navbar() {
                         src="/placeholder.svg?height=32&width=32"
                         alt="User"
                       />
-                      <AvatarFallback>JD</AvatarFallback>
+                      <AvatarFallback>{user?.name[0]}</AvatarFallback>
                     </Avatar>
                     <span className="sr-only">User menu</span>
                   </Button>
@@ -200,9 +200,9 @@ export function Navbar() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">John Doe</p>
+                      <p className="text-sm font-medium">{user.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        john.doe@example.com
+                        {user.email}
                       </p>
                     </div>
                   </DropdownMenuLabel>
