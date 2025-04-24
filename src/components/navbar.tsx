@@ -187,13 +187,14 @@ export function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
-                    <Avatar>
+                    {/* <Avatar>
                       <AvatarImage
                         src="/placeholder.svg?height=32&width=32"
                         alt="User"
                       />
                       <AvatarFallback>{user?.name[0]}</AvatarFallback>
-                    </Avatar>
+                    </Avatar> */}
+                    <User className="h-5 w-5" />
                     <span className="sr-only">User menu</span>
                   </Button>
                 </DropdownMenuTrigger>
