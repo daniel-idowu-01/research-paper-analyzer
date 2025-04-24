@@ -1,5 +1,6 @@
 "use client";
 import { useApi } from "@/hooks/use-api";
+import Spinner from "@/components/spinner";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import {
 
 export default function ProfilePage() {
   const { sendRequest } = useApi();
+  const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     name: "",
@@ -33,6 +35,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
+        setIsLoading(true);
         const response = await sendRequest("/api/profile", "GET");
         if (response) {
           setProfileData({
@@ -47,7 +50,7 @@ export default function ProfilePage() {
       } catch (error) {
         console.error("Failed to fetch profile:", error);
       } finally {
-        // setIsLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -86,6 +89,10 @@ export default function ProfilePage() {
     }
     // Show success message
   };
+
+  if (isLoading) {
+    return <Spinner />;
+  }
 
   return (
     <div className="container px-4 py-10">
