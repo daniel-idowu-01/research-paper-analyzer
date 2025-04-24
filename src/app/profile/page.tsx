@@ -1,7 +1,14 @@
 "use client";
-
-import { useState } from "react";
+import { useApi } from "@/hooks/use-api";
+import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { FileText, Lock, Mail, Save, Upload, User } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -10,24 +17,42 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { FileText, Lock, Mail, Save, Upload, User } from "lucide-react";
 
 export default function ProfilePage() {
+  const { sendRequest } = useApi();
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    bio: "Researcher in Machine Learning and Neural Networks. PhD candidate at University of Technology.",
-    institution: "University of Technology",
-    position: "PhD Candidate",
-    website: "https://johndoe-research.com",
+    name: "",
+    email: "",
+    bio: "",
+    institution: "",
+    position: "",
+    website: "",
   });
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await sendRequest("/api/profile", "GET");
+        if (response) {
+          setProfileData({
+            name: response.name,
+            email: response.email,
+            bio: response.bio || "",
+            institution: response.institution || "",
+            position: response.position || "",
+            website: response.website || "",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      } finally {
+        // setIsLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [sendRequest]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -39,9 +64,26 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleSave = () => {
-    // In a real app, you would save the data to the server here
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      await sendRequest("/api/profile", "PUT", profileData);
+
+      const response = await sendRequest("/api/profile", "GET");
+      if (response) {
+        setProfileData({
+          name: response.name,
+          email: response.email,
+          bio: response.bio || "",
+          institution: response.institution || "",
+          position: response.position || "",
+          website: response.website || "",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+    } finally {
+      setIsEditing(false);
+    }
     // Show success message
   };
 
@@ -60,7 +102,9 @@ export default function ProfilePage() {
                     src="/placeholder.svg?height=128&width=128"
                     alt="Profile"
                   />
-                  <AvatarFallback className="text-2xl">JD</AvatarFallback>
+                  <AvatarFallback className="text-2xl">
+                    {profileData?.name[0]}
+                  </AvatarFallback>
                 </Avatar>
 
                 <div className="text-center">
@@ -176,7 +220,7 @@ export default function ProfilePage() {
                         type="email"
                         value={profileData.email}
                         onChange={handleChange}
-                        disabled={!isEditing}
+                        disabled={true}
                       />
                     </div>
                   </div>

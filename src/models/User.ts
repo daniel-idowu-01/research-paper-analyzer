@@ -23,6 +23,19 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    institution: {
+      type: String,
+    },
+    position: {
+      type: String,
+    },
+    website: {
+      type: String,
+    },
+    researchInterests: {
+      type: [String],
+      default: [],
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
