@@ -7,9 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Lock, Mail, Save, Upload, User } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  FileText,
+  Lock,
+  Mail,
+  Save,
+  Upload,
+  User,
+  AlertCircle,
+  Github,
+  Loader2,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -20,9 +31,16 @@ import {
 } from "@/components/ui/card";
 
 export default function ProfilePage() {
-  const { sendRequest } = useApi();
+  const { error, sendRequest } = useApi();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isPasswordSuccess, setIsPasswordSuccess] = useState("");
+  const [isPasswordSaving, setIsPasswordSaving] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+  });
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
@@ -48,7 +66,7 @@ export default function ProfilePage() {
           });
         }
       } catch (error) {
-        console.error("Failed to fetch profile:", error);
+        return;
       } finally {
         setIsLoading(false);
       }
@@ -62,6 +80,16 @@ export default function ProfilePage() {
   ) => {
     const { name, value } = e.target;
     setProfileData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handlePasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -83,11 +111,31 @@ export default function ProfilePage() {
         });
       }
     } catch (error) {
-      console.error("Failed to update profile:", error);
+      return;
     } finally {
       setIsEditing(false);
     }
-    // Show success message
+  };
+
+  const handlePasswordSave = async () => {
+    setIsPasswordSaving(true);
+    try {
+      const response = await sendRequest(
+        "/api/auth/update-password",
+        "PUT",
+        passwordData
+      );
+
+      setIsPasswordSuccess(response.message);
+
+      setTimeout(() => {
+        setIsPasswordSuccess("");
+      }, 2000);
+    } catch (error) {
+      return;
+    } finally {
+      setIsPasswordSaving(false);
+    }
   };
 
   if (isLoading) {
@@ -121,10 +169,10 @@ export default function ProfilePage() {
                   </p>
                 </div>
 
-                <Button variant="outline" size="sm" className="w-full">
+                {/* <Button variant="outline" size="sm" className="w-full">
                   <Upload className="w-4 h-4 mr-2" />
                   Change Photo
-                </Button>
+                </Button> */}
               </div>
             </CardContent>
           </Card>
@@ -311,22 +359,58 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="current-password">Current Password</Label>
-                    <Input id="current-password" type="password" />
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Input
+                      id="currentPassword"
+                      name="currentPassword"
+                      onChange={handlePasswordChange}
+                      type="password"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-password">New Password</Label>
-                    <Input id="new-password" type="password" />
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input
+                      id="newPassword"
+                      name="newPassword"
+                      onChange={handlePasswordChange}
+                      type="password"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">
+                    <Label htmlFor="confirmNewPassword">
                       Confirm New Password
                     </Label>
-                    <Input id="confirm-password" type="password" />
+                    <Input
+                      id="confirmNewPassword"
+                      name="confirmNewPassword"
+                      onChange={handlePasswordChange}
+                      type="password"
+                    />
                   </div>
+                  {error && (
+                    <Alert variant="destructive" className="mb-4">
+                      <AlertCircle className="w-4 h-4" />
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  {isPasswordSuccess && (
+                    <Alert variant="success" className="mb-4">
+                      <AlertCircle className="w-4 h-4" />
+                      <AlertDescription>{isPasswordSuccess}</AlertDescription>
+                    </Alert>
+                  )}
                 </CardContent>
+
                 <CardFooter>
-                  <Button>Update Password</Button>
+                  <Button
+                    disabled={isPasswordSaving}
+                    onClick={handlePasswordSave}
+                  >
+                    {isPasswordSaving
+                      ? "Updating Password..."
+                      : "Update Password"}
+                  </Button>
                 </CardFooter>
               </Card>
 
