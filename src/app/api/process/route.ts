@@ -29,6 +29,12 @@ export async function POST(request: Request) {
 
     // Parse PDF
     const data = await pdf(buffer);
+    if (!data || !data.text) {
+      return NextResponse.json(
+        { error: "Failed to parse PDF" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       text: data.text,

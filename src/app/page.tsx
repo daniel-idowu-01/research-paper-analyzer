@@ -111,8 +111,6 @@ export default function Home() {
         },
       });
 
-      console.log(121, response);
-
       // After successful "upload", redirect to the demo page
       // router.push("/demo");
     } catch (error) {
