@@ -1,9 +1,11 @@
 "use client";
-
+import Link from "next/link";
 import type React from "react";
-
-import { useState, useRef, useCallback } from "react";
+import { useApi } from "@/hooks/use-api";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useState, useRef, useCallback } from "react";
+import { FileUp, Search, Sparkles, FileText } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,17 +14,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileUp, Search, Sparkles, FileText } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  const { sendRequest } = useApi();
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
+  const [cloudinaryUrl, setCloudinaryUrl] = useState<string | null>(null);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -92,17 +93,54 @@ export default function Home() {
     fileInputRef.current?.click();
   };
 
-  const handleFileUpload = async (file: File) => {
-    setIsUploading(true);
+  const uploadToCloudinary = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "yykpflgd");
 
     try {
-      // In a real application, you would upload the file to your server here
-      // For this demo, we'll simulate a file upload with a timeout
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/ds8bolg2f/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to upload to Cloudinary");
+      }
+
+      const data = await response.json();
+      return data.secure_url;
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
+      throw error;
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true);
+    setError(null);
+
+    if (!file) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await sendRequest("/api/process", "POST", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log(121, response);
 
       // After successful "upload", redirect to the demo page
-      // In a real app, you might pass the file ID or other parameters
-      router.push("/demo");
+      // router.push("/demo");
     } catch (error) {
       console.error("Upload failed:", error);
       setError("Failed to upload file. Please try again.");
