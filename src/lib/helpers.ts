@@ -13,3 +13,12 @@ export const calculatePasswordStrength = (password: string): number => {
 
   return strength;
 };
+
+export const cleanGeminiJsonResponse = (dirtyJson: string): string => {
+  const jsonWithMarkdown = dirtyJson.match(/```json\n([\s\S]*?)\n```/)?.[1];
+
+  const jsonWithBackticks =
+    jsonWithMarkdown || dirtyJson.match(/```\n([\s\S]*?)\n```/)?.[1];
+
+  return (jsonWithBackticks || dirtyJson).trim();
+};

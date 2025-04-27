@@ -1,7 +1,6 @@
 import logger from "@/lib/logger";
 import { NextResponse } from "next/server";
-import { Readable } from "stream";
-import pdf from "pdf-parse";
+import { extractPDFData } from "@/utils/pdfProcessor";
 
 export const config = {
   api: {
@@ -24,27 +23,22 @@ export async function POST(request: Request) {
       );
     }
 
-    // Convert Blob to Buffer
     const buffer = Buffer.from(await file.arrayBuffer());
+    const result = await extractPDFData(buffer);
 
-    // Parse PDF
-    const data = await pdf(buffer);
-    if (!data || !data.text) {
-      return NextResponse.json(
-        { error: "Failed to parse PDF" },
-        { status: 500 }
-      );
-    }
+    console.log("Extracted Data: ", result);
 
     return NextResponse.json({
-      text: data.text,
-      // numPages: data.numpages,
-      // metadata: data.info
+      success: true,
+      data: result,
     });
   } catch (error) {
     console.error("PDF processing error:", error);
     return NextResponse.json(
-      { error: "Failed to process PDF" },
+      {
+        error: "Failed to process PDF",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
