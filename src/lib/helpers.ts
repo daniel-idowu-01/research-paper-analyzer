@@ -22,3 +22,14 @@ export const cleanGeminiJsonResponse = (dirtyJson: string): string => {
 
   return (jsonWithBackticks || dirtyJson).trim();
 };
+
+export const isBoilerplate = (text: string): boolean => {
+  const phrases = [
+    "as shown in figure",
+    "as we can see",
+    "in this section",
+    "the following section",
+    "as mentioned earlier",
+  ];
+  return phrases.some((phrase) => text.toLowerCase().includes(phrase));
+}

@@ -1,6 +1,6 @@
 import logger from "@/lib/logger";
 import { NextResponse } from "next/server";
-import { extractPDFData } from "@/utils/pdfProcessor";
+import { processResearchPaper } from "@/utils/pdfProcessor";
 
 export const config = {
   api: {
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const result = await extractPDFData(buffer);
+    const result = await processResearchPaper(buffer);
 
     console.log("Extracted Data: ", result);
 
