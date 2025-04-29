@@ -21,8 +21,6 @@ export async function GET(
     }
 
     const paper = await Paper.findById(id);
-    console.log("Id: ", id);
-    console.log("Paper: ", paper);
 
     if (!paper) {
       return NextResponse.json({ error: "Paper not found!" }, { status: 400 });

@@ -17,7 +17,7 @@ interface KeyFindings {
 
 interface ResearchImpact {
   significance: string;
-  potential_applications: string[];
+  level: "Low" | "Medium" | "High" | "Very High";
   limitations: string;
 }
 
@@ -189,18 +189,25 @@ async function extractResearchImpact(text: string): Promise<ResearchImpact> {
     const prompt = `Extract research impact as JSON:
         {
           "significance": "string",
-          "potential_applications": ["string"],
+          "level": "Low/Medium/High/Very High",
           "limitations": "string"
         }
         Text: ${text.substring(0, 3000)}`;
 
     const result = await geminiPro.generateContent(prompt);
     const resultText = result.response.candidates?.[0]?.content.parts[0].text;
-    return JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
+    const parsed = JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
+
+    // Validate research impact level
+    if (!["Low", "Medium", "High", "Very High"].includes(parsed.level)) {
+      parsed.level = "Medium";
+    }
+
+    return parsed;
   } catch {
     return {
       significance: "",
-      potential_applications: [],
+      level: "Medium",
       limitations: "",
     };
   }
@@ -467,7 +474,7 @@ async function fallbackPartialExtraction(text: string): Promise<ResearchPaper> {
     },
     research_impact: {
       significance: "",
-      potential_applications: [],
+      level: "Medium",
       limitations: "",
     },
     novelty_assessment: {

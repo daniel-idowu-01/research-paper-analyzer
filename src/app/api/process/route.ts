@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     const result = await processResearchPaper(buffer);
     logger.info("File processed successfully!");
 
+    console.log("Paper result: ", result)
     const paper = await createPaper(result);
 
     return NextResponse.json({

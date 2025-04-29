@@ -16,7 +16,7 @@ export async function createPaper(result: any) {
     },
     research_impact: {
       significance: result.research_impact.significance,
-      potential_applications: result.research_impact.potential_applications,
+      level: result.research_impact.level,
       limitations: result.research_impact.limitations,
     },
     novelty_assessment: {

@@ -39,7 +39,7 @@ interface INoveltyAssessment {
 
 interface IResearchImpact {
   significance: string;
-  potential_applications: string[];
+  level: "Low" | "Medium" | "High" | "Very High";
   limitations: string;
 }
 

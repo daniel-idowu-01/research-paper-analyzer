@@ -113,8 +113,8 @@ export default function PaperPage() {
   const params = useParams();
   const paperId = params.id;
   const { sendRequest } = useApi();
-  const [isPaperLoading, setIsPaperLoading] = useState(false);
   const [paper, setPaper] = useState<IPaper | null>(null);
+  const [isPaperLoading, setIsPaperLoading] = useState(false);
 
   useEffect(() => {
     const getProducts = async () => {
@@ -449,7 +449,9 @@ export default function PaperPage() {
                         style={{ width: "100%" }}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium">High</span>
+                    <span className="text-sm font-medium">
+                      {paper?.research_impact.level}
+                    </span>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
                     {paper?.research_impact.significance}

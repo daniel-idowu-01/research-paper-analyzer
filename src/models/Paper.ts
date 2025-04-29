@@ -47,9 +47,13 @@ const NoveltyAssessmentSchema = new Schema(
 
 const ResearchImpactSchema = new Schema(
   {
-    significance: { type: String, required: true },
-    potential_applications: { type: [String], required: true },
-    limitations: { type: String, required: true },
+    significance: { type: String },
+    level: {
+      type: String,
+      enum: ["Low", "Medium", "High", "Very High"],
+      required: true,
+    },
+    limitations: { type: String },
   },
   { _id: false }
 );
@@ -108,6 +112,5 @@ PaperSchema.index({
 
 PaperSchema.index({ "metadata.published_date": 1 });
 PaperSchema.index({ "performance_metrics.proposed_method.accuracy": 1 });
-
 
 export default mongoose.models.Paper || mongoose.model("Paper", PaperSchema);
