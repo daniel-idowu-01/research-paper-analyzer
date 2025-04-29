@@ -1,8 +1,16 @@
+import mongoose from "mongoose";
 import Paper from "@/models/Paper";
 
-export async function createPaper(result: any, fileUrl: string) {
+export async function createPaper(
+  result: any,
+  fileUrl: string,
+  userId: string | null
+) {
+  const uploaderId = userId ? new mongoose.Types.ObjectId(userId) : undefined;
+
   const paper = new Paper({
     file_url: fileUrl,
+    uploaderId,
     metadata: {
       title: result.metadata.title,
       authors: result.metadata.authors,
@@ -28,7 +36,8 @@ export async function createPaper(result: any, fileUrl: string) {
     related_areas: result.related_areas,
     performance_metrics: {
       proposed_method: {
-        accuracy: result.performance_metrics.proposed_method.accuracy,
+        accuracy:
+          result.performance_metrics.proposed_method.accuracy || "unknown",
         parameters:
           result.performance_metrics.proposed_method.parameters || "unknown",
         training_time:

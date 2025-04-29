@@ -232,38 +232,6 @@ export default function PaperPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* <p>
-                    This paper introduces a novel approach to neural network
-                    architecture that significantly improves performance on
-                    image recognition tasks. The authors propose a modified
-                    attention mechanism that reduces computational complexity
-                    while maintaining accuracy.
-                  </p>
-                  <p>Key contributions include:</p>
-                  <ul className="ml-6 list-disc space-y-2">
-                    <li>
-                      A new attention-based architecture that reduces training
-                      time by 35%
-                    </li>
-                    <li>
-                      Comprehensive benchmarks across multiple datasets showing
-                      consistent improvements
-                    </li>
-                    <li>
-                      Analysis of computational efficiency and memory usage
-                      compared to existing methods
-                    </li>
-                    <li>
-                      Open-source implementation with pre-trained models for
-                      various applications
-                    </li>
-                  </ul>
-                  <p>
-                    The experimental results demonstrate that the proposed
-                    method outperforms state-of-the-art approaches on standard
-                    benchmarks while requiring fewer parameters and less
-                    training time.
-                  </p> */}
                   {paper?.summary}
                 </CardContent>
               </Card>

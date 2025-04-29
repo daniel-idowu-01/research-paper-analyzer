@@ -1,5 +1,7 @@
 import axios from "axios";
+import jwt from "jsonwebtoken";
 import logger from "@/lib/logger";
+import { cookies } from "next/headers";
 import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
 import { createPaper } from "@/usecases/paper";
@@ -17,6 +19,23 @@ export async function POST(request: Request) {
   try {
     logger.info("Processing PDF file...");
     await connectDB();
+
+    const cookieStore = cookies();
+    const token = (await cookieStore).get("token")?.value;
+
+    let userId = null;
+    if (token) {
+      const decodedToken = jwt.verify(
+        token,
+        process.env.JWT_SECRET as string
+      ) as { id: string };
+
+      userId = decodedToken.id;
+
+      if (!decodedToken) {
+        return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+      }
+    }
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
@@ -37,14 +56,14 @@ export async function POST(request: Request) {
       `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload`,
       form
     );
-    const fileUrl =  cloudinaryRequest?.data.secure_url
+    const fileUrl = cloudinaryRequest?.data.secure_url;
     logger.info("Uploaded successfully!");
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const result = await processResearchPaper(buffer);
     logger.info("File processed successfully!");
 
-    const paper = await createPaper(result, fileUrl);
+    const paper = await createPaper(result, fileUrl, userId || null);
 
     return NextResponse.json({
       success: true,

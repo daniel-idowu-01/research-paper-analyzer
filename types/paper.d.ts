@@ -69,5 +69,5 @@ export interface IPaper extends Document {
   status: "processing" | "completed" | "failed";
   createdAt: Date;
   updatedAt: Date;
-  uploaderId: mongoose.Types.ObjectId;
+  uploaderId?: mongoose.Types.ObjectId;
 }
