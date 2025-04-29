@@ -1,5 +1,7 @@
 import logger from "@/lib/logger";
+import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
+import { createPaper } from "@/usecases/paper";
 import { processResearchPaper } from "@/utils/pdfProcessor";
 
 export const config = {
@@ -11,8 +13,10 @@ export const config = {
 };
 
 export async function POST(request: Request) {
-  logger.info("Processing PDF file...");
   try {
+    logger.info("Processing PDF file...");
+    await connectDB();
+    
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
@@ -25,12 +29,13 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const result = await processResearchPaper(buffer);
+    logger.info("File processed successfully!");
 
-    console.log("Extracted Data: ", result);
+    const paper = await createPaper(result);
 
     return NextResponse.json({
       success: true,
-      data: result,
+      data: paper._id,
     });
   } catch (error) {
     console.error("PDF processing error:", error);

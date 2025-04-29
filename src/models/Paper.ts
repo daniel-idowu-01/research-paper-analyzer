@@ -1,123 +1,182 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
+interface IPerformanceMetrics {
+  proposed_method: {
+    accuracy: string;
+    parameters: string;
+    training_time: string;
+  };
+  previous_sota: {
+    accuracy: string;
+    parameters: string;
+    training_time: string;
+  };
+  baseline: {
+    accuracy: string;
+    parameters: string;
+    training_time: string;
+  };
+}
 
-const PaperSchema = new mongoose.Schema(
+interface IReference {
+  authors: string;
+  title: string;
+  venue?: string;
+  year?: string;
+  doi?: string | null;
+}
+
+interface IKeyFindings {
+  primary: string;
+  methodology: string;
+  applications: string;
+}
+
+interface INoveltyAssessment {
+  level: "Low" | "Medium" | "High" | "Very High";
+  comparison_to_prior_work: string;
+}
+
+interface IResearchImpact {
+  significance: string;
+  potential_applications: string[];
+  limitations: string;
+}
+
+interface IKeyFindings {
+  primary: string;
+  methodology_innovation: string;
+  practical_applications: string[];
+}
+
+interface IMetadata {
+  title: string;
+  authors: string[];
+  published_date: string;
+  topics: string[];
+}
+
+interface IPaper extends Document {
+  metadata: IMetadata;
+  summary: string;
+  key_findings: IKeyFindings;
+  research_impact: IResearchImpact;
+  novelty_assessment: INoveltyAssessment;
+  related_areas: string[];
+  performance_metrics: IPerformanceMetrics;
+  references: IReference[];
+  status: "processing" | "completed" | "failed";
+  createdAt: Date;
+  updatedAt: Date;
+  uploaderId: mongoose.Types.ObjectId;
+}
+
+const PerformanceMetricSchema = new Schema(
   {
-    title: {
-      type: String,
-      required: true,
-      trim: true,
+    proposed_method: {
+      accuracy: { type: String, default: "unknown" },
+      parameters: { type: String, default: "unknown" },
+      training_time: { type: String, default: "unknown" },
     },
-    authors: {
-      type: [String],
-      trim: true,
+    previous_sota: {
+      accuracy: { type: String, default: "unknown" },
+      parameters: { type: String, default: "unknown" },
+      training_time: { type: String, default: "unknown" },
     },
-    abstract: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    publicationDate: {
-      type: Date,
-    },
-    topics: {
-      type: [String],
-      required: true,
-    },
-    summary: {
-      keyInsights: {
-        type: String,
-        required: true,
-      },
-      methodology: {
-        type: String,
-        required: true,
-      },
-      performanceComparison: {
-        type: mongoose.Schema.Types.Mixed, // Stores tables/objects flexibly
-        required: false,
-      },
-      practicalApplications: {
-        type: String,
-        required: false,
-      },
-    },
-    aiAnalysis: {
-      generatedSummary: {
-        type: String,
-        required: false,
-      },
-      researchImpact: {
-        type: String,
-        enum: ["Low", "Medium", "High", "Very High"],
-        required: false,
-      },
-      noveltyAssessment: {
-        type: String,
-        enum: ["Low", "Medium", "Medium-High", "High"],
-        required: false,
-      },
-    },
-    relatedResearchAreas: {
-      type: [String],
-      required: false,
-    },
-    suggestedFollowUpPapers: {
-      type: [String],
-      required: false,
-    },
-    journalOrConference: {
-      type: String,
-      trim: true,
-    },
-    fieldOfStudy: {
-      type: String, // "AI", "Cybersecurity", "Physics"
-      trim: true,
-    },
-    keywords: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-    fileUrl: {
-      type: String, // URL to the uploaded PDF or storage location
-      required: true,
-    },
-    fileName: {
-      type: String,
-      required: true,
-    },
-    namedEntities: [
-      {
-        type: {
-          entity: String,
-          type: String, // "Person", "Organization", "Location"
-        },
-      },
-    ],
-    citations: [
-      {
-        type: {
-          title: String,
-          authors: [String],
-          publicationYear: Number,
-        },
-      },
-    ],
-    topicClassification: {
-      type: String,
-      trim: true,
-    },
-    uploadedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    uploadDate: {
-      type: Date,
-      default: Date.now,
+    baseline: {
+      accuracy: { type: String, default: "unknown" },
+      parameters: { type: String, default: "unknown" },
+      training_time: { type: String, default: "unknown" },
     },
   },
-  { timestamps: true }
+  { _id: false }
 );
+
+const ReferenceSchema = new Schema(
+  {
+    authors: { type: String, required: true },
+    title: { type: String, required: true },
+    venue: { type: String },
+    year: { type: String },
+    doi: { type: String },
+  },
+  { _id: false }
+);
+
+const NoveltyAssessmentSchema = new Schema(
+  {
+    level: {
+      type: String,
+      enum: ["Low", "Medium", "High", "Very High"],
+      required: true,
+    },
+    comparison_to_prior_work: { type: String, required: true },
+  },
+  { _id: false }
+);
+
+const ResearchImpactSchema = new Schema(
+  {
+    significance: { type: String, required: true },
+    potential_applications: { type: [String], required: true },
+    limitations: { type: String, required: true },
+  },
+  { _id: false }
+);
+
+const KeyFindingsSchema = new Schema(
+  {
+    primary: { type: String, required: true },
+    methodology_innovation: { type: String, required: true },
+    practical_applications: { type: [String], required: true },
+  },
+  { _id: false }
+);
+
+const MetadataSchema = new Schema(
+  {
+    title: { type: String, required: true },
+    authors: { type: [String], required: true },
+    published_date: { type: String, required: true },
+    topics: { type: [String], required: true },
+  },
+  { _id: false }
+);
+
+const PaperSchema = new Schema<IPaper>(
+  {
+    metadata: { type: MetadataSchema, required: true },
+    summary: { type: String, required: true },
+    key_findings: { type: KeyFindingsSchema, required: true },
+    research_impact: { type: ResearchImpactSchema, required: true },
+    novelty_assessment: { type: NoveltyAssessmentSchema, required: true },
+    related_areas: { type: [String], required: true },
+    performance_metrics: {
+      type: PerformanceMetricSchema,
+      required: true,
+    },
+    references: { type: [ReferenceSchema], required: true },
+    uploaderId: { type: Schema.Types.ObjectId, ref: "User" },
+    status: {
+      type: String,
+      enum: ["processing", "completed", "failed"],
+      default: "processing",
+    },
+  },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+PaperSchema.index({
+  "metadata.title": "text",
+  "metadata.topics": "text",
+  related_areas: "text",
+});
+
+PaperSchema.index({ "metadata.published_date": 1 });
+PaperSchema.index({ "performance_metrics.proposed_method.accuracy": 1 });
+
 
 export default mongoose.models.Paper || mongoose.model("Paper", PaperSchema);

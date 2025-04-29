@@ -6,7 +6,7 @@ interface PaperMetadata {
   title: string;
   authors: string[];
   published_date: string;
-  keywords: string[];
+  topics: string[];
 }
 
 interface KeyFindings {
@@ -52,8 +52,8 @@ interface ResearchPaper {
   research_impact: ResearchImpact;
   novelty_assessment: NoveltyAssessment;
   related_areas: string[];
-  performance_comparison: PerformanceComparison;
-  references: Reference[];
+  performance_metrics: PerformanceComparison;
+  // references: Reference[];
 }
 
 ///////////////////////////////
@@ -87,16 +87,16 @@ async function extractFullPaperData(text: string): Promise<ResearchPaper> {
     noveltyAssessment,
     relatedAreas,
     performanceData,
-    references,
+    // references,
   ] = await Promise.all([
     extractMetadata(text),
     extractSummary(abstract),
     extractKeyFindings(abstract),
     extractResearchImpact(abstract),
     extractNoveltyAssessment(abstract),
-    extractRelatedAreas(abstract),
+   extractRelatedAreas(abstract),
     extractPerformanceData(text),
-    Promise.resolve(extractReferences(text)),
+    // Promise.resolve(extractReferences(text)),
   ]);
 
   return {
@@ -106,8 +106,8 @@ async function extractFullPaperData(text: string): Promise<ResearchPaper> {
     research_impact: researchImpact,
     novelty_assessment: noveltyAssessment,
     related_areas: relatedAreas,
-    performance_comparison: performanceData,
-    references,
+    performance_metrics: performanceData,
+    // references,
   };
 }
 
@@ -121,7 +121,7 @@ async function extractMetadata(text: string): Promise<PaperMetadata> {
         "title": "string",
         "authors": ["string"],
         "published_date": "Month Year",
-        "keywords": ["string"]
+        "topics": ["string"]
       }
       Text: ${text.substring(0, 3000)}`;
 
@@ -475,12 +475,12 @@ async function fallbackPartialExtraction(text: string): Promise<ResearchPaper> {
       comparison_to_prior_work: "",
     },
     related_areas: [],
-    performance_comparison: {
+    performance_metrics: {
       proposed_method: { accuracy: "", parameters: "", training_time: "" },
       previous_sota: { accuracy: "", parameters: "", training_time: "" },
       baseline: { accuracy: "", parameters: "", training_time: "" },
     },
-    references: await extractReferences(text),
+    // references: await extractReferences(text),
   };
 }
 
@@ -638,7 +638,7 @@ async function fallbackMetadataExtraction(
     title: text.split("\n")[0]?.trim() || "Untitled",
     authors,
     published_date: extractYear(text),
-    keywords: await extractKeywords(text),
+    topics: await extractKeywords(text),
   };
 }
 
