@@ -1,18 +1,14 @@
 "use client";
-
-import { useCallback, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
+import { useApi } from "@/hooks/use-api";
+import { IPaper } from "../../../../types";
+import Spinner from "@/components/spinner";
 import { Badge } from "@/components/ui/badge";
-//import { toast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useCallback, useMemo, useState, useEffect } from "react";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   BookOpen,
@@ -21,80 +17,15 @@ import {
   Search,
   Share2,
 } from "lucide-react";
-import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-interface Paper {
-  title: string;
-  authors: string[];
-  publicationDate: string;
-  topics: string[];
-  summary: string;
-  keyFindings: {
-    primary: string;
-    methodology: string;
-    applications: string;
-  };
-  performanceMetrics: {
-    model: string;
-    accuracy: string;
-    parameters: string;
-    trainingTime: string;
-  }[];
-  references: {
-    id: number;
-    citation: string;
-    citedBy: number;
-    impactFactor: number;
-  }[];
-}
-
-const paperData: Paper = {
-  title: "Advances in Neural Information Processing Systems",
-  authors: ["J. Smith", "A. Johnson", "M. Williams"],
-  publicationDate: "June 2023",
-  topics: ["Machine Learning", "Neural Networks", "Deep Learning"],
-  summary:
-    "This paper introduces a novel approach to neural network architecture...",
-  keyFindings: {
-    primary: "The proposed attention mechanism achieves 93.7% accuracy...",
-    methodology:
-      "Novel sparse attention patterns reduce quadratic complexity...",
-    applications:
-      "The method enables deployment on resource-constrained devices...",
-  },
-  performanceMetrics: [
-    {
-      model: "Proposed Method",
-      accuracy: "93.7%",
-      parameters: "45M",
-      trainingTime: "18 hours",
-    },
-    {
-      model: "Previous SOTA",
-      accuracy: "92.3%",
-      parameters: "62M",
-      trainingTime: "28 hours",
-    },
-    {
-      model: "Baseline",
-      accuracy: "89.1%",
-      parameters: "38M",
-      trainingTime: "15 hours",
-    },
-  ],
-  references: [
-    {
-      id: 1,
-      citation:
-        'Smith, J., Johnson, A., et al. (2022). "Advances in Attention Mechanisms for Computer Vision."',
-      citedBy: 128,
-      impactFactor: 9.2,
-    },
-    // ... other references
-  ],
-};
-
-const PaperDetailsCard = ({ paper }: { paper: Paper }) => (
+const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
   <Card>
     <CardHeader className="pb-3">
       <CardTitle>Paper Details</CardTitle>
@@ -102,20 +33,22 @@ const PaperDetailsCard = ({ paper }: { paper: Paper }) => (
     <CardContent className="space-y-4">
       <div>
         <h3 className="mb-1 text-sm font-medium">Title</h3>
-        <p className="text-sm text-gray-500">{paper.title}</p>
+        <p className="text-sm text-gray-500">{paper.metadata.title}</p>
       </div>
       <div>
         <h3 className="mb-1 text-sm font-medium">Authors</h3>
-        <p className="text-sm text-gray-500">{paper.authors.join(", ")}</p>
+        <p className="text-sm text-gray-500">
+          {paper.metadata.authors.join(", ")}
+        </p>
       </div>
       <div>
         <h3 className="mb-1 text-sm font-medium">Published</h3>
-        <p className="text-sm text-gray-500">{paper.publicationDate}</p>
+        <p className="text-sm text-gray-500">{paper.metadata.published_date}</p>
       </div>
       <div>
         <h3 className="mb-1 text-sm font-medium">Topics</h3>
         <div className="flex flex-wrap gap-2">
-          {paper.topics.map((topic) => (
+          {paper.metadata.topics.map((topic) => (
             <Badge key={topic} variant="secondary">
               {topic}
             </Badge>
@@ -177,6 +110,29 @@ const ActionButtons = () => {
 };
 
 export default function PaperPage() {
+  const params = useParams();
+  const paperId = params.id;
+  const { sendRequest } = useApi();
+  const [isPaperLoading, setIsPaperLoading] = useState(false);
+  const [paper, setPaper] = useState<IPaper | null>(null);
+
+  useEffect(() => {
+    const getProducts = async () => {
+      setIsPaperLoading(true);
+      try {
+        const response = await sendRequest(`/api/papers/${paperId}`, "GET");
+        setPaper(response.paper || null);
+      } catch (error) {
+        console.log("Failed to fetch paper:", error);
+        setPaper(null);
+      } finally {
+        setIsPaperLoading(false);
+      }
+    };
+
+    getProducts();
+  }, [paperId]);
+
   const copyToClipboard = useCallback(async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -195,9 +151,13 @@ export default function PaperPage() {
   }, []);
 
   const memoizedPaperDetails = useMemo(
-    () => <PaperDetailsCard paper={paperData} />,
-    []
+    () => (paper ? <PaperDetailsCard paper={paper} /> : null),
+    [paper]
   );
+
+  if (isPaperLoading) {
+    return <Spinner />;
+  }
 
   return (
     <div className="container flex flex-col min-h-screen px-4 py-6 mx-auto">
