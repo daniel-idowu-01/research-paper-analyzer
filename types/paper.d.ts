@@ -57,6 +57,7 @@ interface IMetadata {
 }
 
 export interface IPaper extends Document {
+  file_url: string;
   metadata: IMetadata;
   summary: string;
   key_findings: IKeyFindings;

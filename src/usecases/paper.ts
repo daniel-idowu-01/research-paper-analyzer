@@ -1,7 +1,8 @@
 import Paper from "@/models/Paper";
 
-export async function createPaper(result: any) {
+export async function createPaper(result: any, fileUrl: string) {
   const paper = new Paper({
+    file_url: fileUrl,
     metadata: {
       title: result.metadata.title,
       authors: result.metadata.authors,
@@ -31,8 +32,7 @@ export async function createPaper(result: any) {
         parameters:
           result.performance_metrics.proposed_method.parameters || "unknown",
         training_time:
-          result.performance_metrics.proposed_method.training_time ||
-          "unknown",
+          result.performance_metrics.proposed_method.training_time || "unknown",
       },
       previous_sota: {
         accuracy:
@@ -40,13 +40,11 @@ export async function createPaper(result: any) {
         parameters:
           result.performance_metrics.previous_sota.parameters || "unknown",
         training_time:
-          result.performance_metrics.previous_sota.training_time ||
-          "unknown",
+          result.performance_metrics.previous_sota.training_time || "unknown",
       },
       baseline: {
         accuracy: result.performance_metrics.baseline.accuracy || "unknown",
-        parameters:
-          result.performance_metrics.baseline.parameters || "unknown",
+        parameters: result.performance_metrics.baseline.parameters || "unknown",
         training_time:
           result.performance_metrics.baseline.training_time || "unknown",
       },

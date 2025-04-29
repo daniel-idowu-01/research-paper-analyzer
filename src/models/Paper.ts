@@ -79,6 +79,7 @@ const MetadataSchema = new Schema(
 
 const PaperSchema = new Schema<IPaper>(
   {
+    file_url: { type: String, required: true },
     metadata: { type: MetadataSchema, required: true },
     summary: { type: String, required: true },
     key_findings: { type: KeyFindingsSchema, required: true },

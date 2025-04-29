@@ -400,19 +400,40 @@ export default function PaperPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg border-gray-200 dark:border-gray-800">
-                    <FileText className="w-12 h-12 mb-4 text-gray-500" />
-                    <p className="mb-2 text-sm font-medium">PDF Preview</p>
-                    <p className="mb-4 text-xs text-center text-gray-500">
-                      This is where the PDF preview would be displayed. The
-                      actual implementation would render the first few pages of
-                      the document.
-                    </p>
-                    <Button>
-                      <BookOpen className="w-4 h-4 mr-2" />
-                      Open Full Paper
-                    </Button>
-                  </div>
+                  {paper?.file_url ? (
+                    <div className="relative w-full h-[600px] rounded-lg overflow-hidden border">
+                      <iframe
+                        src={`https://docs.google.com/gview?url=${encodeURIComponent(
+                          paper.file_url
+                        )}&embedded=true`}
+                        className="absolute top-0 left-0 w-full h-full"
+                        frameBorder="0"
+                        allowFullScreen
+                        title="PDF Preview"
+                      />
+                      <div className="absolute bottom-4 right-4 flex gap-2">
+                        <a
+                          href={paper.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 text-sm bg-white rounded-md shadow-sm hover:bg-gray-50"
+                        >
+                          <BookOpen className="inline w-4 h-4 mr-2" />
+                          Open Full PDF
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg border-gray-200 dark:border-gray-800">
+                      <FileText className="w-12 h-12 mb-4 text-gray-500" />
+                      <p className="mb-2 text-sm font-medium">
+                        No PDF Available
+                      </p>
+                      <p className="mb-4 text-xs text-center text-gray-500">
+                        This paper doesn't have a PDF file attached
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
