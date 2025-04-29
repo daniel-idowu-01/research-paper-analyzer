@@ -159,6 +159,25 @@ export default function PaperPage() {
     return <Spinner />;
   }
 
+  const getWidth = (type: string) => {
+    switch (
+      type === "research"
+        ? paper?.research_impact.level
+        : paper?.novelty_assessment.level
+    ) {
+      case "Very High":
+        return "100%";
+      case "High":
+        return "80%";
+      case "Medium":
+        return "50%";
+      case "Low":
+        return "20%";
+      default:
+        return "0%";
+    }
+  };
+
   return (
     <div className="container flex flex-col min-h-screen px-4 py-6 mx-auto">
       <div className="flex items-center mb-6">
@@ -446,7 +465,7 @@ export default function PaperPage() {
                     <div className="w-full h-2 bg-gray-200 rounded-full">
                       <div
                         className="h-2 rounded-full bg-primary"
-                        style={{ width: "100%" }}
+                        style={{ width: getWidth("research") }}
                       ></div>
                     </div>
                     <span className="text-sm font-medium">
@@ -463,7 +482,7 @@ export default function PaperPage() {
                     <div className="w-full h-2 bg-gray-200 rounded-full">
                       <div
                         className="h-2 rounded-full bg-primary"
-                        style={{ width: "50%" }}
+                        style={{ width: getWidth("novelty") }}
                       ></div>
                     </div>
                     <span className="text-sm font-medium">
