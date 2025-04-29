@@ -213,7 +213,7 @@ export default function PaperPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p>
+                  {/* <p>
                     This paper introduces a novel approach to neural network
                     architecture that significantly improves performance on
                     image recognition tasks. The authors propose a modified
@@ -244,7 +244,8 @@ export default function PaperPage() {
                     method outperforms state-of-the-art approaches on standard
                     benchmarks while requiring fewer parameters and less
                     training time.
-                  </p>
+                  </p> */}
+                  {paper?.summary}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -259,11 +260,7 @@ export default function PaperPage() {
                 <CardContent className="space-y-4">
                   <div className="p-4 border rounded-lg bg-primary/5">
                     <h3 className="mb-2 font-medium">Primary Finding</h3>
-                    <p className="text-sm">
-                      The proposed attention mechanism achieves 93.7% accuracy
-                      on ImageNet while using 28% fewer parameters than previous
-                      state-of-the-art models.
-                    </p>
+                    <p className="text-sm">{paper?.key_findings.primary}</p>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
@@ -272,19 +269,22 @@ export default function PaperPage() {
                         Methodology Innovation
                       </h3>
                       <p className="text-sm">
-                        Novel sparse attention patterns reduce quadratic
-                        complexity to linear while preserving long-range
-                        dependencies.
+                        {paper?.key_findings.methodology_innovation}
                       </p>
                     </div>
                     <div className="p-4 border rounded-lg">
                       <h3 className="mb-2 font-medium">
                         Practical Applications
                       </h3>
-                      <p className="text-sm">
-                        The method enables deployment on resource-constrained
-                        devices like mobile phones and edge devices.
-                      </p>
+                      <ul className="list-disc list-inside space-y-1">
+                        {paper?.key_findings.practical_applications.map(
+                          (app, index) => (
+                            <li key={index} className="text-sm">
+                              {app}
+                            </li>
+                          )
+                        )}
+                      </ul>
                     </div>
                   </div>
 
@@ -312,23 +312,59 @@ export default function PaperPage() {
                           <td className="px-6 py-4 font-medium">
                             Proposed Method
                           </td>
-                          <td className="px-6 py-4">93.7%</td>
-                          <td className="px-6 py-4">45M</td>
-                          <td className="px-6 py-4">18 hours</td>
+                          <td className="px-6 py-4">
+                            {
+                              paper?.performance_metrics.proposed_method
+                                .accuracy
+                            }
+                          </td>
+                          <td className="px-6 py-4">
+                            {
+                              paper?.performance_metrics.proposed_method
+                                .parameters
+                            }
+                          </td>
+                          <td className="px-6 py-4">
+                            {
+                              paper?.performance_metrics.proposed_method
+                                .training_time
+                            }{" "}
+                            hours
+                          </td>
                         </tr>
                         <tr className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-700">
                           <td className="px-6 py-4 font-medium">
                             Previous SOTA
                           </td>
-                          <td className="px-6 py-4">92.3%</td>
-                          <td className="px-6 py-4">62M</td>
-                          <td className="px-6 py-4">28 hours</td>
+                          <td className="px-6 py-4">
+                            {paper?.performance_metrics.previous_sota.accuracy}
+                          </td>
+                          <td className="px-6 py-4">
+                            {
+                              paper?.performance_metrics.previous_sota
+                                .parameters
+                            }
+                          </td>
+                          <td className="px-6 py-4">
+                            {
+                              paper?.performance_metrics.previous_sota
+                                .training_time
+                            }{" "}
+                            hours
+                          </td>
                         </tr>
                         <tr className="bg-white dark:bg-gray-900">
                           <td className="px-6 py-4 font-medium">Baseline</td>
-                          <td className="px-6 py-4">89.1%</td>
-                          <td className="px-6 py-4">38M</td>
-                          <td className="px-6 py-4">15 hours</td>
+                          <td className="px-6 py-4">
+                            {paper?.performance_metrics.baseline.accuracy}
+                          </td>
+                          <td className="px-6 py-4">
+                            {paper?.performance_metrics.baseline.parameters}
+                          </td>
+                          <td className="px-6 py-4">
+                            {paper?.performance_metrics.baseline.training_time}{" "}
+                            hours
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -410,14 +446,13 @@ export default function PaperPage() {
                     <div className="w-full h-2 bg-gray-200 rounded-full">
                       <div
                         className="h-2 rounded-full bg-primary"
-                        style={{ width: "85%" }}
+                        style={{ width: "100%" }}
                       ></div>
                     </div>
                     <span className="text-sm font-medium">High</span>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
-                    This paper is likely to have significant impact based on
-                    methodology innovation and performance improvements.
+                    {paper?.research_impact.significance}
                   </p>
                 </div>
                 <div className="p-4 border rounded-lg">
@@ -426,14 +461,15 @@ export default function PaperPage() {
                     <div className="w-full h-2 bg-gray-200 rounded-full">
                       <div
                         className="h-2 rounded-full bg-primary"
-                        style={{ width: "70%" }}
+                        style={{ width: "50%" }}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium">Medium-High</span>
+                    <span className="text-sm font-medium">
+                      {paper?.novelty_assessment.level}
+                    </span>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
-                    Builds on existing attention mechanisms but introduces
-                    significant innovations in architecture.
+                    {paper?.novelty_assessment.comparison_to_prior_work}
                   </p>
                 </div>
               </div>
@@ -441,16 +477,15 @@ export default function PaperPage() {
               <div className="p-4 border rounded-lg">
                 <h3 className="mb-2 font-medium">Related Research Areas</h3>
                 <div className="flex flex-wrap gap-2">
-                  <Badge>Computer Vision</Badge>
-                  <Badge>Attention Mechanisms</Badge>
-                  <Badge>Neural Networks</Badge>
-                  <Badge>Model Optimization</Badge>
-                  <Badge>Deep Learning</Badge>
-                  <Badge>Efficient Computing</Badge>
+                  {paper?.related_areas.map((area) => (
+                    <Badge key={area} variant="secondary">
+                      {area}
+                    </Badge>
+                  ))}
                 </div>
               </div>
 
-              <div className="p-4 border rounded-lg">
+              {/* <div className="p-4 border rounded-lg">
                 <h3 className="mb-2 font-medium">Suggested Follow-up Papers</h3>
                 <ul className="space-y-2">
                   <li className="text-sm">
@@ -469,7 +504,7 @@ export default function PaperPage() {
                     </Link>
                   </li>
                 </ul>
-              </div>
+              </div> */}
             </CardContent>
           </Card>
         </div>
