@@ -94,7 +94,7 @@ async function extractFullPaperData(text: string): Promise<ResearchPaper> {
     extractKeyFindings(abstract),
     extractResearchImpact(abstract),
     extractNoveltyAssessment(abstract),
-   extractRelatedAreas(abstract),
+    extractRelatedAreas(abstract),
     extractPerformanceData(text),
     // Promise.resolve(extractReferences(text)),
   ]);
@@ -622,7 +622,7 @@ async function fallbackMetadataExtraction(
   text: string
 ): Promise<PaperMetadata> {
   const authorResponse = await hf.tokenClassification({
-    model: "dbmdz/bert-large-cased-finetuned-conll03-english",
+    model: "dslim/bert-base-NER",
     inputs: text.substring(0, 1000),
   });
 

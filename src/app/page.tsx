@@ -111,12 +111,10 @@ export default function Home() {
         },
       });
 
-      console.log("ress", response)
-
       // After successful "upload", redirect to the demo page
-      // router.push("/demo");
+      router.push(`/paper/${response.data}`);
     } catch (error) {
-      console.error("Upload failed:", error);
+      console.log("Upload failed:", error);
       setError("Failed to upload file. Please try again.");
     } finally {
       setIsUploading(false);
