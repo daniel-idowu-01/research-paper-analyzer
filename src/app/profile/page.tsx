@@ -37,6 +37,8 @@ type ProfileData = {
   institution: string;
   position: string;
   website: string;
+  papersCount: string;
+  createdAt: string;
 };
 
 type PasswordData = {
@@ -52,6 +54,8 @@ const DEFAULT_PROFILE_DATA: ProfileData = {
   institution: "",
   position: "",
   website: "",
+  papersCount: "0",
+  createdAt: "",
 };
 
 const DEFAULT_PASSWORD_DATA: PasswordData = {
@@ -84,6 +88,8 @@ export default function ProfilePage() {
           institution: response.institution || "",
           position: response.position || "",
           website: response.website || "",
+          papersCount: response.papersCount || "0",
+          createdAt: response.createdAt || ""
         });
       }
     } catch (error) {
@@ -251,10 +257,13 @@ const ProfileSidebar = ({ profileData }: { profileData: ProfileData }) => (
         <CardTitle>Account Stats</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <StatItem label="Papers Uploaded" value="12" />
-        <StatItem label="Papers Analyzed" value="8" />
-        <StatItem label="Saved Searches" value="5" />
-        <StatItem label="Member Since" value="Jan 2023" />
+        {/* <StatItem label="Papers Uploaded" value="12" /> */}
+        <StatItem
+          label="Papers Analyzed"
+          value={profileData.papersCount}
+        />
+        {/* <StatItem label="Saved Searches" value="5" /> */}
+        <StatItem label="Member Since" value={profileData.createdAt} />
       </CardContent>
     </Card>
   </div>

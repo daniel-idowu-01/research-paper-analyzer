@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import logger from "@/lib/logger";
+import Paper from "@/models/Paper";
 import { cookies } from "next/headers";
 import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
@@ -37,6 +38,8 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
+      const papersCount = await Paper.countDocuments({ uploaderId: user._id });
+
       const userData = {
         id: user.id,
         name: user.name,
@@ -45,6 +48,11 @@ export async function GET(request: Request) {
         institution: user.institution,
         position: user.position,
         website: user.website,
+        papersCount: papersCount.toString(),
+        createdAt: user.createdAt.toLocaleString("default", {
+          month: "short",
+          year: "numeric"
+        })
       };
 
       return NextResponse.json(userData, { status: 200 });
