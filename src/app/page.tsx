@@ -201,9 +201,9 @@ export default function Home() {
           <p className="text-sm text-gray-500">
             Recent papers will appear in your history
           </p>
-          <Link href="/demo">
+          {/* <Link href="/demo">
             <Button variant="outline">View Demo</Button>
-          </Link>
+          </Link> */}
         </CardFooter>
       </Card>
 

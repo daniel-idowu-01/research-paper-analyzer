@@ -6,6 +6,7 @@ import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
 import { createPaper } from "@/usecases/paper";
 import { processResearchPaper } from "@/utils/pdfProcessor";
+import { fallbackPartialExtraction } from "@/utils/pdfProcessor";
 
 export const config = {
   api: {
@@ -60,15 +61,29 @@ export async function POST(request: Request) {
     logger.info("Uploaded successfully!");
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const result = await processResearchPaper(buffer);
-    logger.info("File processed successfully!");
 
-    const paper = await createPaper(result, fileUrl, userId || null);
+    try {
+      const result = await processResearchPaper(buffer);
+      logger.info("File processed successfully!");
 
-    return NextResponse.json({
-      success: true,
-      data: paper._id,
-    });
+      const paper = await createPaper(result, fileUrl, userId || null);
+
+      return NextResponse.json({
+        success: true,
+        data: paper._id,
+      });
+    } catch (processingError) {
+      console.error("PDF processing failed:", processingError);
+      return NextResponse.json(
+        {
+          error: "PDF processing failed",
+          details:
+            "We could not fully analyze the PDF. Basic information was extracted.",
+          partialData: await fallbackPartialExtraction(buffer.toString()),
+        },
+        { status: 206 }
+      );
+    }
   } catch (error) {
     console.error("PDF processing error:", error);
     return NextResponse.json(

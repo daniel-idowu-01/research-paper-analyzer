@@ -455,7 +455,7 @@ function extractReferencesFromSummary(summary: string): Reference[] {
 ///////////////////////////////
 // Fallback extraction when full extraction fails
 ///////////////////////////////
-async function fallbackPartialExtraction(text: string): Promise<ResearchPaper> {
+export async function fallbackPartialExtraction(text: string): Promise<ResearchPaper> {
   const sections = identifySections(text);
   const abstract = sections["ABSTRACT"] || text.substring(0, 1000);
 
@@ -628,32 +628,96 @@ function extractPerformanceFromTables(
 async function fallbackMetadataExtraction(
   text: string
 ): Promise<PaperMetadata> {
-  const authorResponse = await hf.tokenClassification({
-    model: "dslim/bert-base-NER",
-    inputs: text.substring(0, 1000),
-  });
+  const modelAlternatives = [
+    "dslim/bert-base-NER",
+    "dbmdz/bert-large-cased-finetuned-conll03-english",
+    "Babelscape/wikineural-multilingual-ner",
+  ];
 
-  const authors = [
-    ...new Set(
-      authorResponse
-        .filter((entity) => entity.entity_group === "PER")
-        .map((entity) => entity.word)
-    ),
-  ].slice(0, 5);
+  // Try each model in sequence
+  for (const model of modelAlternatives) {
+    try {
+      const authorResponse = await hf.tokenClassification({
+        model,
+        inputs: text.substring(0, 1000),
+      });
 
+      const authors = [
+        ...new Set(
+          authorResponse
+            .filter((entity) => entity.entity_group === "PER")
+            .map((entity) => entity.word)
+        ),
+      ].slice(0, 5);
+
+      return {
+        title: extractTitleFromText(text),
+        authors,
+        published_date: extractYear(text),
+        topics: await extractKeywords(text),
+      };
+    } catch (error) {
+      console.warn(`Failed with model ${model}:`, error);
+      continue;
+    }
+  }
+
+  // If all models fail, fallback to regex
   return {
-    title: text.split("\n")[0]?.trim() || "Untitled",
-    authors,
+    title: extractTitleFromText(text),
+    authors: extractAuthorsWithRegex(text),
     published_date: extractYear(text),
-    topics: await extractKeywords(text),
+    topics: ["research", "paper"],
   };
 }
 
+// 
+function extractTitleFromText(text: string): string {
+  const lines = text.split("\n").filter((line) => line.trim().length > 0);
+  const potentialTitles = lines
+    .slice(0, 5)
+    .filter(
+      (line) =>
+        line.length > 10 &&
+        line.length < 120 &&
+        !line.match(/abstract|introduction|keywords/i)
+    );
+
+  return potentialTitles[0]?.trim() || "Untitled Research Paper";
+}
+
+// 
+function extractAuthorsWithRegex(text: string): string[] {
+  const patterns = [
+    /(?:^|\n)\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)(?:\s*,\s*[A-Z][a-z]+)*/g,
+    /by\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s+and\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)*)/i,
+    /(?:author|authors)\s*:\s*([^\n]+)/i,
+  ];
+
+  const authors = new Set<string>();
+
+  for (const pattern of patterns) {
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const authorGroup = match[1];
+      authorGroup
+        .split(/\s+and\s+|,\s+/)
+        .map((author) => author.trim())
+        .filter((author) => author.length > 0)
+        .forEach((author) => authors.add(author));
+    }
+  }
+
+  return Array.from(authors).slice(0, 5);
+}
+
+// 
 function extractYear(text: string): string {
   const match = text.match(/(20\d{2}|19\d{2})/);
   return match ? match[0] : "Unknown";
 }
 
+// 
 async function extractKeywords(text: string): Promise<string[]> {
   const response = await hf.featureExtraction({
     model: "sentence-transformers/all-MiniLM-L6-v2",
