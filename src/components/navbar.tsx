@@ -222,7 +222,7 @@ export function Navbar() {
                     >
                       <FileText className="w-4 h-4 mr-2" />
                       <span>My Papers</span>
-                      <Badge className="ml-auto">12</Badge>
+                      {/* <Badge className="ml-auto">12</Badge> */}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="cursor-pointer"

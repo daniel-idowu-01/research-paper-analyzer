@@ -52,7 +52,7 @@ export default function SettingsPage() {
           <TabsTrigger value="preferences">Preferences</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
+          {/* <TabsTrigger value="billing">Billing</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="preferences" className="space-y-6">
@@ -132,7 +132,7 @@ export default function SettingsPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Default Paper View</Label>
                 <Select defaultValue="summary">
                   <SelectTrigger>
@@ -145,7 +145,7 @@ export default function SettingsPage() {
                     <SelectItem value="references">References</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
             </CardContent>
           </Card>
 
@@ -388,10 +388,10 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-4 space-y-4">
-                <Button variant="outline" className="w-full sm:w-auto">
+                {/* <Button variant="outline" className="w-full sm:w-auto">
                   <Download className="w-4 h-4 mr-2" />
                   Download My Data
-                </Button>
+                </Button> */}
 
                 <Button variant="destructive" className="w-full sm:w-auto">
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -402,7 +402,7 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="billing" className="space-y-6">
+        {/* <TabsContent value="billing" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Subscription Plan</CardTitle>
@@ -524,7 +524,7 @@ export default function SettingsPage() {
               </Button>
             </CardFooter>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );

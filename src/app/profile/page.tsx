@@ -173,7 +173,7 @@ export default function ProfilePage() {
             <TabsList>
               <TabTrigger value="personal" icon={User} label="Personal Info" />
               <TabTrigger value="security" icon={Lock} label="Security" />
-              <TabTrigger value="activity" icon={FileText} label="Activity" />
+              {/* <TabTrigger value="activity" icon={FileText} label="Activity" /> */}
             </TabsList>
 
             <TabsContent value="personal" className="mt-6 space-y-6">
@@ -199,7 +199,7 @@ export default function ProfilePage() {
                 successMessage={isPasswordSuccess}
               />
 
-              <TwoFactorAuthCard />
+              {/* <TwoFactorAuthCard /> */}
             </TabsContent>
 
             <TabsContent value="activity" className="mt-6">
