@@ -48,11 +48,12 @@ export async function GET(request: Request) {
         institution: user.institution,
         position: user.position,
         website: user.website,
+        researchInterests: user.researchInterests,
         papersCount: papersCount.toString(),
         createdAt: user.createdAt.toLocaleString("default", {
           month: "short",
-          year: "numeric"
-        })
+          year: "numeric",
+        }),
       };
 
       return NextResponse.json(userData, { status: 200 });
@@ -109,12 +110,12 @@ export async function PUT(request: Request) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
         id: string;
       };
-      const { name, bio, institution, position, website } =
+      const { name, bio, institution, position, website, researchInterests } =
         await request.json();
 
       const user = await User.findByIdAndUpdate(
         decoded.id,
-        { name, bio, institution, position, website },
+        { name, bio, institution, position, website, researchInterests },
         { new: true }
       );
 

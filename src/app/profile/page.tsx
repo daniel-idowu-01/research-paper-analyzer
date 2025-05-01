@@ -20,6 +20,7 @@ import {
   AlertCircle,
   Github,
   Loader2,
+  X,
 } from "lucide-react";
 import {
   Card,
@@ -39,6 +40,7 @@ type ProfileData = {
   website: string;
   papersCount: string;
   createdAt: string;
+  researchInterests: string[];
 };
 
 type PasswordData = {
@@ -56,6 +58,7 @@ const DEFAULT_PROFILE_DATA: ProfileData = {
   website: "",
   papersCount: "0",
   createdAt: "",
+  researchInterests: [],
 };
 
 const DEFAULT_PASSWORD_DATA: PasswordData = {
@@ -75,6 +78,7 @@ export default function ProfilePage() {
   );
   const [profileData, setProfileData] =
     useState<ProfileData>(DEFAULT_PROFILE_DATA);
+  const [newInterest, setNewInterest] = useState("");
 
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -89,7 +93,8 @@ export default function ProfilePage() {
           position: response.position || "",
           website: response.website || "",
           papersCount: response.papersCount || "0",
-          createdAt: response.createdAt || ""
+          createdAt: response.createdAt || "",
+          researchInterests: response.researchInterests || [],
         });
       }
     } catch (error) {
@@ -129,10 +134,9 @@ export default function ProfilePage() {
     try {
       await sendRequest("/api/profile", "PUT", profileData);
       await fetchUserProfile();
+      setIsEditing(false);
     } catch (error) {
       console.error("Failed to save profile:", error);
-    } finally {
-      setIsEditing(false);
     }
   }, [profileData, sendRequest, fetchUserProfile]);
 
@@ -157,6 +161,31 @@ export default function ProfilePage() {
     }
   }, [passwordData, sendRequest]);
 
+  const handleAddInterest = useCallback(() => {
+    if (!newInterest.trim()) return;
+    setProfileData((prev) => ({
+      ...prev,
+      researchInterests: [...prev.researchInterests, newInterest.trim()],
+    }));
+    setNewInterest("");
+  }, [newInterest]);
+
+  const handleRemoveInterest = useCallback((interest: string) => {
+    setProfileData((prev) => ({
+      ...prev,
+      researchInterests: prev.researchInterests.filter((i) => i !== interest),
+    }));
+  }, []);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        handleAddInterest();
+      }
+    },
+    [handleAddInterest]
+  );
+
   if (isLoading) {
     return <Spinner />;
   }
@@ -173,7 +202,6 @@ export default function ProfilePage() {
             <TabsList>
               <TabTrigger value="personal" icon={User} label="Personal Info" />
               <TabTrigger value="security" icon={Lock} label="Security" />
-              {/* <TabTrigger value="activity" icon={FileText} label="Activity" /> */}
             </TabsList>
 
             <TabsContent value="personal" className="mt-6 space-y-6">
@@ -186,7 +214,16 @@ export default function ProfilePage() {
                 onChange={handleChange}
               />
 
-              <ResearchInterestsCard isEditing={isEditing} />
+              <ResearchInterestsCard
+                isEditing={isEditing}
+                interests={profileData.researchInterests}
+                newInterest={newInterest}
+                onNewInterestChange={(e) => setNewInterest(e.target.value)}
+                onAddInterest={handleAddInterest}
+                onRemoveInterest={handleRemoveInterest}
+                onKeyDown={handleKeyDown}
+                isLoading={isEditing && isLoading}
+              />
             </TabsContent>
 
             <TabsContent value="security" className="mt-6 space-y-6">
@@ -198,12 +235,6 @@ export default function ProfilePage() {
                 error={error ?? undefined}
                 successMessage={isPasswordSuccess}
               />
-
-              {/* <TwoFactorAuthCard /> */}
-            </TabsContent>
-
-            <TabsContent value="activity" className="mt-6">
-              <ActivityCard />
             </TabsContent>
           </Tabs>
         </div>
@@ -211,8 +242,6 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-// Extracted Components
 
 const TabTrigger = ({
   value,
@@ -257,12 +286,7 @@ const ProfileSidebar = ({ profileData }: { profileData: ProfileData }) => (
         <CardTitle>Account Stats</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* <StatItem label="Papers Uploaded" value="12" /> */}
-        <StatItem
-          label="Papers Analyzed"
-          value={profileData.papersCount}
-        />
-        {/* <StatItem label="Saved Searches" value="5" /> */}
+        <StatItem label="Papers Analyzed" value={profileData.papersCount} />
         <StatItem label="Member Since" value={profileData.createdAt} />
       </CardContent>
     </Card>
@@ -438,25 +462,69 @@ const FormTextarea = ({
   </div>
 );
 
-const ResearchInterestsCard = ({ isEditing }: { isEditing: boolean }) => (
+const ResearchInterestsCard = ({
+  isEditing,
+  interests,
+  newInterest,
+  onNewInterestChange,
+  onAddInterest,
+  onRemoveInterest,
+  onKeyDown,
+  isLoading,
+}: {
+  isEditing: boolean;
+  interests: string[];
+  newInterest: string;
+  onNewInterestChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onAddInterest: () => void;
+  onRemoveInterest: (interest: string) => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+  isLoading: boolean;
+}) => (
   <Card>
     <CardHeader>
       <CardTitle>Research Interests</CardTitle>
       <CardDescription>Topics you're interested in</CardDescription>
     </CardHeader>
     <CardContent>
-      <div className="flex flex-wrap gap-2">
-        <Badge>Machine Learning</Badge>
-        <Badge>Neural Networks</Badge>
-        <Badge>Deep Learning</Badge>
-        <Badge>Computer Vision</Badge>
-        <Badge>Natural Language Processing</Badge>
-        {isEditing && (
-          <Button variant="outline" size="sm" className="h-6">
-            + Add Interest
-          </Button>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {interests.length > 0 ? (
+          interests.map((interest) => (
+            <Badge key={interest} className="flex items-center gap-1">
+              {interest}
+              {isEditing && (
+                <button
+                  onClick={() => onRemoveInterest(interest)}
+                  className="rounded-full hover:bg-accent"
+                  disabled={isLoading}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </Badge>
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground">No interests added</p>
         )}
       </div>
+      {isEditing && (
+        <div className="flex gap-2">
+          <Input
+            placeholder="Add new interest"
+            value={newInterest}
+            onChange={onNewInterestChange}
+            onKeyDown={onKeyDown}
+            disabled={isLoading}
+          />
+          <Button
+            onClick={onAddInterest}
+            disabled={!newInterest.trim() || isLoading}
+            size="sm"
+          >
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add"}
+          </Button>
+        </div>
+      )}
     </CardContent>
   </Card>
 );
@@ -537,45 +605,6 @@ const PasswordChangeCard = ({
       </Button>
     </CardFooter>
   </Card>
-);
-
-const TwoFactorAuthCard = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Two-Factor Authentication</CardTitle>
-      <CardDescription>Add an extra layer of security</CardDescription>
-    </CardHeader>
-    <CardContent className="space-y-4">
-      <AuthOption
-        title="Authenticator App"
-        description="Use an authenticator app to generate one-time codes"
-        buttonText="Setup"
-      />
-      <AuthOption
-        title="SMS Recovery"
-        description="Use your phone number as a backup"
-        buttonText="Add Phone"
-      />
-    </CardContent>
-  </Card>
-);
-
-const AuthOption = ({
-  title,
-  description,
-  buttonText,
-}: {
-  title: string;
-  description: string;
-  buttonText: string;
-}) => (
-  <div className="flex items-center justify-between">
-    <div>
-      <p className="font-medium">{title}</p>
-      <p className="text-sm text-muted-foreground">{description}</p>
-    </div>
-    <Button variant="outline">{buttonText}</Button>
-  </div>
 );
 
 const ActivityCard = () => (
