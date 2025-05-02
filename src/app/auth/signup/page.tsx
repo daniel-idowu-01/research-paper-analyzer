@@ -101,7 +101,7 @@ export default function SignupPage() {
     !agreedToTerms;
 
   return (
-    <div className="container flex flex-col items-center justify-center px-4 py-7">
+    <div className="container flex flex-col items-center justify-center px-4 py-18">
       <div className="flex items-center mb-5">
         <FileText className="w-6 h-6 mr-2" />
         <h1 className="text-2xl font-bold">Research Analyzer</h1>

@@ -73,7 +73,7 @@ export default function SignupPage() {
     Object.values(formData).some((value) => !value?.trim()) || loading;
 
   return (
-    <div className="container flex flex-col items-center justify-center px-4 py-10">
+    <div className="container flex flex-col items-center justify-center px-4 py-20">
       <div className="flex items-center mb-5">
         <FileText className="w-6 h-6 mr-2" />
         <h1 className="text-2xl font-bold">Research Analyzer</h1>
@@ -162,7 +162,7 @@ export default function SignupPage() {
             </Button>
           </form>
 
-          <div className="relative my-6">
+          {/* <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <Separator className="w-full" />
             </div>
@@ -182,7 +182,7 @@ export default function SignupPage() {
               <Github className="w-4 h-4 mr-2" />
               GitHub
             </Button>
-          </div>
+          </div> */}
         </CardContent>
         <CardFooter className="flex flex-col items-center space-y-2">
           <div className="text-sm text-center w-full">
