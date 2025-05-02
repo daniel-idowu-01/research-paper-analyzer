@@ -44,7 +44,6 @@ const papers = [
     authors: "J. Smith, A. Johnson, M. Williams",
     date: "June 2023",
     topics: ["Machine Learning", "Neural Networks", "Deep Learning"],
-    status: "Analyzed",
     summary:
       "This paper introduces a novel approach to neural network architecture that significantly improves performance on image recognition tasks.",
   },
@@ -54,7 +53,6 @@ const papers = [
     authors: "L. Chen, R. Garcia",
     date: "May 2023",
     topics: ["Transformers", "Efficiency", "NLP"],
-    status: "Analyzed",
     summary:
       "A comprehensive survey of methods to improve the efficiency of transformer models for various applications.",
   },
@@ -64,7 +62,6 @@ const papers = [
     authors: "K. Zhang, T. Wilson",
     date: "April 2023",
     topics: ["Deep Learning", "Memory Optimization"],
-    status: "Uploaded",
     summary:
       "This paper proposes novel techniques for reducing memory usage during the training of deep neural networks.",
   },
@@ -74,7 +71,6 @@ const papers = [
     authors: "M. Brown, S. Davis",
     date: "March 2023",
     topics: ["Vision Transformers", "Image Processing"],
-    status: "Analyzed",
     summary:
       "A method for applying transformer models to extremely high-resolution images without quadratic complexity.",
   },
@@ -84,7 +80,6 @@ const papers = [
     authors: "A. Martinez, J. Lee",
     date: "February 2023",
     topics: ["Reinforcement Learning", "Robotics"],
-    status: "Uploaded",
     summary:
       "This research explores the application of reinforcement learning algorithms to robotic control systems.",
   },
@@ -92,34 +87,17 @@ const papers = [
 
 export default function MyPapersPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const router = useRouter();
 
-  // Filter papers based on search query, status, and topic
+  // Filter papers based on search query
   const filteredPapers = papers.filter((paper) => {
     const matchesSearch =
       paper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       paper.authors.toLowerCase().includes(searchQuery.toLowerCase()) ||
       paper.summary.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = selectedStatus
-      ? paper.status === selectedStatus
-      : true;
-
-    const matchesTopic = selectedTopic
-      ? paper.topics.some(
-          (topic) => topic.toLowerCase() === selectedTopic.toLowerCase()
-        )
-      : true;
-
-    return matchesSearch && matchesStatus && matchesTopic;
+    return matchesSearch;
   });
-
-  // Get all unique topics from papers
-  const allTopics = Array.from(
-    new Set(papers.flatMap((paper) => paper.topics))
-  );
 
   return (
     <div className="container px-4 py-10">
@@ -141,50 +119,6 @@ export default function MyPapersPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full md:w-auto">
-              <Filter className="w-4 h-4 mr-2" />
-              Status
-              <ChevronDown className="w-4 h-4 ml-2" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setSelectedStatus(null)}>
-              All
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSelectedStatus("Analyzed")}>
-              Analyzed
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSelectedStatus("Uploaded")}>
-              Uploaded
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full md:w-auto">
-              <Filter className="w-4 h-4 mr-2" />
-              Topic
-              <ChevronDown className="w-4 h-4 ml-2" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setSelectedTopic(null)}>
-              All Topics
-            </DropdownMenuItem>
-            {allTopics.map((topic) => (
-              <DropdownMenuItem
-                key={topic}
-                onClick={() => setSelectedTopic(topic)}
-              >
-                {topic}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       <Tabs defaultValue="grid" className="mt-6">
@@ -204,13 +138,7 @@ export default function MyPapersPage() {
               <Card key={paper.id} className="overflow-hidden">
                 <CardHeader className="pb-3">
                   <div className="flex justify-between">
-                    <Badge
-                      variant={
-                        paper.status === "Analyzed" ? "default" : "secondary"
-                      }
-                    >
-                      {paper.status}
-                    </Badge>
+                    <section></section>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="-mr-2">
@@ -257,17 +185,8 @@ export default function MyPapersPage() {
                 <CardFooter className="pt-0">
                   <Link href="/demo" className="w-full">
                     <Button variant="outline" className="w-full">
-                      {paper.status === "Analyzed" ? (
-                        <>
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          View Analysis
-                        </>
-                      ) : (
-                        <>
-                          <FileText className="w-4 h-4 mr-2" />
-                          View Paper
-                        </>
-                      )}
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      View Analysis
                     </Button>
                   </Link>
                 </CardFooter>
@@ -283,13 +202,6 @@ export default function MyPapersPage() {
                 <div className="flex flex-col p-6 sm:flex-row sm:items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge
-                        variant={
-                          paper.status === "Analyzed" ? "default" : "secondary"
-                        }
-                      >
-                        {paper.status}
-                      </Badge>
                       <span className="text-sm text-muted-foreground">
                         <Calendar className="inline w-4 h-4 mr-1" />
                         {paper.date}
@@ -317,17 +229,10 @@ export default function MyPapersPage() {
                   <div className="flex flex-row gap-2 mt-4 sm:flex-col sm:mt-0">
                     <Link href="/demo">
                       <Button variant="default" size="sm" className="w-full">
-                        {paper.status === "Analyzed" ? (
-                          <>
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Analysis
-                          </>
-                        ) : (
-                          <>
-                            <FileText className="w-4 h-4 mr-2" />
-                            View
-                          </>
-                        )}
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Analysis
+                        </>
                       </Button>
                     </Link>
                     <DropdownMenu>

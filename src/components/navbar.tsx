@@ -54,6 +54,14 @@ export function Navbar() {
 
   const isAuthenticated = !!user;
 
+  const handleLogout = async () => {
+    await sendRequest("/api/auth/logout", "GET");
+    clearUser();
+    setIsOpen(false);
+
+    router.push("/");
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex items-center justify-between h-16 px-4 md:px-6">
@@ -235,7 +243,7 @@ export function Navbar() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="cursor-pointer text-red-500 focus:text-red-500"
-                    onClick={() => router.push("/logout")}
+                    onClick={handleLogout}
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     <span>Log out</span>

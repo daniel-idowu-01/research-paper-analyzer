@@ -223,7 +223,7 @@ export default function SignupPage() {
             </Button>
           </form>
 
-          <div className="relative my-6">
+          {/* <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <Separator className="w-full" />
             </div>
@@ -243,7 +243,7 @@ export default function SignupPage() {
               <Github className="w-4 h-4 mr-2" />
               GitHub
             </Button>
-          </div>
+          </div> */}
         </CardContent>
         <CardFooter>
           <div className="text-sm text-center w-full">
