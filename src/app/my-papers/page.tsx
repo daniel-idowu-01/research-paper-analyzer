@@ -1,7 +1,14 @@
 "use client";
-
-import { useState } from "react";
+import Link from "next/link";
+import { IPaper } from "../../../types";
+import { useApi } from "@/hooks/use-api";
+import Spinner from "@/components/spinner";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -10,15 +17,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BookOpen,
   Calendar,
@@ -33,8 +37,6 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 // Sample paper data
 const papers = [
@@ -86,18 +88,49 @@ const papers = [
 ];
 
 export default function MyPapersPage() {
-  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const { sendRequest } = useApi();
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [papers, setPapers] = useState<IPaper[]>([]);
+
+  useEffect(() => {
+    const fetchPapers = async () => {
+      try {
+        const response = await sendRequest("/api/papers", "GET");
+        if (response.success) {
+          setPapers(response.papers);
+        } else {
+          setError(response.error);
+        }
+      } catch (error: any) {
+        setError(
+          error.message || "Failed to fetch papers. Please try again later."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPapers();
+  }, [sendRequest]);
 
   // Filter papers based on search query
   const filteredPapers = papers.filter((paper) => {
     const matchesSearch =
-      paper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      paper.authors.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      paper.metadata.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      paper.metadata.authors.map((author) =>
+        author.toLowerCase().includes(searchQuery.toLowerCase())
+      ) ||
       paper.summary.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesSearch;
   });
+
+  if (loading) {
+    <Spinner />;
+  }
 
   return (
     <div className="container px-4 py-10">
@@ -165,17 +198,26 @@ export default function MyPapersPage() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                  <CardTitle className="line-clamp-2">{paper.title}</CardTitle>
-                  <CardDescription>{paper.authors}</CardDescription>
+                  <CardTitle className="line-clamp-2">
+                    {paper.metadata.title}
+                  </CardTitle>
+                  {paper.metadata.authors.length > 0 && (
+                    <CardDescription className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <FileText className="w-4 h-4" />
+                      <span className="line-clamp-1">
+                        {paper.metadata.authors.join(", ")}
+                      </span>
+                    </CardDescription>
+                  )}
                 </CardHeader>
                 <CardContent className="pb-3">
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Calendar className="w-4 h-4 mr-1" />
-                    {paper.date}
+                    {paper.metadata.published_date}
                   </div>
                   <p className="mt-2 text-sm line-clamp-3">{paper.summary}</p>
                   <div className="flex flex-wrap gap-1 mt-3">
-                    {paper.topics.map((topic) => (
+                    {paper.metadata.topics.map((topic) => (
                       <Badge key={topic} variant="outline" className="text-xs">
                         {topic}
                       </Badge>
@@ -204,18 +246,21 @@ export default function MyPapersPage() {
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm text-muted-foreground">
                         <Calendar className="inline w-4 h-4 mr-1" />
-                        {paper.date}
+                        {paper.metadata.published_date}
                       </span>
                     </div>
                     <h3 className="mb-1 text-lg font-semibold">
-                      {paper.title}
+                      {paper.metadata.title}
                     </h3>
-                    <p className="mb-2 text-sm text-muted-foreground">
-                      {paper.authors}
+                    <p className="text-sm text-muted-foreground">
+                      {paper.metadata.authors.join(", ")}
                     </p>
+                    {/* <p className="mb-2 text-sm text-muted-foreground">
+                      {paper.authors}
+                    </p> */}
                     <p className="mb-3 text-sm">{paper.summary}</p>
                     <div className="flex flex-wrap gap-1">
-                      {paper.topics.map((topic) => (
+                      {paper.metadata.topics.map((topic) => (
                         <Badge
                           key={topic}
                           variant="outline"
