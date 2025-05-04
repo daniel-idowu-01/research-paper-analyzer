@@ -38,55 +38,6 @@ import {
   Upload,
 } from "lucide-react";
 
-// Sample paper data
-const papers = [
-  {
-    id: 1,
-    title: "Advances in Neural Information Processing Systems",
-    authors: "J. Smith, A. Johnson, M. Williams",
-    date: "June 2023",
-    topics: ["Machine Learning", "Neural Networks", "Deep Learning"],
-    summary:
-      "This paper introduces a novel approach to neural network architecture that significantly improves performance on image recognition tasks.",
-  },
-  {
-    id: 2,
-    title: "Efficient Transformers: A Survey",
-    authors: "L. Chen, R. Garcia",
-    date: "May 2023",
-    topics: ["Transformers", "Efficiency", "NLP"],
-    summary:
-      "A comprehensive survey of methods to improve the efficiency of transformer models for various applications.",
-  },
-  {
-    id: 3,
-    title: "Memory-Efficient Training of Deep Networks",
-    authors: "K. Zhang, T. Wilson",
-    date: "April 2023",
-    topics: ["Deep Learning", "Memory Optimization"],
-    summary:
-      "This paper proposes novel techniques for reducing memory usage during the training of deep neural networks.",
-  },
-  {
-    id: 4,
-    title: "Scaling Vision Transformers to Gigapixel Images",
-    authors: "M. Brown, S. Davis",
-    date: "March 2023",
-    topics: ["Vision Transformers", "Image Processing"],
-    summary:
-      "A method for applying transformer models to extremely high-resolution images without quadratic complexity.",
-  },
-  {
-    id: 5,
-    title: "Reinforcement Learning for Robotic Control",
-    authors: "A. Martinez, J. Lee",
-    date: "February 2023",
-    topics: ["Reinforcement Learning", "Robotics"],
-    summary:
-      "This research explores the application of reinforcement learning algorithms to robotic control systems.",
-  },
-];
-
 export default function MyPapersPage() {
   const router = useRouter();
   const { sendRequest } = useApi();
@@ -128,8 +79,20 @@ export default function MyPapersPage() {
     return matchesSearch;
   });
 
+  // handle download
+  const handleDownload = (paper: IPaper) => {
+    if (!paper.file_url) return;
+
+    const link = document.createElement("a");
+    link.href = paper.file_url;
+    link.download = `${paper.metadata.title.replace(/\s+/g, "_")}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
-    <Spinner />;
+    return <Spinner />;
   }
 
   return (
@@ -166,100 +129,62 @@ export default function MyPapersPage() {
         </div>
 
         <TabsContent value="grid" className="mt-6">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredPapers.map((paper) => (
-              <Card key={paper.id} className="overflow-hidden">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between">
-                    <section></section>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="-mr-2">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <BookOpen className="w-4 h-4 mr-2" />
-                          View Analysis
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Share2 className="w-4 h-4 mr-2" />
-                          Share
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-500 focus:text-red-500">
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  <CardTitle className="line-clamp-2">
-                    {paper.metadata.title}
-                  </CardTitle>
-                  {paper.metadata.authors.length > 0 && (
-                    <CardDescription className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <FileText className="w-4 h-4" />
-                      <span className="line-clamp-1">
-                        {paper.metadata.authors.join(", ")}
-                      </span>
-                    </CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent className="pb-3">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {paper.metadata.published_date}
-                  </div>
-                  <p className="mt-2 text-sm line-clamp-3">{paper.summary}</p>
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {paper.metadata.topics.map((topic) => (
-                      <Badge key={topic} variant="outline" className="text-xs">
-                        {topic}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-0">
-                  <Link href="/demo" className="w-full">
-                    <Button variant="outline" className="w-full">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      View Analysis
-                    </Button>
-                  </Link>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="list" className="mt-6">
-          <div className="space-y-4">
-            {filteredPapers.map((paper) => (
-              <Card key={paper.id}>
-                <div className="flex flex-col p-6 sm:flex-row sm:items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm text-muted-foreground">
-                        <Calendar className="inline w-4 h-4 mr-1" />
-                        {paper.metadata.published_date}
-                      </span>
+          {filteredPapers.length > 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredPapers.map((paper) => (
+                <Card key={paper.id} className="overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between">
+                      <section></section>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="-mr-2">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <BookOpen className="w-4 h-4 mr-2" />
+                            <Link href={`/paper/${paper._id}`}>
+                              View Analysis
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDownload(paper)}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Share2 className="w-4 h-4 mr-2" />
+                            Share
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-500 focus:text-red-500">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    <h3 className="mb-1 text-lg font-semibold">
+                    <CardTitle className="line-clamp-2">
                       {paper.metadata.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {paper.metadata.authors.join(", ")}
-                    </p>
-                    {/* <p className="mb-2 text-sm text-muted-foreground">
-                      {paper.authors}
-                    </p> */}
-                    <p className="mb-3 text-sm">{paper.summary}</p>
-                    <div className="flex flex-wrap gap-1">
+                    </CardTitle>
+                    {paper.metadata.authors.length > 0 && (
+                      <CardDescription className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <FileText className="w-4 h-4" />
+                        <span className="line-clamp-1">
+                          {paper.metadata.authors.join(", ")}
+                        </span>
+                      </CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent className="pb-3">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      {paper.metadata.published_date}
+                    </div>
+                    <p className="mt-2 text-sm line-clamp-3">{paper.summary}</p>
+                    <div className="flex flex-wrap gap-1 mt-3">
                       {paper.metadata.topics.map((topic) => (
                         <Badge
                           key={topic}
@@ -270,42 +195,108 @@ export default function MyPapersPage() {
                         </Badge>
                       ))}
                     </div>
-                  </div>
-                  <div className="flex flex-row gap-2 mt-4 sm:flex-col sm:mt-0">
-                    <Link href="/demo">
-                      <Button variant="default" size="sm" className="w-full">
-                        <>
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Analysis
-                        </>
+                  </CardContent>
+                  <CardFooter className="pt-0">
+                    <Link href={`/paper/${paper._id}`} className="w-full">
+                      <Button variant="outline" className="w-full">
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        View Analysis
                       </Button>
                     </Link>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="w-full">
-                          <MoreHorizontal className="w-4 h-4" />
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <p className="text-sm text-muted-foreground mt-20">
+                No papers analyzed
+              </p>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="list" className="mt-6">
+          {filteredPapers.length > 0 ? (
+            <div className="space-y-4">
+              {filteredPapers.map((paper) => (
+                <Card key={paper.id}>
+                  <div className="flex flex-col p-6 sm:flex-row sm:items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm text-muted-foreground">
+                          <Calendar className="inline w-4 h-4 mr-1" />
+                          {paper.metadata.published_date}
+                        </span>
+                      </div>
+                      <h3 className="mb-1 text-lg font-semibold">
+                        {paper.metadata.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {paper.metadata.authors.join(", ")}
+                      </p>
+                      {/* <p className="mb-2 text-sm text-muted-foreground">
+                      {paper.authors}
+                    </p> */}
+                      <p className="mb-3 text-sm">{paper.summary}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {paper.metadata.topics.map((topic) => (
+                          <Badge
+                            key={topic}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {topic}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-row gap-2 mt-4 sm:flex-col sm:mt-0">
+                      <Link href="/demo">
+                        <Button variant="default" size="sm" className="w-full">
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Analysis
+                          </>
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Share2 className="w-4 h-4 mr-2" />
-                          Share
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-500 focus:text-red-500">
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                      </Link>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                          >
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Download className="w-4 h-4 mr-2" />
+                            Download
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Share2 className="w-4 h-4 mr-2" />
+                            Share
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-500 focus:text-red-500">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <p className="text-sm text-muted-foreground mt-20">
+                No papers analyzed
+              </p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
