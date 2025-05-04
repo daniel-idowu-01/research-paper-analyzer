@@ -91,6 +91,22 @@ export default function MyPapersPage() {
     document.body.removeChild(link);
   };
 
+  // handle paper sharing
+  const handleShare = async (paper: IPaper) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: paper.metadata.title,
+          text: `Check out this paper: ${paper.metadata.title}`,
+          url: `${window.location.origin}/papers/${paper.id}`,
+        });
+        return;
+      } catch (err) {
+        console.log("Share canceled:", err);
+      }
+    }
+  };
+
   if (loading) {
     return <Spinner />;
   }
@@ -155,7 +171,7 @@ export default function MyPapersPage() {
                             <Download className="w-4 h-4 mr-2" />
                             Download
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleShare(paper)}>
                             <Share2 className="w-4 h-4 mr-2" />
                             Share
                           </DropdownMenuItem>
@@ -271,11 +287,13 @@ export default function MyPapersPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDownload(paper)}
+                          >
                             <Download className="w-4 h-4 mr-2" />
                             Download
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleShare(paper)}>
                             <Share2 className="w-4 h-4 mr-2" />
                             Share
                           </DropdownMenuItem>
