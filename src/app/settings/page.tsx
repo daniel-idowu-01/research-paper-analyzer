@@ -27,7 +27,8 @@ import {
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
-  const { updateSettings, isUpdating, fetchSettings, settings } = useSettings();
+  const { updateSettings, isUpdating, fetchSettings, settings, user } =
+    useSettings();
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -412,12 +413,12 @@ export default function SettingsPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label>Email</Label>
-                  <p className="text-sm font-medium">john.doe@example.com</p>
+                  <p className="text-sm font-medium">{user?.email}</p>
                 </div>
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label>Account Type</Label>
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">Premium</p>
+                    <p className="text-xs font-medium">Premium</p>
                     <Badge>Active</Badge>
                   </div>
                 </div>
@@ -425,7 +426,7 @@ export default function SettingsPage() {
 
               <div>
                 <Label>Member Since</Label>
-                <p className="text-sm font-medium">January 15, 2023</p>
+                <p className="text-sm font-medium">{user?.createdAt}</p>
               </div>
 
               <div className="pt-4">

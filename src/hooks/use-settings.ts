@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useApi } from "./use-api";
+import { IUser } from "../../types/user";
 
 export function useSettings() {
   const { sendRequest } = useApi();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [user, setUser] = useState<IUser | null>(null);
+
   const [settings, setSettings] = useState({
     notifications: {
       paperAnalysis: true,
@@ -55,13 +58,14 @@ export function useSettings() {
       }
 
       setSettings(response.settings || settings);
+      setUser(response.user || null)
 
-      return response.settings
+      return response.settings;
     } catch (error) {
       console.log("Fetch error:", error);
       throw error;
     }
   };
 
-  return { updateSettings, isUpdating, fetchSettings, settings };
+  return { updateSettings, isUpdating, fetchSettings, settings, user };
 }

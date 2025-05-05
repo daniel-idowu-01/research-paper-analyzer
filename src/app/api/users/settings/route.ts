@@ -120,13 +120,25 @@ export async function GET(request: Request) {
         id: string;
       };
 
-      const user = await User.findById(decoded.id).select("settings");
+      const user = await User.findById(decoded.id);
 
       if (!user) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
-      return NextResponse.json({ settings: user.settings }, { status: 200 });
+      return NextResponse.json(
+        {
+          settings: user.settings,
+          user: {
+            email: user.email,
+            createdAt: user.createdAt.toLocaleString("default", {
+              month: "short",
+              year: "numeric",
+            }),
+          },
+        },
+        { status: 200 }
+      );
     } catch (error) {
       logger.error("JWT Error: " + error);
       if (error instanceof jwt.JsonWebTokenError) {
