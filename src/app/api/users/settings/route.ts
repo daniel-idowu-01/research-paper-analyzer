@@ -41,7 +41,7 @@ export async function PUT(request: Request) {
         case "preferences":
           updateQuery = { "settings.preferences": data };
           break;
-        case "appearances":
+        case "appearance":
           updateQuery = {
             "settings.appearance.theme": data.theme,
             "settings.appearance.language": data.language,
@@ -102,7 +102,7 @@ export async function PUT(request: Request) {
 // get user settings
 export async function GET(request: Request) {
   try {
-    logger.info("Fetching user settnigs...");
+    logger.info("Fetching user settings...");
     await connectDB();
 
     const cookieStore = cookies();

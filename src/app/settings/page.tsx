@@ -60,7 +60,7 @@ export default function SettingsPage() {
 
   // Theme change handler
   const handleThemeChange = async (newTheme: string) => {
-    await updateSettings("appearances", {
+    await updateSettings("appearance", {
       ...settings.appearance,
       theme: newTheme,
     });
