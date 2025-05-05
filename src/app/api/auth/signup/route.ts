@@ -3,6 +3,7 @@ import User from "@/models/User";
 import logger from "@/lib/logger";
 import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
+import Notification from "@/models/Notification";
 import { emailRegex, passwordRegex } from "@/lib/constants";
 
 export async function POST(req: Request) {
@@ -58,6 +59,13 @@ export async function POST(req: Request) {
       name,
       email,
       password: hashedPassword,
+    });
+
+    await Notification.create({
+      userId: newUser.id,
+      type: "system_alert",
+      title: `Welcome to our system, ${newUser.name.split(" ")[0] || newUser.name}!`,
+      message: "Thank you for signing up! We hope you have a smooth ride.",
     });
 
     return NextResponse.json(

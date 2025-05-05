@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/stores/user-store";
 import { usePathname, useRouter } from "next/navigation";
+import { INotification } from "../../types/notification";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -34,6 +35,9 @@ export function Navbar() {
   const { sendRequest } = useApi();
   const [isOpen, setIsOpen] = useState(false);
   const { user, setUser, clearUser } = useUserStore();
+  const [notifications, setNotifications] = useState<INotification[] | null>(
+    []
+  );
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -41,6 +45,7 @@ export function Navbar() {
         const response = await sendRequest("/api/auth/me", "GET");
         if (response.authenticated) {
           setUser(response.user);
+          setNotifications(response.notifications || []);
         } else {
           clearUser();
         }
@@ -157,7 +162,7 @@ export function Navbar() {
                   <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-5 w-5" />
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                      2
+                      {notifications?.length}
                     </Badge>
                     <span className="sr-only">Notifications</span>
                   </Button>
@@ -166,29 +171,26 @@ export function Navbar() {
                   <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <div className="max-h-[300px] overflow-y-auto">
-                    <DropdownMenuItem className="cursor-pointer">
-                      <div className="flex flex-col gap-1">
-                        <p className="font-medium">New AI analysis complete</p>
-                        <p className="text-xs text-muted-foreground">
-                          Your paper "Neural Networks in Healthcare" has been
-                          analyzed
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          10 minutes ago
-                        </p>
-                      </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer">
-                      <div className="flex flex-col gap-1">
-                        <p className="font-medium">Similar paper found</p>
-                        <p className="text-xs text-muted-foreground">
-                          We found a paper similar to your recent upload
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          2 hours ago
-                        </p>
-                      </div>
-                    </DropdownMenuItem>
+                    {notifications && notifications.length > 0 ? (
+                      notifications?.map((notification, index) => (
+                        <DropdownMenuItem
+                          key={index}
+                          className="cursor-pointer"
+                        >
+                          <div className="flex flex-col gap-1">
+                            <p className="font-medium">{notification.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {notification.createdAt.toString()}
+                            </p>
+                          </div>
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <p>No new notifications</p>
+                    )}
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
