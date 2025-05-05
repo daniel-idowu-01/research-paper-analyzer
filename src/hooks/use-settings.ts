@@ -29,18 +29,18 @@ export function useSettings() {
   const updateSettings = async (settingsType: string, data: any) => {
     setIsUpdating(true);
     try {
-      const response = await sendRequest("/api/users/settings", "POST", {
+      const response = await sendRequest("/api/users/settings", "PUT", {
         settingsType,
         data,
       });
 
-      if (!response.success) {
+      if (!response.message) {
         throw new Error("Failed to update settings");
       }
 
       setSettings((prev) => ({ ...prev, [settingsType]: data }));
     } catch (error) {
-      console.error("Update error:", error);
+      console.log("Update error:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -49,12 +49,16 @@ export function useSettings() {
   const fetchSettings = async () => {
     try {
       const response = await sendRequest("/api/users/settings");
-      if (!response.ok) {
+
+      if (!response.settings) {
         throw new Error("Failed to fetch settings");
       }
-      setSettings(response.data.settings || settings);
+
+      setSettings(response.settings || settings);
+
+      return response.settings
     } catch (error) {
-      console.error("Fetch error:", error);
+      console.log("Fetch error:", error);
       throw error;
     }
   };

@@ -28,29 +28,17 @@ import {
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { updateSettings, isUpdating, fetchSettings, settings } = useSettings();
-  const [notifications, setNotifications] = useState({
-    paperAnalysis: true,
-    similarPapers: true,
-    newFeatures: false,
-    marketing: false,
-    email: true,
-    browser: true,
-  });
 
-  // useEffect(() => {
-  //   const loadSettings = async () => {
-  //     try {
-  //       const { settings } = await fetchSettings();
-  //       if (settings?.notifications) {
-  //         setNotifications(settings.notifications);
-  //       }
-  //       // Set other settings similarly
-  //     } catch (error) {
-  //       console.error("Failed to load settings:", error);
-  //     }
-  //   };
-  //   loadSettings();
-  // }, []);
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        await fetchSettings();
+      } catch (error) {
+        console.log("Failed to load settings:", error);
+      }
+    };
+    loadSettings();
+  }, []);
 
   // Modified handler that saves to DB
   const handleNotificationChange = async (key: string, value: boolean) => {

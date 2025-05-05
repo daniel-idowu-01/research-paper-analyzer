@@ -43,8 +43,8 @@ export async function PUT(request: Request) {
           break;
         case "appearances":
           updateQuery = {
-            "settings.theme": data.theme,
-            "settings.language": data.language,
+            "settings.appearance.theme": data.theme,
+            "settings.appearance.language": data.language,
           };
           break;
 
