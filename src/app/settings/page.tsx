@@ -1,5 +1,6 @@
 "use client";
 import { useTheme } from "next-themes";
+import Spinner from "@/components/spinner";
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ import {
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const [isLoading, setIsLoading] = useState(true)
   const { updateSettings, isUpdating, fetchSettings, settings, user } =
     useSettings();
 
@@ -36,12 +38,14 @@ export default function SettingsPage() {
         await fetchSettings();
       } catch (error) {
         console.log("Failed to load settings:", error);
+      } finally {
+        setIsLoading(false)
       }
     };
     loadSettings();
   }, []);
 
-  // Modified handler that saves to DB
+  // Notification change handler
   const handleNotificationChange = async (key: string, value: boolean) => {
     const updatedNotifications = {
       ...settings.notifications,
@@ -50,6 +54,7 @@ export default function SettingsPage() {
     await updateSettings("notifications", updatedNotifications);
   };
 
+  // Preference change handler
   const handlePreferenceChange = async (key: string, value: any) => {
     const updatedPreferences = {
       ...settings.preferences,
@@ -71,6 +76,10 @@ export default function SettingsPage() {
   const handleLanguageChange = async (language: string) => {
     await updateSettings("appearance", { ...settings.appearance, language });
   };
+
+  if(isLoading) {
+    return <Spinner />
+  }
 
   return (
     <div className="container px-4 py-10">
@@ -397,9 +406,6 @@ export default function SettingsPage() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button>Save Notification Settings</Button>
-            </CardFooter>
           </Card>
         </TabsContent>
 
@@ -418,7 +424,7 @@ export default function SettingsPage() {
                 <div className="flex flex-col gap-2">
                   <Label>Account Type</Label>
                   <div className="flex items-center gap-2">
-                    <p className="text-xs font-medium">Premium</p>
+                    <p className="text-xs font-medium">{user?.accountType}</p>
                     <Badge>Active</Badge>
                   </div>
                 </div>

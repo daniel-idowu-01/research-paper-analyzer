@@ -131,6 +131,7 @@ export async function GET(request: Request) {
           settings: user.settings,
           user: {
             email: user.email,
+            accountType: user.accountType,
             createdAt: user.createdAt.toLocaleString("default", {
               month: "short",
               year: "numeric",

@@ -80,6 +80,11 @@ const UserSchema = new mongoose.Schema(
       preferences: { type: PreferencesSchema, default: () => ({}) },
       appearance: { type: AppearanceSettingsSchema, default: () => ({}) },
     },
+    accountType: {
+      type: String,
+      enum: ["Regular", "Premium"],
+      default: "Regular",
+    },
   },
   {
     timestamps: true,

@@ -44,6 +44,7 @@ export interface IUser extends Document {
     preferences: IPreferences;
     appearance: IAppearanceSettings;
   };
+  accountType: "Regular" | "Premuim";
   createdAt: string;
   updatedAt: string;
   id: string;
