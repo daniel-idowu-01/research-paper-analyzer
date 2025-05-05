@@ -1,5 +1,35 @@
 import mongoose from "mongoose";
 
+const NotificationSettingsSchema = new mongoose.Schema({
+  paperAnalysis: { type: Boolean, default: true },
+  similarPapers: { type: Boolean, default: true },
+  newFeatures: { type: Boolean, default: false },
+  marketing: { type: Boolean, default: false },
+  email: { type: Boolean, default: true },
+  browser: { type: Boolean, default: true },
+});
+
+const PreferencesSchema = new mongoose.Schema({
+  autoAnalyze: { type: Boolean, default: true },
+  findSimilar: { type: Boolean, default: true },
+  citationFormat: {
+    type: String,
+    default: "apa",
+    enum: ["apa", "mla", "chicago", "harvard", "ieee"],
+  },
+  dataCollection: { type: Boolean, default: true },
+  storeHistory: { type: Boolean, default: true },
+});
+
+const AppearanceSettingsSchema = new mongoose.Schema({
+  theme: { type: String, default: "system", enum: ["light", "dark", "system"] },
+  language: {
+    type: String,
+    default: "en",
+    enum: ["en", "es", "fr", "de", "zh"],
+  },
+});
+
 const UserSchema = new mongoose.Schema(
   {
     name: {
@@ -45,6 +75,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    settings: {
+      notifications: { type: NotificationSettingsSchema, default: () => ({}) },
+      preferences: { type: PreferencesSchema, default: () => ({}) },
+      appearance: { type: AppearanceSettingsSchema, default: () => ({}) },
+    },
   },
   {
     timestamps: true,
@@ -58,5 +93,18 @@ const UserSchema = new mongoose.Schema(
     },
   }
 );
+
+UserSchema.post("findOneAndUpdate", async function (doc) {
+  if (doc && !doc.settings) {
+    doc.settings = {
+      notifications: {},
+      preferences: {
+        autoAnalyze: doc.autoAnalyzePaper,
+      },
+      appearance: {},
+    };
+    await doc.save();
+  }
+});
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);

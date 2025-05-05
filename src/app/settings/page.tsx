@@ -1,7 +1,14 @@
 "use client";
-
-import { useState } from "react";
+import { useTheme } from "next-themes";
+import { useState, useEffect } from "react";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { useSettings } from "@/hooks/use-settings";
+import { Separator } from "@/components/ui/separator";
+import { CreditCard, Download, Moon, Sun, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -10,9 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -20,13 +24,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { CreditCard, Download, Moon, Sun, Trash2 } from "lucide-react";
-import { useTheme } from "next-themes";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { updateSettings, isUpdating, fetchSettings, settings } = useSettings();
   const [notifications, setNotifications] = useState({
     paperAnalysis: true,
     similarPapers: true,
@@ -36,11 +37,50 @@ export default function SettingsPage() {
     browser: true,
   });
 
-  const handleNotificationChange = (key: string) => {
-    setNotifications((prev) => ({
-      ...prev,
-      [key]: !prev[key as keyof typeof notifications],
-    }));
+  // useEffect(() => {
+  //   const loadSettings = async () => {
+  //     try {
+  //       const { settings } = await fetchSettings();
+  //       if (settings?.notifications) {
+  //         setNotifications(settings.notifications);
+  //       }
+  //       // Set other settings similarly
+  //     } catch (error) {
+  //       console.error("Failed to load settings:", error);
+  //     }
+  //   };
+  //   loadSettings();
+  // }, []);
+
+  // Modified handler that saves to DB
+  const handleNotificationChange = async (key: string, value: boolean) => {
+    const updatedNotifications = {
+      ...settings.notifications,
+      [key]: value,
+    };
+    await updateSettings("notifications", updatedNotifications);
+  };
+
+  const handlePreferenceChange = async (key: string, value: any) => {
+    const updatedPreferences = {
+      ...settings.preferences,
+      [key]: value,
+    };
+    await updateSettings("preferences", updatedPreferences);
+  };
+
+  // Theme change handler
+  const handleThemeChange = async (newTheme: string) => {
+    await updateSettings("appearances", {
+      ...settings.appearance,
+      theme: newTheme,
+    });
+    setTheme(newTheme);
+  };
+
+  // Language change handler
+  const handleLanguageChange = async (language: string) => {
+    await updateSettings("appearance", { ...settings.appearance, language });
   };
 
   return (
@@ -68,25 +108,40 @@ export default function SettingsPage() {
                 <Label>Theme</Label>
                 <div className="flex gap-4">
                   <Button
-                    variant={theme === "light" ? "default" : "outline"}
+                    variant={
+                      settings.appearance.theme === "light"
+                        ? "default"
+                        : "outline"
+                    }
                     className="flex-1 justify-start"
-                    onClick={() => setTheme("light")}
+                    onClick={() => handleThemeChange("light")}
+                    disabled={isUpdating}
                   >
                     <Sun className="w-4 h-4 mr-2" />
                     Light
                   </Button>
                   <Button
-                    variant={theme === "dark" ? "default" : "outline"}
+                    variant={
+                      settings.appearance.theme === "dark"
+                        ? "default"
+                        : "outline"
+                    }
                     className="flex-1 justify-start"
-                    onClick={() => setTheme("dark")}
+                    onClick={() => handleThemeChange("dark")}
+                    disabled={isUpdating}
                   >
                     <Moon className="w-4 h-4 mr-2" />
                     Dark
                   </Button>
                   <Button
-                    variant={theme === "system" ? "default" : "outline"}
+                    variant={
+                      settings.appearance.theme === "system"
+                        ? "default"
+                        : "outline"
+                    }
                     className="flex-1 justify-start"
-                    onClick={() => setTheme("system")}
+                    onClick={() => handleThemeChange("system")}
+                    disabled={isUpdating}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -118,7 +173,11 @@ export default function SettingsPage() {
 
               <div className="space-y-2">
                 <Label>Language</Label>
-                <Select defaultValue="en">
+                <Select
+                  value={settings.appearance.language}
+                  onValueChange={handleLanguageChange}
+                  disabled={isUpdating}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
@@ -166,7 +225,14 @@ export default function SettingsPage() {
                     Automatically analyze papers when they are uploaded
                   </p>
                 </div>
-                <Switch id="auto-analyze" defaultChecked />
+                <Switch
+                  id="auto-analyze"
+                  checked={settings.preferences.autoAnalyze}
+                  onCheckedChange={(val) =>
+                    handlePreferenceChange("autoAnalyze", val)
+                  }
+                  disabled={isUpdating}
+                />
               </div>
 
               <div className="flex items-center justify-between">
@@ -176,7 +242,14 @@ export default function SettingsPage() {
                     Suggest similar papers based on content analysis
                   </p>
                 </div>
-                <Switch id="similar-papers" defaultChecked />
+                <Switch
+                  id="similar-papers"
+                  checked={settings.preferences.findSimilar}
+                  onCheckedChange={(val) =>
+                    handlePreferenceChange("findSimilar", val)
+                  }
+                  disabled={isUpdating}
+                />
               </div>
 
               <div className="flex items-center justify-between">
@@ -188,7 +261,13 @@ export default function SettingsPage() {
                     Choose your preferred citation style
                   </p>
                 </div>
-                <Select defaultValue="apa">
+                <Select
+                  value={settings.preferences.citationFormat}
+                  onValueChange={(val) =>
+                    handlePreferenceChange("citationFormat", val)
+                  }
+                  disabled={isUpdating}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select format" />
                   </SelectTrigger>
@@ -225,10 +304,11 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <Switch
-                      checked={notifications.paperAnalysis}
-                      onCheckedChange={() =>
-                        handleNotificationChange("paperAnalysis")
+                      checked={settings.notifications.paperAnalysis}
+                      onCheckedChange={(val) =>
+                        handleNotificationChange("paperAnalysis", val)
                       }
+                      disabled={isUpdating}
                     />
                   </div>
 
@@ -240,10 +320,11 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <Switch
-                      checked={notifications.similarPapers}
-                      onCheckedChange={() =>
-                        handleNotificationChange("similarPapers")
+                      checked={settings.notifications.similarPapers}
+                      onCheckedChange={(val) =>
+                        handleNotificationChange("similarPapers", val)
                       }
+                      disabled={isUpdating}
                     />
                   </div>
                 </div>
@@ -262,10 +343,11 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <Switch
-                      checked={notifications.newFeatures}
-                      onCheckedChange={() =>
-                        handleNotificationChange("newFeatures")
+                      checked={settings.notifications.newFeatures}
+                      onCheckedChange={(val) =>
+                        handleNotificationChange("newFeatures", val)
                       }
+                      disabled={isUpdating}
                     />
                   </div>
 
@@ -277,10 +359,11 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <Switch
-                      checked={notifications.marketing}
-                      onCheckedChange={() =>
-                        handleNotificationChange("marketing")
+                      checked={settings.notifications.marketing}
+                      onCheckedChange={(val) =>
+                        handleNotificationChange("marketing", val)
                       }
+                      disabled={isUpdating}
                     />
                   </div>
                 </div>
@@ -299,8 +382,11 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <Switch
-                      checked={notifications.email}
-                      onCheckedChange={() => handleNotificationChange("email")}
+                      checked={settings.notifications.email}
+                      onCheckedChange={(val) =>
+                        handleNotificationChange("email", val)
+                      }
+                      disabled={isUpdating}
                     />
                   </div>
 
@@ -312,10 +398,11 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <Switch
-                      checked={notifications.browser}
-                      onCheckedChange={() =>
-                        handleNotificationChange("browser")
+                      checked={settings.notifications.browser}
+                      onCheckedChange={(val) =>
+                        handleNotificationChange("browser", val)
                       }
+                      disabled={isUpdating}
                     />
                   </div>
                 </div>
