@@ -50,6 +50,7 @@ export async function GET(request: Request) {
         website: user.website,
         researchInterests: user.researchInterests,
         papersCount: papersCount.toString(),
+        autoAnalyze: user.settings.preferences.autoAnalyze,
         createdAt: user.createdAt.toLocaleString("default", {
           month: "short",
           year: "numeric",

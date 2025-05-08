@@ -50,7 +50,12 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         message: "Login successful",
-        user: { id: user._id, email: user.email, name: user.name },
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          autoAnalyze: user.settings.preferences.autoAnalyze,
+        },
       },
       { status: 200 }
     );

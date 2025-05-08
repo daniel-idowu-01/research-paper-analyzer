@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
+import { useUserStore } from "@/stores/user-store";
 import { Separator } from "@/components/ui/separator";
 import { CreditCard, Download, Moon, Sun, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

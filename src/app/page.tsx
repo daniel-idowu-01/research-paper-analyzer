@@ -4,7 +4,8 @@ import type React from "react";
 import { useApi } from "@/hooks/use-api";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useState, useRef, useCallback } from "react";
+import { useUserStore } from "@/stores/user-store";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { FileUp, Search, Sparkles, FileText } from "lucide-react";
 import {
   Card,
@@ -18,12 +19,30 @@ import {
 export default function Home() {
   const router = useRouter();
   const { sendRequest } = useApi();
+  const [isLoading, setIsLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cloudinaryUrl, setCloudinaryUrl] = useState<string | null>(null);
+  const [autoAnalyze, setAutoAnalyze] = useState<boolean>(false);
+
+  const fetchUserProfile = useCallback(async () => {
+    try {
+      const response = await sendRequest("/api/profile", "GET");
+      if (response?.autoAnalyze !== undefined) {
+        setAutoAnalyze(response.autoAnalyze);
+      }
+    } catch (error) {
+      console.log("Failed to fetch profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [sendRequest]);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -65,32 +84,45 @@ export default function Home() {
     return true;
   };
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedFile = e.dataTransfer.files[0];
-      if (validateFile(droppedFile)) {
-        setFile(droppedFile);
-        handleFileUpload(droppedFile);
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const droppedFile = e.dataTransfer.files[0];
+        if (validateFile(droppedFile)) {
+          setFile(droppedFile);
+          if (autoAnalyze) {
+            handleFileUpload(droppedFile);
+          }
+        }
       }
-    }
-  }, []);
+    },
+    [autoAnalyze]
+  );
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
       if (validateFile(selectedFile)) {
         setFile(selectedFile);
-        handleFileUpload(selectedFile);
+        if (autoAnalyze) {
+          handleFileUpload(selectedFile);
+        }
       }
     }
   };
 
   const handleButtonClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleAnalyzeClick = async () => {
+    if (file) {
+      await handleFileUpload(file);
+    }
   };
 
   const handleFileUpload = async (file: File) => {
@@ -111,7 +143,6 @@ export default function Home() {
         },
       });
 
-      // After successful "upload", redirect to the demo page
       router.push(`/paper/${response.data}`);
     } catch (error) {
       console.log("Upload failed:", error);
@@ -182,17 +213,16 @@ export default function Home() {
               className="hidden"
             />
 
-            <Button
-              className="mt-4"
-              onClick={handleButtonClick}
-              disabled={isUploading}
-            >
-              {isUploading
-                ? "Uploading..."
-                : file
-                ? "Change File"
-                : "Select PDF"}
-            </Button>
+            <div className="flex gap-2 mt-4">
+              <Button onClick={handleButtonClick} disabled={isUploading}>
+                {file ? "Change File" : "Select PDF"}
+              </Button>
+              {file && !autoAnalyze && (
+                <Button onClick={handleAnalyzeClick} disabled={isUploading}>
+                  {isUploading ? "Analyzing..." : "Analyze Now"}
+                </Button>
+              )}
+            </div>
 
             {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
           </div>
@@ -201,9 +231,6 @@ export default function Home() {
           <p className="text-sm text-gray-500">
             Recent papers will appear in your history
           </p>
-          {/* <Link href="/demo">
-            <Button variant="outline">View Demo</Button>
-          </Link> */}
         </CardFooter>
       </Card>
 
