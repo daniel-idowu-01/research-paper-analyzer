@@ -191,15 +191,17 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container px-4 py-10">
-      <h1 className="mb-6 text-3xl font-bold">Profile</h1>
+    <div className="container px-4 py-10 bg-gray-50 dark:bg-gray-900">
+      <h1 className="mb-6 text-3xl font-bold text-gray-900 dark:text-white">
+        Profile
+      </h1>
 
       <div className="grid gap-6 md:grid-cols-[300px_1fr]">
         <ProfileSidebar profileData={profileData} />
 
         <div className="space-y-6">
           <Tabs defaultValue="personal">
-            <TabsList>
+            <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               <TabTrigger value="personal" icon={User} label="Personal Info" />
               <TabTrigger value="security" icon={Lock} label="Security" />
             </TabsList>
@@ -252,7 +254,10 @@ const TabTrigger = ({
   icon: React.ComponentType<{ className?: string }>;
   label: string;
 }) => (
-  <TabsTrigger value={value}>
+  <TabsTrigger
+    value={value}
+    className="data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
+  >
     <Icon className="w-4 h-4 mr-2" />
     {label}
   </TabsTrigger>
@@ -260,7 +265,7 @@ const TabTrigger = ({
 
 const ProfileSidebar = ({ profileData }: { profileData: ProfileData }) => (
   <div className="space-y-6">
-    <Card>
+    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       <CardContent className="pt-6">
         <div className="flex flex-col items-center space-y-4">
           <Avatar className="w-32 h-32">
@@ -268,22 +273,28 @@ const ProfileSidebar = ({ profileData }: { profileData: ProfileData }) => (
               src="/placeholder.svg?height=128&width=128"
               alt="Profile"
             />
-            <AvatarFallback className="text-2xl">
+            <AvatarFallback className="text-2xl bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
               {profileData?.name[0]}
             </AvatarFallback>
           </Avatar>
 
           <div className="text-center">
-            <h2 className="text-xl font-bold">{profileData.name}</h2>
-            <p className="text-sm text-muted-foreground">{profileData.email}</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              {profileData.name}
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {profileData.email}
+            </p>
           </div>
         </div>
       </CardContent>
     </Card>
 
-    <Card>
+    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       <CardHeader>
-        <CardTitle>Account Stats</CardTitle>
+        <CardTitle className="text-gray-900 dark:text-white">
+          Account Stats
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <StatItem label="Papers Analyzed" value={profileData.papersCount} />
@@ -295,8 +306,13 @@ const ProfileSidebar = ({ profileData }: { profileData: ProfileData }) => (
 
 const StatItem = ({ label, value }: { label: string; value: string }) => (
   <div className="flex justify-between">
-    <span className="text-sm text-muted-foreground">{label}</span>
-    <Badge variant="secondary">{value}</Badge>
+    <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
+    <Badge
+      variant="secondary"
+      className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
+    >
+      {value}
+    </Badge>
   </div>
 );
 
@@ -313,16 +329,25 @@ const PersonalInfoTab = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
 }) => (
-  <Card>
+  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
     <CardHeader>
       <div className="flex items-center justify-between">
         <div>
-          <CardTitle>Personal Information</CardTitle>
-          <CardDescription>Update your personal details</CardDescription>
+          <CardTitle className="text-gray-900 dark:text-white">
+            Personal Information
+          </CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-400">
+            Update your personal details
+          </CardDescription>
         </div>
         <Button
           variant={isEditing ? "default" : "outline"}
           onClick={onEditToggle}
+          className={
+            isEditing
+              ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+              : ""
+          }
         >
           {isEditing ? (
             <>
@@ -418,7 +443,9 @@ const FormField = ({
   disabled?: boolean;
 }) => (
   <div className="space-y-2">
-    <Label htmlFor={id}>{label}</Label>
+    <Label htmlFor={id} className="text-gray-700 dark:text-gray-300">
+      {label}
+    </Label>
     <Input
       id={id}
       name={name}
@@ -426,6 +453,7 @@ const FormField = ({
       value={value}
       onChange={onChange}
       disabled={disabled}
+      className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
     />
   </div>
 );
@@ -450,7 +478,9 @@ const FormTextarea = ({
   rows?: number;
 }) => (
   <div className="space-y-2">
-    <Label htmlFor={id}>{label}</Label>
+    <Label htmlFor={id} className="text-gray-700 dark:text-gray-300">
+      {label}
+    </Label>
     <Textarea
       id={id}
       name={name}
@@ -458,6 +488,7 @@ const FormTextarea = ({
       onChange={onChange}
       disabled={disabled}
       rows={rows}
+      className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
     />
   </div>
 );
@@ -481,21 +512,28 @@ const ResearchInterestsCard = ({
   onKeyDown: (e: React.KeyboardEvent) => void;
   isLoading: boolean;
 }) => (
-  <Card>
+  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
     <CardHeader>
-      <CardTitle>Research Interests</CardTitle>
-      <CardDescription>Topics you're interested in</CardDescription>
+      <CardTitle className="text-gray-900 dark:text-white">
+        Research Interests
+      </CardTitle>
+      <CardDescription className="text-gray-600 dark:text-gray-400">
+        Topics you're interested in
+      </CardDescription>
     </CardHeader>
     <CardContent>
       <div className="flex flex-wrap gap-2 mb-4">
         {interests.length > 0 ? (
           interests.map((interest) => (
-            <Badge key={interest} className="flex items-center gap-1">
+            <Badge
+              key={interest}
+              className="flex items-center gap-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
+            >
               {interest}
               {isEditing && (
                 <button
                   onClick={() => onRemoveInterest(interest)}
-                  className="rounded-full hover:bg-accent"
+                  className="rounded-full hover:bg-blue-200 dark:hover:bg-blue-800/50"
                   disabled={isLoading}
                 >
                   <X className="w-3 h-3" />
@@ -504,7 +542,9 @@ const ResearchInterestsCard = ({
             </Badge>
           ))
         ) : (
-          <p className="text-sm text-muted-foreground">No interests added</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            No interests added
+          </p>
         )}
       </div>
       {isEditing && (
@@ -515,11 +555,13 @@ const ResearchInterestsCard = ({
             onChange={onNewInterestChange}
             onKeyDown={onKeyDown}
             disabled={isLoading}
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           />
           <Button
             onClick={onAddInterest}
             disabled={!newInterest.trim() || isLoading}
             size="sm"
+            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add"}
           </Button>
@@ -546,10 +588,14 @@ const PasswordChangeCard = ({
   error?: string;
   successMessage?: string;
 }) => (
-  <Card>
+  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
     <CardHeader>
-      <CardTitle>Change Password</CardTitle>
-      <CardDescription>Update your password</CardDescription>
+      <CardTitle className="text-gray-900 dark:text-white">
+        Change Password
+      </CardTitle>
+      <CardDescription className="text-gray-600 dark:text-gray-400">
+        Update your password
+      </CardDescription>
     </CardHeader>
     <CardContent className="space-y-4">
       <FormField
@@ -585,15 +631,21 @@ const PasswordChangeCard = ({
       )}
 
       {successMessage && (
-        <Alert variant="success" className="mb-4">
-          <AlertCircle className="w-4 h-4" />
-          <AlertDescription>{successMessage}</AlertDescription>
+        <Alert className="mb-4 bg-green-100 dark:bg-green-900/30 border-green-200 dark:border-green-800">
+          <AlertCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+          <AlertDescription className="text-green-800 dark:text-green-400">
+            {successMessage}
+          </AlertDescription>
         </Alert>
       )}
     </CardContent>
 
     <CardFooter>
-      <Button disabled={isSaving} onClick={onSave}>
+      <Button
+        disabled={isSaving}
+        onClick={onSave}
+        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+      >
         {isSaving ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -608,10 +660,14 @@ const PasswordChangeCard = ({
 );
 
 const ActivityCard = () => (
-  <Card>
+  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
     <CardHeader>
-      <CardTitle>Recent Activity</CardTitle>
-      <CardDescription>Your recent actions and uploads</CardDescription>
+      <CardTitle className="text-gray-900 dark:text-white">
+        Recent Activity
+      </CardTitle>
+      <CardDescription className="text-gray-600 dark:text-gray-400">
+        Your recent actions and uploads
+      </CardDescription>
     </CardHeader>
     <CardContent>
       <div className="space-y-6">
@@ -621,7 +677,10 @@ const ActivityCard = () => (
       </div>
     </CardContent>
     <CardFooter>
-      <Button variant="outline" className="w-full">
+      <Button
+        variant="outline"
+        className="w-full border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+      >
         View All Activity
       </Button>
     </CardFooter>
@@ -629,16 +688,20 @@ const ActivityCard = () => (
 );
 
 const ActivityItem = () => (
-  <div className="flex items-start gap-4 pb-4 border-b last:border-0">
-    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-      <FileText className="w-5 h-5 text-primary" />
+  <div className="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
+    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30">
+      <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
     </div>
     <div className="flex-1 space-y-1">
       <div className="flex items-center justify-between">
-        <p className="font-medium">Uploaded "Advances in Neural Networks"</p>
-        <span className="text-xs text-muted-foreground">2 days ago</span>
+        <p className="font-medium text-gray-900 dark:text-white">
+          Uploaded "Advances in Neural Networks"
+        </p>
+        <span className="text-xs text-gray-500 dark:text-gray-400">
+          2 days ago
+        </span>
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-gray-600 dark:text-gray-400">
         You uploaded a new research paper and received AI analysis.
       </p>
     </div>

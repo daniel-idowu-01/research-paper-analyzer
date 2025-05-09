@@ -63,34 +63,36 @@ export function Navbar() {
     await sendRequest("/api/auth/logout", "GET");
     clearUser();
     setIsOpen(false);
-
     router.push("/");
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60 border-gray-200 dark:border-gray-700">
       <div className="container flex items-center justify-between h-16 px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
+                <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[240px] sm:w-[300px]">
+            <SheetContent
+              side="left"
+              className="w-[240px] sm:w-[300px] bg-white dark:bg-gray-800"
+            >
               <nav className="flex flex-col gap-4 mt-6">
                 <Link
                   href="/"
-                  className="flex items-center gap-2 text-lg font-semibold"
+                  className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white"
                   onClick={() => setIsOpen(false)}
                 >
-                  <FileText className="w-5 h-5" />
+                  <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   <span>Research Analyzer</span>
                 </Link>
                 <Link
                   href="/demo"
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                   onClick={() => setIsOpen(false)}
                 >
                   <BookOpen className="w-4 h-4" />
@@ -98,7 +100,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/my-papers"
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                   onClick={() => setIsOpen(false)}
                 >
                   <History className="w-4 h-4" />
@@ -106,7 +108,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/profile"
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                   onClick={() => setIsOpen(false)}
                 >
                   <User className="w-4 h-4" />
@@ -114,7 +116,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/settings"
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                   onClick={() => setIsOpen(false)}
                 >
                   <Settings className="w-4 h-4" />
@@ -124,127 +126,116 @@ export function Navbar() {
             </SheetContent>
           </Sheet>
           <Link href="/" className="flex items-center gap-2">
-            <FileText className="hidden w-5 h-5 sm:inline-block" />
-            <span className="text-lg font-semibold">Research Analyzer</span>
+            <FileText className="hidden w-5 h-5 text-blue-600 dark:text-blue-400 sm:inline-block" />
+            <span className="text-lg font-semibold text-gray-900 dark:text-white">
+              Research Analyzer
+            </span>
           </Link>
         </div>
-        {/* <nav className="hidden md:flex items-center gap-6">
-          <Link
-            href="/demo"
-            className={`text-sm font-medium transition-colors hover:text-primary ${
-              pathname === "/demo" ? "text-primary" : ""
-            }`}
-          >
-            Demo Paper
-          </Link>
-          <Link
-            href="/my-papers"
-            className={`text-sm font-medium transition-colors hover:text-primary ${
-              pathname === "/my-papers" ? "text-primary" : ""
-            }`}
-          >
-            My Papers
-          </Link>
-          <Link
-            href="/settings"
-            className={`text-sm font-medium transition-colors hover:text-primary ${
-              pathname === "/settings" ? "text-primary" : ""
-            }`}
-          >
-            Settings
-          </Link>
-        </nav> */}
+
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                  >
                     <Bell className="h-5 w-5" />
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-blue-600 dark:bg-blue-700 text-white">
                       {notifications?.length}
                     </Badge>
                     <span className="sr-only">Notifications</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[300px]">
-                  <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[300px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                >
+                  <DropdownMenuLabel className="text-gray-900 dark:text-white">
+                    Notifications
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
                   <div className="max-h-[300px] overflow-y-auto">
                     {notifications && notifications.length > 0 ? (
                       notifications?.map((notification, index) => (
                         <DropdownMenuItem
                           key={index}
-                          className="cursor-pointer"
+                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                           <div className="flex flex-col gap-1">
-                            <p className="font-medium">{notification.title}</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {notification.title}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                               {notification.message}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                               {notification.createdAt.toString()}
                             </p>
                           </div>
                         </DropdownMenuItem>
                       ))
                     ) : (
-                      <p>No new notifications</p>
+                      <p className="text-gray-500 dark:text-gray-400 p-2">
+                        No new notifications
+                      </p>
                     )}
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    {/* <Avatar>
-                      <AvatarImage
-                        src="/placeholder.svg?height=32&width=32"
-                        alt="User"
-                      />
-                      <AvatarFallback>{user?.name[0]}</AvatarFallback>
-                    </Avatar> */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                  >
                     <User className="h-5 w-5" />
                     <span className="sr-only">User menu</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>
+                <DropdownMenuContent
+                  align="end"
+                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                >
+                  <DropdownMenuLabel className="text-gray-900 dark:text-white">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {user.email}
                       </p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
                   <DropdownMenuGroup>
                     <DropdownMenuItem
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                       onClick={() => router.push("/profile")}
                     >
-                      <User className="w-4 h-4 mr-2" />
+                      <User className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
                       <span>Profile</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                       onClick={() => router.push("/my-papers")}
                     >
-                      <FileText className="w-4 h-4 mr-2" />
+                      <FileText className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
                       <span>My Papers</span>
-                      {/* <Badge className="ml-auto">12</Badge> */}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                       onClick={() => router.push("/settings")}
                     >
-                      <Settings className="w-4 h-4 mr-2" />
+                      <Settings className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
                       <span>Settings</span>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
                   <DropdownMenuItem
-                    className="cursor-pointer text-red-500 focus:text-red-500"
+                    className="cursor-pointer text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 focus:text-red-600 dark:text-red-400"
                     onClick={handleLogout}
                   >
                     <LogOut className="w-4 h-4 mr-2" />
@@ -256,10 +247,17 @@ export function Navbar() {
           ) : (
             <div className="hidden md:flex gap-2">
               <Link href="/auth/login">
-                <Button variant="ghost">Log in</Button>
+                <Button
+                  variant="ghost"
+                  className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
+                  Log in
+                </Button>
               </Link>
               <Link href="/auth/signup">
-                <Button>Sign up</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800">
+                  Sign up
+                </Button>
               </Link>
             </div>
           )}

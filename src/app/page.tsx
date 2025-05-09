@@ -153,32 +153,36 @@ export default function Home() {
   };
 
   return (
-    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 mx-auto">
+    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 mx-auto bg-gray-50 dark:bg-gray-900">
       <div className="space-y-6 text-center">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+          <h1 className="text-3xl font-bold tracking-tighter text-gray-900 dark:text-white sm:text-4xl md:text-5xl">
             Research Paper Analyzer
           </h1>
-          <p className="max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
+          <p className="max-w-[700px] text-gray-600 dark:text-gray-300 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
             Upload your research papers and get AI-powered insights, summaries,
             and topic classification.
           </p>
         </div>
       </div>
 
-      <Card className="w-full max-w-3xl mt-12">
+      <Card className="w-full max-w-3xl mt-12 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle>Upload Research Paper</CardTitle>
-          <CardDescription>Supported formats: PDF (max 10MB)</CardDescription>
+          <CardTitle className="text-gray-900 dark:text-white">
+            Upload Research Paper
+          </CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-400">
+            Supported formats: PDF (max 10MB)
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div
             className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg transition-colors ${
               isDragging
-                ? "border-primary bg-primary/5"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/10"
                 : file
-                ? "border-green-500 bg-green-50 dark:bg-green-900/20"
-                : "border-gray-200 dark:border-gray-800"
+                ? "border-green-500 bg-green-50 dark:bg-green-900/10"
+                : "border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700/30"
             }`}
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
@@ -187,19 +191,21 @@ export default function Home() {
           >
             {file ? (
               <>
-                <FileText className="w-12 h-12 mb-4 text-green-500" />
-                <p className="mb-2 text-sm font-medium">{file.name}</p>
-                <p className="text-xs text-gray-500">
+                <FileText className="w-12 h-12 mb-4 text-green-600 dark:text-green-400" />
+                <p className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  {file.name}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
               </>
             ) : (
               <>
-                <FileUp className="w-12 h-12 mb-4 text-gray-500" />
-                <p className="mb-2 text-sm font-medium">
+                <FileUp className="w-12 h-12 mb-4 text-gray-500 dark:text-gray-400" />
+                <p className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Drag and drop your file here or click to browse
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   Your document will be processed securely
                 </p>
               </>
@@ -214,58 +220,74 @@ export default function Home() {
             />
 
             <div className="flex gap-2 mt-4">
-              <Button onClick={handleButtonClick} disabled={isUploading}>
+              <Button
+                onClick={handleButtonClick}
+                disabled={isUploading}
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+              >
                 {file ? "Change File" : "Select PDF"}
               </Button>
               {file && !autoAnalyze && (
-                <Button onClick={handleAnalyzeClick} disabled={isUploading}>
+                <Button
+                  onClick={handleAnalyzeClick}
+                  disabled={isUploading}
+                  className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 dark:text-white"
+                >
                   {isUploading ? "Analyzing..." : "Analyze Now"}
                 </Button>
               )}
             </div>
 
-            {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+            {error && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                {error}
+              </p>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Recent papers will appear in your history
           </p>
         </CardFooter>
       </Card>
 
       <div className="grid grid-cols-1 gap-6 mt-16 md:grid-cols-3 max-w-3xl w-full">
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader className="space-y-1">
-            <div className="flex items-center justify-center w-8 h-8 mb-2 rounded-full bg-primary/10">
-              <Sparkles className="w-4 h-4 text-primary" />
+            <div className="flex items-center justify-center w-8 h-8 mb-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
+              <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <CardTitle className="text-lg">AI Summaries</CardTitle>
+            <CardTitle className="text-lg text-gray-900 dark:text-white">
+              AI Summaries
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Get concise summaries of key findings, methodology, and
               conclusions.
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader className="space-y-1">
-            <div className="flex items-center justify-center w-8 h-8 mb-2 rounded-full bg-primary/10">
-              <Search className="w-4 h-4 text-primary" />
+            <div className="flex items-center justify-center w-8 h-8 mb-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
+              <Search className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <CardTitle className="text-lg">Smart Search</CardTitle>
+            <CardTitle className="text-lg text-gray-900 dark:text-white">
+              Smart Search
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Search across all your papers with semantic understanding of
               concepts.
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader className="space-y-1">
-            <div className="flex items-center justify-center w-8 h-8 mb-2 rounded-full bg-primary/10">
+            <div className="flex items-center justify-center w-8 h-8 mb-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -276,7 +298,7 @@ export default function Home() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-4 h-4 text-primary"
+                className="w-4 h-4 text-blue-600 dark:text-blue-400"
               >
                 <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
                 <polyline points="14 2 14 8 20 8" />
@@ -285,10 +307,12 @@ export default function Home() {
                 <path d="M12 12v5" />
               </svg>
             </div>
-            <CardTitle className="text-lg">Topic Classification</CardTitle>
+            <CardTitle className="text-lg text-gray-900 dark:text-white">
+              Topic Classification
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Automatically categorize papers by research field and key topics.
             </p>
           </CardContent>
