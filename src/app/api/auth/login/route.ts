@@ -54,7 +54,6 @@ export async function POST(req: Request) {
           id: user._id,
           email: user.email,
           name: user.name,
-          autoAnalyze: user.settings.preferences.autoAnalyze,
         },
       },
       { status: 200 }

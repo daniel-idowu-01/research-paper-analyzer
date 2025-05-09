@@ -197,11 +197,11 @@ export default function SignupPage() {
                 className="text-sm font-normal leading-tight"
               >
                 I agree to the
-                <Link href="#" className=" hover:underline">
+                <Link href="/terms-of-service" className=" hover:underline">
                   Terms of Service
                 </Link>
                 and
-                <Link href="#" className=" hover:underline">
+                <Link href="/privacy-policy" className=" hover:underline">
                   Privacy Policy
                 </Link>
               </Label>
