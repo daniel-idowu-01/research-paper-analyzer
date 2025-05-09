@@ -29,7 +29,7 @@ import {
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
   const { updateSettings, isUpdating, fetchSettings, settings, user } =
     useSettings();
 
@@ -40,7 +40,7 @@ export default function SettingsPage() {
       } catch (error) {
         console.log("Failed to load settings:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     };
     loadSettings();
@@ -78,33 +78,53 @@ export default function SettingsPage() {
     await updateSettings("appearance", { ...settings.appearance, language });
   };
 
-  if(isLoading) {
-    return <Spinner />
+  if (isLoading) {
+    return <Spinner />;
   }
 
   return (
-    <div className="container px-4 py-10">
-      <h1 className="mb-6 text-3xl font-bold">Settings</h1>
+    <div className="container px-4 py-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <h1 className="mb-6 text-3xl font-bold text-gray-900 dark:text-white">
+        Settings
+      </h1>
 
       <Tabs defaultValue="preferences" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="account">Account</TabsTrigger>
-          {/* <TabsTrigger value="billing">Billing</TabsTrigger> */}
+        <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <TabsTrigger
+            value="preferences"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:data-[state=active]:bg-blue-700"
+          >
+            Preferences
+          </TabsTrigger>
+          <TabsTrigger
+            value="notifications"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:data-[state=active]:bg-blue-700"
+          >
+            Notifications
+          </TabsTrigger>
+          <TabsTrigger
+            value="account"
+            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:data-[state=active]:bg-blue-700"
+          >
+            Account
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="preferences" className="space-y-6">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>Appearance</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">
+                Appearance
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
                 Customize how the application looks
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label>Theme</Label>
+                <Label className="text-gray-700 dark:text-gray-300">
+                  Theme
+                </Label>
                 <div className="flex gap-4">
                   <Button
                     variant={
@@ -112,12 +132,16 @@ export default function SettingsPage() {
                         ? "default"
                         : "outline"
                     }
-                    className="flex-1 justify-start"
+                    className={`flex-1 justify-start ${
+                      settings.appearance.theme === "light"
+                        ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+                        : "border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+                    }`}
                     onClick={() => handleThemeChange("light")}
                     disabled={isUpdating}
                   >
                     <Sun className="w-4 h-4 mr-2" />
-                    Light
+                    <span className="text-white">Light</span>
                   </Button>
                   <Button
                     variant={
@@ -125,12 +149,16 @@ export default function SettingsPage() {
                         ? "default"
                         : "outline"
                     }
-                    className="flex-1 justify-start"
+                    className={`flex-1 justify-start ${
+                      settings.appearance.theme === "dark"
+                        ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
+                        : "border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+                    }`}
                     onClick={() => handleThemeChange("dark")}
                     disabled={isUpdating}
                   >
                     <Moon className="w-4 h-4 mr-2" />
-                    Dark
+                    <span className="text-gray-900 dark:text-white">Dark</span>
                   </Button>
                   <Button
                     variant={
@@ -138,7 +166,11 @@ export default function SettingsPage() {
                         ? "default"
                         : "outline"
                     }
-                    className="flex-1 justify-start"
+                    className={`flex-1 justify-start ${
+                      settings.appearance.theme === "system"
+                        ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
+                        : "border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+                    }`}
                     onClick={() => handleThemeChange("system")}
                     disabled={isUpdating}
                   >
@@ -165,62 +197,81 @@ export default function SettingsPage() {
                       <line x1="8" y1="21" x2="16" y2="21"></line>
                       <line x1="12" y1="17" x2="12" y2="21"></line>
                     </svg>
-                    System
+                    <span className="text-gray-900 dark:text-white">
+                      System
+                    </span>
                   </Button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Language</Label>
+                <Label className="text-gray-700 dark:text-gray-300">
+                  Language
+                </Label>
                 <Select
                   value={settings.appearance.language}
                   onValueChange={handleLanguageChange}
                   disabled={isUpdating}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="es">Spanish</SelectItem>
-                    <SelectItem value="fr">French</SelectItem>
-                    <SelectItem value="de">German</SelectItem>
-                    <SelectItem value="zh">Chinese</SelectItem>
+                  <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    <SelectItem
+                      value="en"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      English
+                    </SelectItem>
+                    <SelectItem
+                      value="es"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Spanish
+                    </SelectItem>
+                    <SelectItem
+                      value="fr"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      French
+                    </SelectItem>
+                    <SelectItem
+                      value="de"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      German
+                    </SelectItem>
+                    <SelectItem
+                      value="zh"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Chinese
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* <div className="space-y-2">
-                <Label>Default Paper View</Label>
-                <Select defaultValue="summary">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select default view" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="summary">Summary</SelectItem>
-                    <SelectItem value="insights">Key Insights</SelectItem>
-                    <SelectItem value="preview">Paper Preview</SelectItem>
-                    <SelectItem value="references">References</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div> */}
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>Paper Analysis</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">
+                Paper Analysis
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
                 Configure how papers are analyzed
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="auto-analyze">
+                  <Label
+                    htmlFor="auto-analyze"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
                     Auto-analyze uploaded papers
                   </Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Automatically analyze papers when they are uploaded
                   </p>
                 </div>
@@ -231,13 +282,19 @@ export default function SettingsPage() {
                     handlePreferenceChange("autoAnalyze", val)
                   }
                   disabled={isUpdating}
+                  className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="similar-papers">Find similar papers</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <Label
+                    htmlFor="similar-papers"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
+                    Find similar papers
+                  </Label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Suggest similar papers based on content analysis
                   </p>
                 </div>
@@ -248,15 +305,19 @@ export default function SettingsPage() {
                     handlePreferenceChange("findSimilar", val)
                   }
                   disabled={isUpdating}
+                  className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="citation-format">
+                  <Label
+                    htmlFor="citation-format"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
                     Default citation format
                   </Label>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Choose your preferred citation style
                   </p>
                 </div>
@@ -267,15 +328,40 @@ export default function SettingsPage() {
                   }
                   disabled={isUpdating}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px] bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
                     <SelectValue placeholder="Select format" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="apa">APA</SelectItem>
-                    <SelectItem value="mla">MLA</SelectItem>
-                    <SelectItem value="chicago">Chicago</SelectItem>
-                    <SelectItem value="harvard">Harvard</SelectItem>
-                    <SelectItem value="ieee">IEEE</SelectItem>
+                  <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    <SelectItem
+                      value="apa"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      APA
+                    </SelectItem>
+                    <SelectItem
+                      value="mla"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      MLA
+                    </SelectItem>
+                    <SelectItem
+                      value="chicago"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Chicago
+                    </SelectItem>
+                    <SelectItem
+                      value="harvard"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Harvard
+                    </SelectItem>
+                    <SelectItem
+                      value="ieee"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      IEEE
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -284,21 +370,27 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-6">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">
+                Notification Preferences
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
                 Choose what you want to be notified about
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Content Notifications</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Content Notifications
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Paper Analysis Complete</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <Label className="text-gray-700 dark:text-gray-300">
+                        Paper Analysis Complete
+                      </Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         Get notified when your paper analysis is complete
                       </p>
                     </div>
@@ -308,13 +400,16 @@ export default function SettingsPage() {
                         handleNotificationChange("paperAnalysis", val)
                       }
                       disabled={isUpdating}
+                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
                     />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Similar Papers Found</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <Label className="text-gray-700 dark:text-gray-300">
+                        Similar Papers Found
+                      </Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         Get notified when we find papers similar to yours
                       </p>
                     </div>
@@ -324,20 +419,25 @@ export default function SettingsPage() {
                         handleNotificationChange("similarPapers", val)
                       }
                       disabled={isUpdating}
+                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
                     />
                   </div>
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-gray-200 dark:bg-gray-700" />
 
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">System Notifications</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  System Notifications
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>New Features</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <Label className="text-gray-700 dark:text-gray-300">
+                        New Features
+                      </Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         Get notified about new features and improvements
                       </p>
                     </div>
@@ -347,13 +447,16 @@ export default function SettingsPage() {
                         handleNotificationChange("newFeatures", val)
                       }
                       disabled={isUpdating}
+                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
                     />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Marketing</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <Label className="text-gray-700 dark:text-gray-300">
+                        Marketing
+                      </Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         Receive marketing emails and promotions
                       </p>
                     </div>
@@ -363,20 +466,25 @@ export default function SettingsPage() {
                         handleNotificationChange("marketing", val)
                       }
                       disabled={isUpdating}
+                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
                     />
                   </div>
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-gray-200 dark:bg-gray-700" />
 
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Notification Channels</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Notification Channels
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Email</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <Label className="text-gray-700 dark:text-gray-300">
+                        Email
+                      </Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         Receive notifications via email
                       </p>
                     </div>
@@ -386,13 +494,16 @@ export default function SettingsPage() {
                         handleNotificationChange("email", val)
                       }
                       disabled={isUpdating}
+                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
                     />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label>Browser</Label>
-                      <p className="text-sm text-muted-foreground">
+                      <Label className="text-gray-700 dark:text-gray-300">
+                        Browser
+                      </Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         Receive browser notifications
                       </p>
                     </div>
@@ -402,6 +513,7 @@ export default function SettingsPage() {
                         handleNotificationChange("browser", val)
                       }
                       disabled={isUpdating}
+                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
                     />
                   </div>
                 </div>
@@ -411,72 +523,105 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="account" className="space-y-6">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>Account Information</CardTitle>
-              <CardDescription>Manage your account details</CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">
+                Account Information
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
+                Manage your account details
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <Label>Email</Label>
-                  <p className="text-sm font-medium">{user?.email}</p>
+                  <Label className="text-gray-700 dark:text-gray-300">
+                    Email
+                  </Label>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {user?.email}
+                  </p>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label>Account Type</Label>
+                  <Label className="text-gray-700 dark:text-gray-300">
+                    Account Type
+                  </Label>
                   <div className="flex items-center gap-2">
-                    <p className="text-xs font-medium">{user?.accountType}</p>
-                    <Badge>Active</Badge>
+                    <p className="text-xs font-medium text-gray-900 dark:text-white">
+                      {user?.accountType}
+                    </p>
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                      Active
+                    </Badge>
                   </div>
                 </div>
               </div>
 
               <div>
-                <Label>Member Since</Label>
-                <p className="text-sm font-medium">{user?.createdAt}</p>
+                <Label className="text-gray-700 dark:text-gray-300">
+                  Member Since
+                </Label>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  {user?.createdAt}
+                </p>
               </div>
 
               <div className="pt-4">
-                <Button variant="outline">Change Email</Button>
+                <Button
+                  variant="outline"
+                  className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+                >
+                  Change Email
+                </Button>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>Data & Privacy</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">
+                Data & Privacy
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
                 Manage your data and privacy settings
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Data Collection</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <Label className="text-gray-700 dark:text-gray-300">
+                    Data Collection
+                  </Label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Allow us to collect usage data to improve the service
                   </p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  defaultChecked
+                  className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                />
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Store Paper History</Label>
-                  <p className="text-sm text-muted-foreground">
+                  <Label className="text-gray-700 dark:text-gray-300">
+                    Store Paper History
+                  </Label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Keep a history of your uploaded and analyzed papers
                   </p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  defaultChecked
+                  className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                />
               </div>
 
               <div className="pt-4 space-y-4">
-                {/* <Button variant="outline" className="w-full sm:w-auto">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download My Data
-                </Button> */}
-
-                <Button variant="destructive" className="w-full sm:w-auto">
+                <Button
+                  variant="destructive"
+                  className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+                >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete Account
                 </Button>
@@ -484,130 +629,6 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </TabsContent>
-
-        {/* <TabsContent value="billing" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Subscription Plan</CardTitle>
-              <CardDescription>
-                Manage your subscription and billing
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium">Premium Plan</h3>
-                    <p className="text-sm text-muted-foreground">
-                      $15.00 per month
-                    </p>
-                  </div>
-                  <Badge>Active</Badge>
-                </div>
-                <div className="grid gap-4 mt-4 md:grid-cols-2">
-                  <div>
-                    <p className="text-sm font-medium">Next billing date</p>
-                    <p className="text-sm text-muted-foreground">
-                      June 15, 2023
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Payment method</p>
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="w-4 h-4" />
-                      <p className="text-sm text-muted-foreground">•••• 4242</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">Plan Features</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2 text-sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="w-4 h-4 text-green-500"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Unlimited paper uploads
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="w-4 h-4 text-green-500"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Advanced AI analysis
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="w-4 h-4 text-green-500"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Priority processing
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="w-4 h-4 text-green-500"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Email support
-                  </li>
-                </ul>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
-              <Button variant="outline" className="w-full sm:w-auto">
-                Update Payment Method
-              </Button>
-              <Button variant="outline" className="w-full sm:w-auto">
-                Billing History
-              </Button>
-              <Button variant="destructive" className="w-full sm:w-auto">
-                Cancel Subscription
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent> */}
       </Tabs>
     </div>
   );
