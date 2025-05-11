@@ -182,7 +182,7 @@ export default function ResetPasswordPage() {
           <CardFooter className="flex justify-center">
             <Button
               asChild
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
             >
               <Link href="/auth/forgot-password">Request New Link</Link>
             </Button>
@@ -224,7 +224,7 @@ export default function ResetPasswordPage() {
           <CardFooter className="flex justify-center">
             <Button
               asChild
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
             >
               <Link href="/auth/login">Log In</Link>
             </Button>
@@ -325,7 +325,7 @@ export default function ResetPasswordPage() {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
               disabled={isLoading}
             >
               {isLoading ? (

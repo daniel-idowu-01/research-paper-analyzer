@@ -69,7 +69,7 @@ export default function SignupPage() {
     Object.values(formData).some((value) => !value?.trim()) || loading;
 
   return (
-    <div className="container flex flex-col items-center justify-center px-4 py-20 bg-gray-50 dark:bg-gray-900">
+    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-20 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-5">
         <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" />
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -162,7 +162,7 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
               disabled={isFormIncomplete}
             >
               {loading ? (
