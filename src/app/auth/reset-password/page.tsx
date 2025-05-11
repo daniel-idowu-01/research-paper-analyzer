@@ -37,17 +37,13 @@ export default function ResetPasswordPage() {
   const [isTokenChecking, setIsTokenChecking] = useState(true);
   const [isTokenValid, setIsTokenValid] = useState<boolean | null>(null);
 
-  // Simulate token validation
   useEffect(() => {
     const validateToken = async () => {
-      // In a real app, you would make an API call to validate the token
-      // For this demo, we'll simulate token validation
       setIsTokenChecking(true);
 
       try {
         await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        // For demo purposes, consider the token valid if it exists and has some length
         if (token && token.length > 10) {
           setIsTokenValid(true);
         } else {
@@ -89,7 +85,6 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     if (!password || !confirmPassword) {
       setError("Please fill in all fields");
       return;
@@ -109,12 +104,9 @@ export default function ResetPasswordPage() {
     setError(null);
 
     try {
-      // For this demo, we'll simulate a password reset process
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
       setIsSuccess(true);
     } catch (err) {
-      // Handle reset error
       setError(
         "An error occurred while resetting your password. Please try again."
       );
@@ -123,27 +115,28 @@ export default function ResetPasswordPage() {
     }
   };
 
-  // Show loading state while checking token
   if (isTokenChecking) {
     return (
-      <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12">
+      <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center mb-8">
-          <FileText className="w-6 h-6 mr-2" />
-          <h1 className="text-2xl font-bold">Research Analyzer</h1>
+          <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Research Analyzer
+          </h1>
         </div>
 
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">
+            <CardTitle className="text-2xl text-center text-gray-900 dark:text-white">
               Verifying your link
             </CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-center text-gray-600 dark:text-gray-400">
               Please wait while we verify your password reset link
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center py-8">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="mt-4 text-sm text-muted-foreground">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400" />
+            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
               This will only take a moment...
             </p>
           </CardContent>
@@ -152,36 +145,45 @@ export default function ResetPasswordPage() {
     );
   }
 
-  // Show error state if token is invalid
   if (isTokenValid === false) {
     return (
-      <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12">
+      <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center mb-8">
-          <FileText className="w-6 h-6 mr-2" />
-          <h1 className="text-2xl font-bold">Research Analyzer</h1>
+          <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Research Analyzer
+          </h1>
         </div>
 
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">
+            <CardTitle className="text-2xl text-center text-gray-900 dark:text-white">
               Invalid Reset Link
             </CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-center text-gray-600 dark:text-gray-400">
               The password reset link is invalid or has expired
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert variant="destructive">
-              <AlertCircle className="w-4 h-4" />
-              <AlertDescription>{error}</AlertDescription>
+            <Alert
+              variant="destructive"
+              className="bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-800"
+            >
+              <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+              <AlertDescription className="text-red-800 dark:text-red-200">
+                {error}
+              </AlertDescription>
             </Alert>
 
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-sm text-gray-500 dark:text-gray-400">
               <p>Please request a new password reset link.</p>
             </div>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <Button asChild>
+            <Button
+              asChild
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+            >
               <Link href="/auth/forgot-password">Request New Link</Link>
             </Button>
           </CardFooter>
@@ -190,36 +192,40 @@ export default function ResetPasswordPage() {
     );
   }
 
-  // Show success state after password reset
   if (isSuccess) {
     return (
-      <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12">
+      <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center mb-8">
-          <FileText className="w-6 h-6 mr-2" />
-          <h1 className="text-2xl font-bold">Research Analyzer</h1>
+          <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Research Analyzer
+          </h1>
         </div>
 
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader className="space-y-1">
             <div className="flex justify-center mb-4">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30">
                 <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <CardTitle className="text-2xl text-center">
+            <CardTitle className="text-2xl text-center text-gray-900 dark:text-white">
               Password Reset Successful
             </CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-center text-gray-600 dark:text-gray-400">
               Your password has been successfully updated
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center py-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               You can now log in with your new password.
             </p>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <Button asChild>
+            <Button
+              asChild
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+            >
               <Link href="/auth/login">Log In</Link>
             </Button>
           </CardFooter>
@@ -228,45 +234,57 @@ export default function ResetPasswordPage() {
     );
   }
 
-  // Show the password reset form
   return (
-    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12">
+    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-8">
-        <FileText className="w-6 h-6 mr-2" />
-        <h1 className="text-2xl font-bold">Research Analyzer</h1>
+        <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" />
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Research Analyzer
+        </h1>
       </div>
 
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
-              <LockKeyhole className="w-6 h-6 text-primary" />
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30">
+              <LockKeyhole className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">
+          <CardTitle className="text-2xl text-center text-gray-900 dark:text-white">
             Reset Your Password
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-gray-600 dark:text-gray-400">
             Create a new password for your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="w-4 h-4" />
-              <AlertDescription>{error}</AlertDescription>
+            <Alert
+              variant="destructive"
+              className="mb-4 bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-800"
+            >
+              <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+              <AlertDescription className="text-red-800 dark:text-red-200">
+                {error}
+              </AlertDescription>
             </Alert>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
+              <Label
+                htmlFor="password"
+                className="text-gray-700 dark:text-gray-300"
+              >
+                New Password
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
 
               {password && (
@@ -274,13 +292,13 @@ export default function ResetPasswordPage() {
                   <div className="flex items-center justify-between">
                     <Progress
                       value={passwordStrength}
-                      className={getPasswordStrengthColor()}
+                      className={`h-2 ${getPasswordStrengthColor()}`}
                     />
-                    <span className="ml-2 text-xs">
+                    <span className="ml-2 text-xs text-gray-700 dark:text-gray-300">
                       {getPasswordStrengthText()}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Use 8+ characters with a mix of uppercase, lowercase, and
                     numbers
                   </p>
@@ -289,17 +307,27 @@ export default function ResetPasswordPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Label
+                htmlFor="confirm-password"
+                className="text-gray-700 dark:text-gray-300"
+              >
+                Confirm New Password
+              </Label>
               <Input
                 id="confirm-password"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -314,7 +342,7 @@ export default function ResetPasswordPage() {
         <CardFooter className="flex justify-center">
           <Link
             href="/auth/login"
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-blue-600 hover:underline dark:text-blue-400"
           >
             Back to login
           </Link>

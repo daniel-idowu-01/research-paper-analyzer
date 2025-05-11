@@ -56,18 +56,20 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12">
+    <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-8">
-        <FileText className="w-6 h-6 mr-2" />
-        <h1 className="text-2xl font-bold">Research Analyzer</h1>
+        <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" />
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Research Analyzer
+        </h1>
       </div>
 
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">
+          <CardTitle className="text-2xl text-center text-gray-900 dark:text-white">
             Reset your password
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-gray-600 dark:text-gray-400">
             {isSubmitted
               ? "Check your email for a reset link"
               : "Enter your email address and we'll send you a link to reset your password"}
@@ -84,14 +86,18 @@ export default function ForgotPasswordPage() {
           {isSubmitted ? (
             <div className="space-y-4">
               <div className="flex justify-center">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
-                  <Mail className="w-6 h-6 text-primary" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                  <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
               <div className="text-center space-y-2">
-                <p>We've sent a password reset link to:</p>
-                <p className="font-medium">{email}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-gray-700 dark:text-gray-300">
+                  We've sent a password reset link to:
+                </p>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {email}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   If you don't see the email, check your spam folder or try
                   again with a different email address.
                 </p>
@@ -100,7 +106,12 @@ export default function ForgotPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label
+                  htmlFor="email"
+                  className="text-gray-700 dark:text-gray-300"
+                >
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -108,10 +119,15 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -127,7 +143,7 @@ export default function ForgotPasswordPage() {
         <CardFooter className="flex justify-center">
           <Link
             href="/login"
-            className="flex items-center text-sm text-primary hover:underline"
+            className="flex items-center text-sm text-blue-600 hover:underline dark:text-blue-400"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
             Back to login
