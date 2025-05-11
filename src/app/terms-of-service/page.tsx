@@ -25,26 +25,36 @@ export default function TermsOfServicePage() {
   ];
 
   return (
-    <div className="container p-10 pl-5">
+    <div className="container p-10 pl-5 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-6">
         <Link href="/">
-          <Button variant="ghost" size="icon" className="mr-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </Link>
         <div className="flex items-center">
-          <Scale className="w-5 h-5 mr-2 text-primary" />
-          <h1 className="text-2xl font-bold">Terms of Service</h1>
+          <Scale className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Terms of Service
+          </h1>
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-[250px_1fr]">
         {/* Table of Contents - Sidebar */}
         <div className="space-y-4">
-          <Card className="sticky top-20">
+          <Card className="sticky top-20 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader className="pb-3">
-              <CardTitle>Contents</CardTitle>
-              <CardDescription>Navigate the terms of service</CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">
+                Contents
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
+                Navigate the terms of service
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <nav className="space-y-1">
@@ -52,7 +62,7 @@ export default function TermsOfServicePage() {
                   <Link
                     key={item.id}
                     href={`#${item.id}`}
-                    className="block py-1 text-sm hover:text-primary transition-colors"
+                    className="block py-1 text-sm text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
                   >
                     {item.title}
                   </Link>
@@ -64,31 +74,35 @@ export default function TermsOfServicePage() {
 
         {/* Main Content */}
         <div className="space-y-8">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-primary/10">
-                <FileText className="w-6 h-6 text-primary" />
+              <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <CardTitle className="text-2xl">
+              <CardTitle className="text-2xl text-gray-900 dark:text-white">
                 Research Analyzer Terms of Service
               </CardTitle>
-              <CardDescription>Last Updated: May 9, 2023</CardDescription>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
+                Last Updated: May 9, 2023
+              </CardDescription>
             </CardHeader>
             <CardContent className="prose dark:prose-invert max-w-none">
-              <p>
+              <p className="text-gray-700 dark:text-gray-300">
                 Please read these Terms of Service ("Terms", "Terms of Service")
                 carefully before using the Research Analyzer website and service
                 operated by Research Analyzer, Inc. ("us", "we", "our").
               </p>
 
               <section id="acceptance" className="scroll-mt-20">
-                <h2 className="text-xl font-bold">1. Acceptance of Terms</h2>
-                <p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  1. Acceptance of Terms
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300">
                   By accessing or using our Service, you agree to be bound by
                   these Terms. If you disagree with any part of the terms, then
                   you may not access the Service.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   These Terms apply to all visitors, users, and others who
                   access or use the Service. By accessing or using the Service,
                   you agree to be bound by these Terms. If you are using the
@@ -98,14 +112,16 @@ export default function TermsOfServicePage() {
               </section>
 
               <section id="accounts" className="scroll-mt-20 mt-8">
-                <h2 className="text-xl font-bold">2. User Accounts</h2>
-                <p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  2. User Accounts
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300">
                   When you create an account with us, you must provide accurate,
                   complete, and up-to-date information. Failure to do so
                   constitutes a breach of the Terms, which may result in
                   immediate termination of your account on our Service.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   You are responsible for safeguarding the password that you use
                   to access the Service and for any activities or actions under
                   your password. You agree not to disclose your password to any
@@ -113,7 +129,7 @@ export default function TermsOfServicePage() {
                   aware of any breach of security or unauthorized use of your
                   account.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   You may not use as a username the name of another person or
                   entity that is not lawfully available for use, or a name or
                   trademark that is subject to any rights of another person or
@@ -122,10 +138,10 @@ export default function TermsOfServicePage() {
               </section>
 
               <section id="intellectual-property" className="scroll-mt-20 mt-8">
-                <h2 className="text-xl font-bold">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   3. Intellectual Property Rights
                 </h2>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   The Service and its original content, features, and
                   functionality are and will remain the exclusive property of
                   Research Analyzer, Inc. and its licensors. The Service is
@@ -135,7 +151,7 @@ export default function TermsOfServicePage() {
                   service without the prior written consent of Research
                   Analyzer, Inc.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   You retain ownership of any intellectual property rights that
                   you hold in the content you upload to the Service. By
                   uploading content to the Service, you grant us a worldwide,
@@ -149,9 +165,13 @@ export default function TermsOfServicePage() {
               </section>
 
               <section id="acceptable-use" className="scroll-mt-20 mt-8">
-                <h2 className="text-xl font-bold">4. Acceptable Use Policy</h2>
-                <p>You agree not to use the Service to:</p>
-                <ul>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  4. Acceptable Use Policy
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300">
+                  You agree not to use the Service to:
+                </p>
+                <ul className="text-gray-700 dark:text-gray-300">
                   <li>
                     Violate any applicable laws, regulations, or third-party
                     rights, including intellectual property and privacy rights
@@ -195,20 +215,22 @@ export default function TermsOfServicePage() {
               </section>
 
               <section id="user-content" className="scroll-mt-20 mt-8">
-                <h2 className="text-xl font-bold">5. User Content</h2>
-                <p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  5. User Content
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300">
                   Our Service allows you to upload, store, and analyze research
                   papers and other content. You are responsible for the content
                   that you upload to the Service, including its legality,
                   reliability, and appropriateness.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   By uploading content to the Service, you represent and warrant
                   that you have the right to upload such content and that the
                   content does not violate any third-party rights, including
                   intellectual property rights and privacy rights.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   We reserve the right to remove any content that violates these
                   Terms or that we determine, in our sole discretion, is
                   otherwise objectionable or inappropriate.
@@ -216,13 +238,15 @@ export default function TermsOfServicePage() {
               </section>
 
               <section id="third-party" className="scroll-mt-20 mt-8">
-                <h2 className="text-xl font-bold">6. Third-Party Links</h2>
-                <p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  6. Third-Party Links
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300">
                   Our Service may contain links to third-party websites or
                   services that are not owned or controlled by Research
                   Analyzer, Inc.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   Research Analyzer, Inc. has no control over, and assumes no
                   responsibility for, the content, privacy policies, or
                   practices of any third-party websites or services. You further
@@ -233,7 +257,7 @@ export default function TermsOfServicePage() {
                   goods, or services available on or through any such websites
                   or services.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   We strongly advise you to read the terms and conditions and
                   privacy policies of any third-party websites or services that
                   you visit.
@@ -241,10 +265,10 @@ export default function TermsOfServicePage() {
               </section>
 
               <section id="liability" className="scroll-mt-20 mt-8">
-                <h2 className="text-xl font-bold">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   7. Limitation of Liability
                 </h2>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   In no event shall Research Analyzer, Inc., nor its directors,
                   employees, partners, agents, suppliers, or affiliates, be
                   liable for any indirect, incidental, special, consequential,
@@ -252,7 +276,7 @@ export default function TermsOfServicePage() {
                   profits, data, use, goodwill, or other intangible losses,
                   resulting from:
                 </p>
-                <ul>
+                <ul className="text-gray-700 dark:text-gray-300">
                   <li>
                     Your access to or use of or inability to access or use the
                     Service
@@ -270,7 +294,7 @@ export default function TermsOfServicePage() {
                     transmissions or content
                   </li>
                 </ul>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   The Service is provided on an "AS IS" and "AS AVAILABLE"
                   basis. The Service is provided without warranties of any kind,
                   whether express or implied, including, but not limited to,
@@ -281,19 +305,21 @@ export default function TermsOfServicePage() {
               </section>
 
               <section id="termination" className="scroll-mt-20 mt-8">
-                <h2 className="text-xl font-bold">8. Termination</h2>
-                <p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  8. Termination
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300">
                   We may terminate or suspend your account immediately, without
                   prior notice or liability, for any reason whatsoever,
                   including without limitation if you breach the Terms.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   Upon termination, your right to use the Service will
                   immediately cease. If you wish to terminate your account, you
                   may simply discontinue using the Service or delete your
                   account through the account settings.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   All provisions of the Terms which by their nature should
                   survive termination shall survive termination, including,
                   without limitation, ownership provisions, warranty
@@ -302,13 +328,15 @@ export default function TermsOfServicePage() {
               </section>
 
               <section id="governing-law" className="scroll-mt-20 mt-8">
-                <h2 className="text-xl font-bold">9. Governing Law</h2>
-                <p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  9. Governing Law
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300">
                   These Terms shall be governed and construed in accordance with
                   the laws of the State of California, United States, without
                   regard to its conflict of law provisions.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   Our failure to enforce any right or provision of these Terms
                   will not be considered a waiver of those rights. If any
                   provision of these Terms is held to be invalid or
@@ -318,15 +346,17 @@ export default function TermsOfServicePage() {
               </section>
 
               <section id="changes" className="scroll-mt-20 mt-8">
-                <h2 className="text-xl font-bold">10. Changes to Terms</h2>
-                <p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  10. Changes to Terms
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300">
                   We reserve the right, at our sole discretion, to modify or
                   replace these Terms at any time. If a revision is material, we
                   will try to provide at least 30 days' notice prior to any new
                   terms taking effect. What constitutes a material change will
                   be determined at our sole discretion.
                 </p>
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   By continuing to access or use our Service after those
                   revisions become effective, you agree to be bound by the
                   revised terms. If you do not agree to the new terms, please
@@ -335,40 +365,40 @@ export default function TermsOfServicePage() {
               </section>
 
               <section id="contact" className="scroll-mt-20 mt-8">
-                <h2 className="text-xl font-bold">11. Contact Us</h2>
-                <p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  11. Contact Us
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300">
                   If you have any questions about these Terms, please contact us
                   at{" "}
                   <a
                     href="mailto:danielidowu414@gmail.com"
-                    className="text-primary hover:underline"
+                    className="text-blue-600 hover:underline dark:text-blue-400"
                   >
                     legal@researchanalyzer.com
                   </a>
                   .
                 </p>
-                {/* <p>Or write to us at:</p>
-                <address className="not-italic">
-                  Research Analyzer, Inc.
-                  <br />
-                  123 Analysis Street
-                  <br />
-                  San Francisco, CA 94103
-                  <br />
-                  United States
-                </address> */}
               </section>
             </CardContent>
           </Card>
 
           <div className="flex justify-between">
-            <Button variant="outline" asChild>
+            <Button
+              variant="outline"
+              className="text-gray-700 border-gray-300 hover:bg-gray-100 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+              asChild
+            >
               <Link href="/">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
               </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button
+              variant="outline"
+              className="text-gray-700 border-gray-300 hover:bg-gray-100 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+              asChild
+            >
               <Link href="/privacy-policy">Privacy Policy</Link>
             </Button>
           </div>

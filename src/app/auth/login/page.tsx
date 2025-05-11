@@ -193,11 +193,11 @@ export default function SignupPage() {
           </div>
           <div className="text-xs text-center text-muted-foreground">
             By logging in, you agree to our{" "}
-            <Link href="#" className="hover:underline">
+            <Link href="/terms-of-service" className="hover:underline">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="#" className="hover:underline">
+            <Link href="/privacy-policy" className="hover:underline">
               Privacy Policy
             </Link>
           </div>

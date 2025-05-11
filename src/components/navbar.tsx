@@ -72,14 +72,18 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent
               side="left"
-              className="w-[240px] sm:w-[300px] bg-white dark:bg-gray-800"
+              className="w-[240px] sm:w-[300px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
             >
               <nav className="flex flex-col gap-4 mt-6">
                 <Link
@@ -235,7 +239,7 @@ export function Navbar() {
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
                   <DropdownMenuItem
-                    className="cursor-pointer text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 focus:text-red-600 dark:text-red-400"
+                    className="cursor-pointer text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400"
                     onClick={handleLogout}
                   >
                     <LogOut className="w-4 h-4 mr-2" />
@@ -255,7 +259,7 @@ export function Navbar() {
                 </Button>
               </Link>
               <Link href="/auth/signup">
-                <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800">
+                <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white">
                   Sign up
                 </Button>
               </Link>
