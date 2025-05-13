@@ -26,30 +26,48 @@ import {
 } from "@/components/ui/card";
 
 const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
-  <Card>
+  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
     <CardHeader className="pb-3">
-      <CardTitle>Paper Details</CardTitle>
+      <CardTitle className="text-gray-900 dark:text-white">
+        Paper Details
+      </CardTitle>
     </CardHeader>
     <CardContent className="space-y-4">
       <div>
-        <h3 className="mb-1 text-sm font-medium">Title</h3>
-        <p className="text-sm text-gray-500">{paper.metadata.title}</p>
+        <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-white">
+          Title
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          {paper.metadata.title}
+        </p>
       </div>
       <div>
-        <h3 className="mb-1 text-sm font-medium">Authors</h3>
-        <p className="text-sm text-gray-500">
+        <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-white">
+          Authors
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
           {paper.metadata.authors.join(", ")}
         </p>
       </div>
       <div>
-        <h3 className="mb-1 text-sm font-medium">Published</h3>
-        <p className="text-sm text-gray-500">{paper.metadata.published_date}</p>
+        <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-white">
+          Published
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          {paper.metadata.published_date}
+        </p>
       </div>
       <div>
-        <h3 className="mb-1 text-sm font-medium">Topics</h3>
+        <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-white">
+          Topics
+        </h3>
         <div className="flex flex-wrap gap-2">
           {paper.metadata.topics.map((topic) => (
-            <Badge key={topic} variant="secondary">
+            <Badge
+              key={topic}
+              variant="secondary"
+              className="bg-gray-100 dark:bg-gray-700"
+            >
               {topic}
             </Badge>
           ))}
@@ -90,19 +108,19 @@ const ActionButtons = () => {
       <Button
         size="sm"
         variant="outline"
-        className="w-full"
+        className="w-full text-gray-700 border-gray-300 hover:bg-gray-100 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
         onClick={handleDownload}
       >
-        <Download className="w-4 h-4 mr-2" />
+        <Download className="w-4 h-4 mr-2 text-gray-700 dark:text-gray-300" />
         Download
       </Button>
       <Button
         size="sm"
         variant="outline"
-        className="w-full"
+        className="w-full text-gray-700 border-gray-300 hover:bg-gray-100 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
         onClick={handleShare}
       >
-        <Share2 className="w-4 h-4 mr-2" />
+        <Share2 className="w-4 h-4 mr-2 text-gray-700 dark:text-gray-300" />
         Share
       </Button>
     </div>
@@ -179,14 +197,20 @@ export default function PaperPage() {
   };
 
   return (
-    <div className="container flex flex-col min-h-screen px-4 py-6 mx-auto">
+    <div className="container flex flex-col min-h-screen px-4 py-6 mx-auto bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-6">
         <Link href="/" aria-label="Go back">
-          <Button variant="ghost" size="icon" className="mr-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold">Research Paper Analysis</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Research Paper Analysis
+        </h1>
       </div>
 
       <div className="grid gap-6 md:grid-cols-[300px_1fr]">
@@ -196,15 +220,17 @@ export default function PaperPage() {
 
           <ActionButtons />
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader className="pb-3">
-              <CardTitle>Search Within Paper</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-white">
+                Search Within Paper
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
                 <Input
-                  className="pl-8"
+                  className="pl-8 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                   type="search"
                   placeholder="Search terms..."
                   aria-label="Search within paper"
@@ -217,86 +243,120 @@ export default function PaperPage() {
         {/* Main Content */}
         <div className="space-y-6">
           <Tabs defaultValue="summary">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="summary">Summary</TabsTrigger>
-              <TabsTrigger value="insights">Key Insights</TabsTrigger>
-              <TabsTrigger value="preview">Paper Preview</TabsTrigger>
-              {/* <TabsTrigger value="references">References</TabsTrigger> */}
+            <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800">
+              <TabsTrigger
+                value="summary"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
+              >
+                Summary
+              </TabsTrigger>
+              <TabsTrigger
+                value="insights"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
+              >
+                Key Insights
+              </TabsTrigger>
+              <TabsTrigger
+                value="preview"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white"
+              >
+                Paper Preview
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="summary" className="mt-4">
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle>AI-Generated Summary</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-gray-900 dark:text-white">
+                    AI-Generated Summary
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">
                     Generated using advanced natural language processing
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 text-gray-700 dark:text-gray-300">
                   {paper?.summary}
                 </CardContent>
               </Card>
             </TabsContent>
             <TabsContent value="insights" className="mt-4">
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle>Key Insights & Findings</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-gray-900 dark:text-white">
+                    Key Insights & Findings
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">
                     Important discoveries and implications
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 border rounded-lg bg-primary/5">
-                    <h3 className="mb-2 font-medium">Primary Finding</h3>
-                    <p className="text-sm">{paper?.key_findings.primary}</p>
+                  <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                    <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
+                      Primary Finding
+                    </h3>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      {paper?.key_findings.primary}
+                    </p>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="p-4 border rounded-lg">
-                      <h3 className="mb-2 font-medium">
+                    <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
                         Methodology Innovation
                       </h3>
-                      <p className="text-sm">
+                      <p className="text-sm text-gray-700 dark:text-gray-300">
                         {paper?.key_findings.methodology_innovation}
                       </p>
                     </div>
-                    <div className="p-4 border rounded-lg">
-                      <h3 className="mb-2 font-medium">
+                    <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
                         Practical Applications
                       </h3>
-                      <ul className="list-disc list-inside space-y-1">
+                      <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 dark:text-gray-300">
                         {paper?.key_findings.practical_applications.map(
                           (app, index) => (
-                            <li key={index} className="text-sm">
-                              {app}
-                            </li>
+                            <li key={index}>{app}</li>
                           )
                         )}
                       </ul>
                     </div>
                   </div>
 
-                  <h3 className="font-medium">Performance Comparison</h3>
-                  <div className="relative overflow-x-auto rounded-lg border">
-                    <table className="w-full text-sm text-left">
-                      <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-800">
+                  <h3 className="font-medium text-gray-900 dark:text-white">
+                    Performance Comparison
+                  </h3>
+                  <div className="relative overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table className="w-full text-sm text-left text-gray-700 dark:text-gray-300">
+                      <thead className="text-xs uppercase bg-gray-100 dark:bg-gray-700">
                         <tr>
-                          <th scope="col" className="px-6 py-3">
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-gray-900 dark:text-white"
+                          >
                             Model
                           </th>
-                          <th scope="col" className="px-6 py-3">
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-gray-900 dark:text-white"
+                          >
                             Accuracy
                           </th>
-                          <th scope="col" className="px-6 py-3">
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-gray-900 dark:text-white"
+                          >
                             Parameters
                           </th>
-                          <th scope="col" className="px-6 py-3">
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-gray-900 dark:text-white"
+                          >
                             Training Time
                           </th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-                          <td className="px-6 py-4 font-medium">
+                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                          <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                             Proposed Method
                           </td>
                           <td className="px-6 py-4">
@@ -319,8 +379,8 @@ export default function PaperPage() {
                             hours
                           </td>
                         </tr>
-                        <tr className="bg-gray-50 border-b dark:bg-gray-800 dark:border-gray-700">
-                          <td className="px-6 py-4 font-medium">
+                        <tr className="bg-gray-50 border-b dark:bg-gray-700 dark:border-gray-600">
+                          <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                             Previous SOTA
                           </td>
                           <td className="px-6 py-4">
@@ -340,8 +400,10 @@ export default function PaperPage() {
                             hours
                           </td>
                         </tr>
-                        <tr className="bg-white dark:bg-gray-900">
-                          <td className="px-6 py-4 font-medium">Baseline</td>
+                        <tr className="bg-white dark:bg-gray-800">
+                          <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                            Baseline
+                          </td>
                           <td className="px-6 py-4">
                             {paper?.performance_metrics.baseline.accuracy}
                           </td>
@@ -360,16 +422,18 @@ export default function PaperPage() {
               </Card>
             </TabsContent>
             <TabsContent value="preview" className="mt-4">
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle>Paper Preview</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-gray-900 dark:text-white">
+                    Paper Preview
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 dark:text-gray-400">
                     First few pages of the document
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {paper?.file_url ? (
-                    <div className="relative w-full h-[600px] rounded-lg overflow-hidden border">
+                    <div className="relative w-full h-[600px] rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                       <iframe
                         src={`https://docs.google.com/gview?url=${encodeURIComponent(
                           paper.file_url
@@ -384,7 +448,7 @@ export default function PaperPage() {
                           href={paper.file_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-4 py-2 text-sm bg-white rounded-md shadow-sm hover:bg-gray-50"
+                          className="px-4 py-2 text-sm bg-white dark:bg-gray-700 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
                         >
                           <BookOpen className="inline w-4 h-4 mr-2" />
                           Open Full PDF
@@ -392,12 +456,12 @@ export default function PaperPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg border-gray-200 dark:border-gray-800">
-                      <FileText className="w-12 h-12 mb-4 text-gray-500" />
-                      <p className="mb-2 text-sm font-medium">
+                    <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg border-gray-200 dark:border-gray-700">
+                      <FileText className="w-12 h-12 mb-4 text-gray-500 dark:text-gray-400" />
+                      <p className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
                         No PDF Available
                       </p>
-                      <p className="mb-4 text-xs text-center text-gray-500">
+                      <p className="mb-4 text-xs text-center text-gray-500 dark:text-gray-400">
                         This paper doesn't have a PDF file attached
                       </p>
                     </div>
@@ -405,116 +469,75 @@ export default function PaperPage() {
                 </CardContent>
               </Card>
             </TabsContent>
-            {/* <TabsContent value="references" className="mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>References & Citations</CardTitle>
-                  <CardDescription>
-                    Key papers cited in this research
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="p-4 border rounded-lg">
-                        <p className="text-sm">
-                          <span className="font-medium">[{i}]</span> Smith, J.,
-                          Johnson, A., et al. (2022). "Advances in Attention
-                          Mechanisms for Computer Vision."{" "}
-                          <span className="italic">
-                            Conference on Computer Vision and Pattern
-                            Recognition (CVPR)
-                          </span>
-                          , pp. 1234-1242.
-                        </p>
-                        <div className="flex gap-2 mt-2">
-                          <Badge variant="outline">Cited by 128</Badge>
-                          <Badge variant="outline">Impact Factor: 9.2</Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent> */}
           </Tabs>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>AI Analysis</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-gray-900 dark:text-white">
+                AI Analysis
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400">
                 Automated insights about this research
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="p-4 border rounded-lg">
-                  <h3 className="mb-2 font-medium">Research Impact</h3>
+                <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
+                    Research Impact
+                  </h3>
                   <div className="flex items-center gap-2">
-                    <div className="w-full h-2 bg-gray-200 rounded-full">
+                    <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
                       <div
-                        className="h-2 rounded-full bg-primary"
+                        className="h-2 rounded-full bg-blue-600 dark:bg-blue-500"
                         style={{ width: getWidth("research") }}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {paper?.research_impact.level}
                     </span>
                   </div>
-                  <p className="mt-2 text-xs text-gray-500">
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     {paper?.research_impact.significance}
                   </p>
                 </div>
-                <div className="p-4 border rounded-lg">
-                  <h3 className="mb-2 font-medium">Novelty Assessment</h3>
+                <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
+                    Novelty Assessment
+                  </h3>
                   <div className="flex items-center gap-2">
-                    <div className="w-full h-2 bg-gray-200 rounded-full">
+                    <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
                       <div
-                        className="h-2 rounded-full bg-primary"
+                        className="h-2 rounded-full bg-blue-600 dark:bg-blue-500"
                         style={{ width: getWidth("novelty") }}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {paper?.novelty_assessment.level}
                     </span>
                   </div>
-                  <p className="mt-2 text-xs text-gray-500">
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     {paper?.novelty_assessment.comparison_to_prior_work}
                   </p>
                 </div>
               </div>
 
-              <div className="p-4 border rounded-lg">
-                <h3 className="mb-2 font-medium">Related Research Areas</h3>
+              <div className="p-4 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
+                  Related Research Areas
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {paper?.related_areas.map((area) => (
-                    <Badge key={area} variant="secondary">
+                    <Badge
+                      key={area}
+                      variant="secondary"
+                      className="bg-gray-100 dark:bg-gray-700"
+                    >
                       {area}
                     </Badge>
                   ))}
                 </div>
               </div>
-
-              {/* <div className="p-4 border rounded-lg">
-                <h3 className="mb-2 font-medium">Suggested Follow-up Papers</h3>
-                <ul className="space-y-2">
-                  <li className="text-sm">
-                    <Link href="#" className="text-primary hover:underline">
-                      "Efficient Transformers: A Survey" (2023)
-                    </Link>
-                  </li>
-                  <li className="text-sm">
-                    <Link href="#" className="text-primary hover:underline">
-                      "Memory-Efficient Training of Deep Networks" (2022)
-                    </Link>
-                  </li>
-                  <li className="text-sm">
-                    <Link href="#" className="text-primary hover:underline">
-                      "Scaling Vision Transformers to Gigapixel Images" (2023)
-                    </Link>
-                  </li>
-                </ul>
-              </div> */}
             </CardContent>
           </Card>
         </div>
