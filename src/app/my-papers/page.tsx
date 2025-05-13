@@ -6,8 +6,8 @@ import Spinner from "@/components/spinner";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -50,7 +50,6 @@ export default function MyPapersPage() {
     const fetchPapers = async () => {
       try {
         const response = await sendRequest("/api/papers", "GET");
-        console.log(response)
         if (response.success) {
           setPapers(response.papers);
         } else {
