@@ -1,6 +1,6 @@
 export default function Spinner() {
   return (
-    <div className="container py-10 px-5 sm:px-10 h-screen">
+    <div className="container py-10 px-5 sm:px-10 h-screen dark:bg-gray-900">
       <div className="flex flex-col space-y-6">
         <h1 className="text-3xl font-bold tracking-tight"></h1>
         <div className="flex justify-center items-center py-20">
