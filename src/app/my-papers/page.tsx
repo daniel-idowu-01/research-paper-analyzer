@@ -50,6 +50,7 @@ export default function MyPapersPage() {
     const fetchPapers = async () => {
       try {
         const response = await sendRequest("/api/papers", "GET");
+        console.log(response)
         if (response.success) {
           setPapers(response.papers);
         } else {
@@ -104,6 +105,24 @@ export default function MyPapersPage() {
       } catch (err) {
         console.log("Share canceled:", err);
       }
+    }
+  };
+
+  // handle delete paper
+  const handleDelete = async (paper: IPaper) => {
+    try {
+      const response = await sendRequest(`/api/papers/${paper._id}`, "DELETE");
+      if (response.success) {
+        setPapers((prevPapers) =>
+          prevPapers.filter((p) => p._id !== paper._id)
+        );
+      } else {
+        setError(response.error);
+      }
+    } catch (error: any) {
+      setError(
+        error.message || "Failed to delete paper. Please try again later."
+      );
     }
   };
 
@@ -211,7 +230,10 @@ export default function MyPapersPage() {
                               Share
                             </span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30">
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(paper)}
+                            className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
+                          >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </DropdownMenuItem>
