@@ -1,10 +1,12 @@
 import axios from "axios";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import logger from "@/lib/logger";
 import { cookies } from "next/headers";
 import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
 import { createPaper } from "@/usecases/paper";
+import Notification from "@/models/Notification";
 import { processResearchPaper } from "@/utils/pdfProcessor";
 import { fallbackPartialExtraction } from "@/utils/pdfProcessor";
 
@@ -67,6 +69,14 @@ export async function POST(request: Request) {
       logger.info("File processed successfully!");
 
       const paper = await createPaper(result, fileUrl, userId || null);
+
+      await Notification.createPaperAnalysisNotification(
+        new mongoose.Types.ObjectId(userId as string),
+        result.metadata.title,
+        paper._id
+      );
+
+      logger.info("Notification created successfully!");
 
       return NextResponse.json({
         success: true,

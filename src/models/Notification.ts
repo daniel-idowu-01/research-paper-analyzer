@@ -63,13 +63,18 @@ NotificationSchema.index({ createdAt: -1 });
 NotificationSchema.index({ userId: 1, type: 1 });
 
 // Static methods
-interface INotificationModel extends Model<INotification> {
+interface NotificationModelStatics {
   markAsRead(notificationIds: Types.ObjectId[]): Promise<number>;
   getUserNotifications(
     userId: Types.ObjectId,
     limit?: number,
     skip?: number
   ): Promise<INotification[]>;
+  createPaperAnalysisNotification(
+    userId: Types.ObjectId,
+    paperTitle: string,
+    paperId: Types.ObjectId
+  ): Promise<INotification>;
 }
 
 // Mark notifications as read
@@ -124,5 +129,13 @@ NotificationSchema.pre<INotification>("save", function (next) {
   next();
 });
 
-export default mongoose.models.Notification ||
-  mongoose.model("Notification", NotificationSchema);
+type NotificationModel = Model<INotification> & NotificationModelStatics;
+
+const Notification: NotificationModel =
+  (mongoose.models.Notification as NotificationModel) ||
+  mongoose.model<INotification, NotificationModel>(
+    "Notification",
+    NotificationSchema
+  );
+
+export default Notification;

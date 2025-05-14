@@ -88,7 +88,7 @@ export async function GET(request: Request) {
       );
     }
   } catch (error) {
-    console.log("Fetching papers error:", error);
+    logger.error("Fetching papers error: " + error);
     return NextResponse.json(
       {
         error: "Failed to fetch papers",
