@@ -28,7 +28,7 @@ export async function GET() {
       })
         .sort({ createdAt: -1 })
         .limit(5)
-        .select("title message createdAt type")
+        .select("title message createdAt type status")
         .lean(),
     ]);
 

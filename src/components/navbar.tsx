@@ -34,10 +34,9 @@ export function Navbar() {
   const pathname = usePathname();
   const { sendRequest } = useApi();
   const [isOpen, setIsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { user, setUser, clearUser } = useUserStore();
-  const [notifications, setNotifications] = useState<INotification[] | null>(
-    []
-  );
+  const [notifications, setNotifications] = useState<INotification[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -46,6 +45,7 @@ export function Navbar() {
         if (response.authenticated) {
           setUser(response.user);
           setNotifications(response.notifications || []);
+          updateUnreadCount(response.notifications);
         } else {
           clearUser();
         }
@@ -56,6 +56,60 @@ export function Navbar() {
 
     checkAuth();
   }, []);
+
+  const updateUnreadCount = (notifications: INotification[] = []) => {
+    const count = notifications.filter((n) => n.status === "unread").length;
+    setUnreadCount(count);
+  };
+
+  // to mark all notifications as read
+  const markNotificationsAsRead = async () => {
+    try {
+      const unreadIds = notifications
+        .filter((n) => n.status === "unread")
+        .map((n) => n._id);
+
+      if (unreadIds.length === 0) return;
+
+      const response = await sendRequest(
+        "/api/notifications/mark-as-read",
+        "POST",
+        {
+          notificationIds: unreadIds,
+        }
+      );
+
+      if (response.success) {
+        const updatedNotifications = notifications.map((n) => ({
+          ...n,
+          status: unreadIds.includes(n._id) ? "read" : n.status,
+        })) as INotification[];
+
+        setNotifications(updatedNotifications as INotification[]);
+        updateUnreadCount(updatedNotifications);
+      }
+    } catch (error) {
+      console.error("Error marking notifications as read:", error);
+    }
+  };
+
+  // to handle notification click and mark it as read
+  const handleNotificationClick = (notification: INotification) => {
+    if (notification.status === "unread") {
+      const updatedNotifications = notifications.map((n) =>
+        n._id === notification._id ? { ...n, status: "read" } : n
+      ) as INotification[];
+
+      setNotifications(updatedNotifications as INotification[]);
+      updateUnreadCount(updatedNotifications);
+
+      sendRequest(`/api/notifications/${notification._id}/read`, "PUT");
+    }
+
+    if (notification.relatedPaperId) {
+      router.push(`/paper/${notification.relatedPaperId}`);
+    }
+  };
 
   const isAuthenticated = !!user;
 
@@ -146,11 +200,14 @@ export function Navbar() {
                     variant="ghost"
                     size="icon"
                     className="relative text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                    onClick={markNotificationsAsRead}
                   >
                     <Bell className="h-5 w-5" />
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-blue-600 dark:bg-blue-700 text-white">
-                      {notifications?.length}
-                    </Badge>
+                    {unreadCount > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-blue-600 dark:bg-blue-700 text-white">
+                        {unreadCount}
+                      </Badge>
+                    )}
                     <span className="sr-only">Notifications</span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -167,7 +224,12 @@ export function Navbar() {
                       notifications?.map((notification, index) => (
                         <DropdownMenuItem
                           key={index}
-                          className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className={`cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                            notification.status === "unread"
+                              ? "bg-blue-50 dark:bg-blue-900/30"
+                              : ""
+                          }`}
+                          onClick={() => handleNotificationClick(notification)}
                         >
                           <div className="flex flex-col gap-1">
                             <p className="font-medium text-gray-900 dark:text-white">
