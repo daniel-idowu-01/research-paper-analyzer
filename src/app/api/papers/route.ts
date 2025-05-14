@@ -11,12 +11,6 @@ export async function GET(request: Request) {
     logger.info("Fetching user papers...");
     await connectDB();
 
-    // const user = getUser(request);
-
-    // if (!user) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
-
     const cookieStore = cookies();
     const token = (await cookieStore).get("token")?.value;
 
@@ -32,21 +26,35 @@ export async function GET(request: Request) {
         id: string;
       };
 
+      const url = new URL(request.url);
+      const page = parseInt(url.searchParams.get("page") || "1");
+      const limit = parseInt(url.searchParams.get("limit") || "10");
+      const search = url.searchParams.get("search") || "";
+
       const user = await getUserById(decoded.id);
 
       if (!user) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
-      const papers = await Paper.find({ uploaderId: user.id });
+      let query: any = { uploaderId: user.id };
 
-      if (!papers) {
-        return NextResponse.json({
-          success: true,
-          message: "No papers found",
-          papers: [],
-        });
+      // Add search functionality if search term exists
+      if (search) {
+        query.$or = [
+          { "metadata.title": { $regex: search, $options: "i" } },
+          { "metadata.authors": { $regex: search, $options: "i" } },
+          { summary: { $regex: search, $options: "i" } },
+        ];
       }
+
+      const total = await Paper.countDocuments(query);
+
+      // Fetch paginated papers
+      const papers = await Paper.find(query)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit);
 
       logger.info("Papers fetched successfully!");
 
@@ -54,6 +62,9 @@ export async function GET(request: Request) {
         success: true,
         message: "Paper details fetched successfully",
         papers,
+        total,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
       });
     } catch (error) {
       logger.error("JWT Error: " + error);

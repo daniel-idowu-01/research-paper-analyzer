@@ -41,30 +41,40 @@ import {
 export default function MyPapersPage() {
   const router = useRouter();
   const { sendRequest } = useApi();
+  const [papersPerPage] = useState(10);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPapers, setTotalPapers] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [papers, setPapers] = useState<IPaper[]>([]);
 
-  useEffect(() => {
-    const fetchPapers = async () => {
-      try {
-        const response = await sendRequest("/api/papers", "GET");
-        if (response.success) {
-          setPapers(response.papers);
-        } else {
-          setError(response.error);
-        }
-      } catch (error: any) {
-        setError(
-          error.message || "Failed to fetch papers. Please try again later."
-        );
-      } finally {
-        setLoading(false);
+  const fetchPapers = async (page = 1, search = "") => {
+    try {
+      setLoading(true);
+      let url = `/api/papers?page=${page}&limit=${papersPerPage}`;
+      if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
       }
-    };
+      const response = await sendRequest(url, "GET");
+      if (response.success) {
+        setPapers(response.papers);
+        setTotalPapers(response.total);
+        setCurrentPage(page);
+      } else {
+        setError(response.error);
+      }
+    } catch (error: any) {
+      setError(
+        error.message || "Failed to fetch papers. Please try again later."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchPapers();
+  useEffect(() => {
+    fetchPapers(1);
   }, [sendRequest]);
 
   // Filter papers based on search query
@@ -151,7 +161,10 @@ export default function MyPapersPage() {
             className="pl-8 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
             placeholder="Search papers..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              fetchPapers(1, e.target.value);
+            }}
           />
         </div>
       </div>
@@ -173,7 +186,9 @@ export default function MyPapersPage() {
             </TabsTrigger>
           </TabsList>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Showing {filteredPapers.length} of {papers.length} papers
+            Showing {(currentPage - 1) * papersPerPage + 1} to{" "}
+            {Math.min(currentPage * papersPerPage, totalPapers)} of{" "}
+            {totalPapers} papers
           </p>
         </div>
 
@@ -394,6 +409,31 @@ export default function MyPapersPage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* pagination */}
+      {filteredPapers.length > 0 && (
+        <div className="flex items-center justify-between mt-6">
+          <div></div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              disabled={currentPage === 1}
+              onClick={() => fetchPapers(currentPage - 1)}
+              className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              disabled={currentPage * papersPerPage >= totalPapers}
+              onClick={() => fetchPapers(currentPage + 1)}
+              className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
