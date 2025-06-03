@@ -56,6 +56,15 @@ interface IMetadata {
   topics: string[];
 }
 
+interface IAIAnalysis {
+  summary?: string | null;
+  topics?: Array<{ topic: string }>;
+  embeddings?: number[] | null;
+  keyPhrases?: string[];
+  sentiment?: string | null;
+  processedAt?: string;
+}
+
 export interface IPaper extends Document {
   file_url: string;
   metadata: IMetadata;
@@ -67,6 +76,7 @@ export interface IPaper extends Document {
   performance_metrics: IPerformanceMetrics;
   references: IReference[];
   status: "processing" | "completed" | "failed";
+  aiAnalysis?: IAIAnalysis;
   createdAt: Date;
   updatedAt: Date;
   uploaderId?: mongoose.Types.ObjectId;

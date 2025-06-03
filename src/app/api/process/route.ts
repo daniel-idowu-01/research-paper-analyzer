@@ -7,8 +7,8 @@ import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
 import { createPaper } from "@/usecases/paper";
 import Notification from "@/models/Notification";
-import { processResearchPaper } from "@/utils/pdfProcessor";
 import { fallbackPartialExtraction } from "@/utils/pdfProcessor";
+import { enhancedProcessResearchPaper } from "@/utils/enhancedProcessor";
 
 export const config = {
   api: {
@@ -20,7 +20,7 @@ export const config = {
 
 export async function POST(request: Request) {
   try {
-    logger.info("Processing PDF file...");
+    logger.info("Processing PDF file with AI enhancement...");
     await connectDB();
 
     const cookieStore = cookies();
@@ -28,11 +28,16 @@ export async function POST(request: Request) {
 
     let userId = null;
     if (token) {
+      if (!process.env.JWT_SECRET) {
+        return NextResponse.json(
+          { error: "JWT Secret is not configured" },
+          { status: 500 }
+        );
+      }
       const decodedToken = jwt.verify(
         token,
-        process.env.JWT_SECRET as string
-      ) as { id: string };
-
+        process.env.JWT_SECRET
+      ) as jwt.JwtPayload;
       userId = decodedToken.id;
 
       if (!decodedToken) {
@@ -41,7 +46,7 @@ export async function POST(request: Request) {
     }
 
     const formData = await request.formData();
-    const file = formData.get("file") as File | null;
+    const file = formData.get("file");
 
     if (!file) {
       return NextResponse.json(
@@ -50,9 +55,16 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!process.env.CLOUDINARY_UPLOAD_PRESET) {
+      return NextResponse.json(
+        { error: "Cloudinary Upload Preset is not configured" },
+        { status: 500 }
+      );
+    }
+
     const form = new FormData();
     form.append("file", file);
-    form.append("upload_preset", process.env.CLOUDINARY_UPLOAD_PRESET!);
+    form.append("upload_preset", process.env.CLOUDINARY_UPLOAD_PRESET);
 
     logger.info("Uploading to cloudinary...");
     const cloudinaryRequest = await axios.post(
@@ -62,16 +74,17 @@ export async function POST(request: Request) {
     const fileUrl = cloudinaryRequest?.data.secure_url;
     logger.info("Uploaded successfully!");
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const buffer = Buffer.from(await (file as Blob).arrayBuffer());
 
     try {
-      const result = await processResearchPaper(buffer);
-      logger.info("File processed successfully!");
+      // Use enhanced processing with Hugging Face
+      const result = await enhancedProcessResearchPaper(buffer);
+      logger.info("File processed successfully with AI enhancement!");
 
       const paper = await createPaper(result, fileUrl, userId || null);
 
       await Notification.createPaperAnalysisNotification(
-        new mongoose.Types.ObjectId(userId as string),
+        new mongoose.Types.ObjectId(userId),
         result.metadata.title,
         paper._id
       );
@@ -81,14 +94,14 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         data: paper._id,
+        aiEnhanced: true,
       });
     } catch (processingError) {
-      console.error("PDF processing failed:", processingError);
+      console.error("Enhanced PDF processing failed:", processingError);
       return NextResponse.json(
         {
           error: "PDF processing failed",
-          details:
-            "We could not fully analyze the PDF. Basic information was extracted.",
+          details: "AI enhancement failed, falling back to basic processing.",
           partialData: await fallbackPartialExtraction(buffer.toString()),
         },
         { status: 206 }

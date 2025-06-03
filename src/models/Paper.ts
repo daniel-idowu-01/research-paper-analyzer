@@ -97,6 +97,28 @@ const PaperSchema = new Schema<IPaper>(
       enum: ["processing", "completed", "failed"],
       default: "processing",
     },
+    aiAnalysis: {
+      summary: String,
+      topics: [
+        {
+          topic: String,
+          confidence: Number,
+        },
+      ],
+      embeddings: [Number],
+      keyPhrases: [
+        {
+          text: String,
+          label: String,
+          confidence: Number,
+        },
+      ],
+      sentiment: {
+        label: String,
+        score: Number,
+      },
+      processedAt: Date,
+    },
   },
   {
     timestamps: true,
