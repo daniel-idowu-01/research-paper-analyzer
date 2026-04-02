@@ -55,7 +55,7 @@ export function Navbar() {
     };
 
     checkAuth();
-  }, []);
+  }, [clearUser, sendRequest, setUser]);
 
   const updateUnreadCount = (notifications: INotification[] = []) => {
     const count = notifications.filter((n) => n.status === "unread").length;
@@ -67,7 +67,7 @@ export function Navbar() {
     try {
       const unreadIds = notifications
         .filter((n) => n.status === "unread")
-        .map((n) => n._id);
+        .map((n) => n.id);
 
       if (unreadIds.length === 0) return;
 
@@ -82,7 +82,7 @@ export function Navbar() {
       if (response.success) {
         const updatedNotifications = notifications.map((n) => ({
           ...n,
-          status: unreadIds.includes(n._id) ? "read" : n.status,
+          status: unreadIds.includes(n.id) ? "read" : n.status,
         })) as INotification[];
 
         setNotifications(updatedNotifications as INotification[]);
@@ -97,13 +97,13 @@ export function Navbar() {
   const handleNotificationClick = (notification: INotification) => {
     if (notification.status === "unread") {
       const updatedNotifications = notifications.map((n) =>
-        n._id === notification._id ? { ...n, status: "read" } : n
+        n.id === notification.id ? { ...n, status: "read" } : n
       ) as INotification[];
 
       setNotifications(updatedNotifications as INotification[]);
       updateUnreadCount(updatedNotifications);
 
-      sendRequest(`/api/notifications/${notification._id}/read`, "PUT");
+      sendRequest(`/api/notifications/${notification.id}/read`, "PUT");
     }
 
     if (notification.relatedPaperId) {
@@ -223,7 +223,7 @@ export function Navbar() {
                     {notifications && notifications.length > 0 ? (
                       notifications?.map((notification, index) => (
                         <DropdownMenuItem
-                          key={index}
+                          key={notification.id}
                           className={`cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
                             notification.status === "unread"
                               ? "bg-blue-50 dark:bg-blue-900/30"
@@ -239,7 +239,7 @@ export function Navbar() {
                               {notification.message}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {notification.createdAt.toString()}
+                              {String(notification.createdAt)}
                             </p>
                           </div>
                         </DropdownMenuItem>

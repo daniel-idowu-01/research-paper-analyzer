@@ -26,10 +26,8 @@ import {
 import {
   BookOpen,
   Calendar,
-  ChevronDown,
   Download,
   FileText,
-  Filter,
   MoreHorizontal,
   Search,
   Share2,
@@ -42,7 +40,7 @@ export default function MyPapersPage() {
   const router = useRouter();
   const { sendRequest } = useApi();
   const [papersPerPage] = useState(10);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPapers, setTotalPapers] = useState(0);
@@ -77,18 +75,6 @@ export default function MyPapersPage() {
     fetchPapers(1);
   }, [sendRequest]);
 
-  // Filter papers based on search query
-  const filteredPapers = papers.filter((paper) => {
-    const matchesSearch =
-      paper.metadata.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      paper.metadata.authors.map((author) =>
-        author.toLowerCase().includes(searchQuery.toLowerCase())
-      ) ||
-      paper.summary.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesSearch;
-  });
-
   // handle download
   const handleDownload = (paper: IPaper) => {
     if (!paper.file_url) return;
@@ -108,7 +94,7 @@ export default function MyPapersPage() {
         await navigator.share({
           title: paper.metadata.title,
           text: `Check out this paper: ${paper.metadata.title}`,
-          url: `${window.location.origin}/papers/${paper.id}`,
+          url: `${window.location.origin}/paper/${paper.id}`,
         });
         return;
       } catch (err) {
@@ -120,11 +106,9 @@ export default function MyPapersPage() {
   // handle delete paper
   const handleDelete = async (paper: IPaper) => {
     try {
-      const response = await sendRequest(`/api/papers/${paper._id}`, "DELETE");
+      const response = await sendRequest(`/api/papers/${paper.id}`, "DELETE");
       if (response.success) {
-        setPapers((prevPapers) =>
-          prevPapers.filter((p) => p._id !== paper._id)
-        );
+        setPapers((prevPapers) => prevPapers.filter((p) => p.id !== paper.id));
       } else {
         setError(response.error);
       }
@@ -169,6 +153,10 @@ export default function MyPapersPage() {
         </div>
       </div>
 
+      {error && (
+        <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
+      )}
+
       <Tabs defaultValue="grid" className="mt-6">
         <div className="flex items-center justify-between">
           <TabsList className="bg-gray-100 dark:bg-gray-800">
@@ -193,9 +181,9 @@ export default function MyPapersPage() {
         </div>
 
         <TabsContent value="grid" className="mt-6">
-          {filteredPapers.length > 0 ? (
+          {papers.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredPapers.map((paper) => (
+              {papers.map((paper) => (
                 <Card
                   key={paper.id}
                   className="overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
@@ -220,7 +208,7 @@ export default function MyPapersPage() {
                           <DropdownMenuItem className="hover:bg-gray-100 dark:hover:bg-gray-700">
                             <BookOpen className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
                             <Link
-                              href={`/paper/${paper._id}`}
+                              href={`/paper/${paper.id}`}
                               className="text-gray-700 dark:text-gray-300"
                             >
                               View Analysis
@@ -287,7 +275,7 @@ export default function MyPapersPage() {
                     </div>
                   </CardContent>
                   <CardFooter className="pt-0">
-                    <Link href={`/paper/${paper._id}`} className="w-full">
+                    <Link href={`/paper/${paper.id}`} className="w-full">
                       <Button
                         variant="outline"
                         className="w-full border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
@@ -310,9 +298,9 @@ export default function MyPapersPage() {
         </TabsContent>
 
         <TabsContent value="list" className="mt-6">
-          {filteredPapers.length > 0 ? (
+          {papers.length > 0 ? (
             <div className="space-y-4">
-              {filteredPapers.map((paper) => (
+              {papers.map((paper) => (
                 <Card
                   key={paper.id}
                   className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
@@ -347,7 +335,7 @@ export default function MyPapersPage() {
                       </div>
                     </div>
                     <div className="flex flex-row gap-2 mt-4 sm:flex-col sm:mt-0">
-                      <Link href={`/paper/${paper._id}`}>
+                      <Link href={`/paper/${paper.id}`}>
                         <Button
                           variant="default"
                           size="sm"
@@ -389,7 +377,10 @@ export default function MyPapersPage() {
                               Share
                             </span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30">
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(paper)}
+                            className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
+                          >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </DropdownMenuItem>
@@ -411,7 +402,7 @@ export default function MyPapersPage() {
       </Tabs>
 
       {/* pagination */}
-      {filteredPapers.length > 0 && (
+      {papers.length > 0 && (
         <div className="flex items-center justify-between mt-6">
           <div></div>
           <div className="flex gap-2">

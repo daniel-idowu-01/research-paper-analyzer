@@ -76,9 +76,6 @@ export default function TermsOfServicePage() {
         <div className="space-y-8">
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
               <CardTitle className="text-2xl text-gray-900 dark:text-white">
                 Research Analyzer Terms of Service
               </CardTitle>

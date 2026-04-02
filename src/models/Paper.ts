@@ -90,7 +90,7 @@ const PaperSchema = new Schema<IPaper>(
       type: PerformanceMetricSchema,
       required: true,
     },
-    references: { type: [ReferenceSchema], required: true },
+    references: { type: [ReferenceSchema], default: [] },
     uploaderId: { type: Schema.Types.ObjectId, ref: "User" },
     status: {
       type: String,

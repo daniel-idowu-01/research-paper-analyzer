@@ -2,32 +2,33 @@ import { useState } from "react";
 import { useApi } from "./use-api";
 import { IUser } from "../../types/user";
 
+const DEFAULT_SETTINGS = {
+  notifications: {
+    paperAnalysis: true,
+    similarPapers: true,
+    newFeatures: false,
+    marketing: false,
+    email: true,
+    browser: true,
+  },
+  preferences: {
+    autoAnalyze: true,
+    findSimilar: true,
+    citationFormat: "apa",
+    dataCollection: true,
+    storeHistory: true,
+  },
+  appearance: {
+    theme: "system",
+    language: "en",
+  },
+};
+
 export function useSettings() {
   const { sendRequest } = useApi();
   const [isUpdating, setIsUpdating] = useState(false);
   const [user, setUser] = useState<IUser | null>(null);
-
-  const [settings, setSettings] = useState({
-    notifications: {
-      paperAnalysis: true,
-      similarPapers: true,
-      newFeatures: false,
-      marketing: false,
-      email: true,
-      browser: true,
-    },
-    preferences: {
-      autoAnalyze: true,
-      findSimilar: true,
-      citationFormat: "apa",
-      dataCollection: true,
-      storeHistory: true,
-    },
-    appearance: {
-      theme: "system",
-      language: "en",
-    },
-  });
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
   const updateSettings = async (settingsType: string, data: any) => {
     setIsUpdating(true);
@@ -41,7 +42,11 @@ export function useSettings() {
         throw new Error("Failed to update settings");
       }
 
-      setSettings((prev) => ({ ...prev, [settingsType]: data }));
+      if (response.settings) {
+        setSettings(response.settings);
+      } else {
+        setSettings((prev) => ({ ...prev, [settingsType]: data }));
+      }
     } catch (error) {
       console.log("Update error:", error);
     } finally {
@@ -57,8 +62,8 @@ export function useSettings() {
         throw new Error("Failed to fetch settings");
       }
 
-      setSettings(response.settings || settings);
-      setUser(response.user || null)
+      setSettings(response.settings || DEFAULT_SETTINGS);
+      setUser(response.user || null);
 
       return response.settings;
     } catch (error) {

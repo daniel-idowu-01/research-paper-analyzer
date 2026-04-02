@@ -3,14 +3,19 @@
 import { useState, useCallback } from "react";
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 
-interface ApiResponse<T> {
+type ApiResponseState<T> = {
   data: T | null;
   error: string | null;
   loading: boolean;
-}
+};
+
+export type ApiError = Error & {
+  status?: number;
+  response?: AxiosError["response"];
+};
 
 export function useApi<T = any>() {
-  const [apiState, setApiState] = useState<ApiResponse<T>>({
+  const [apiState, setApiState] = useState<ApiResponseState<T>>({
     data: null,
     error: null,
     loading: false,
@@ -26,13 +31,14 @@ export function useApi<T = any>() {
       setApiState({ data: null, error: null, loading: true });
 
       try {
+        const isFormData = body instanceof FormData;
         const res: AxiosResponse<T> = await axios({
           url,
           method,
           data: body,
           withCredentials: true,
           headers: {
-            "Content-Type": "application/json",
+            ...(isFormData ? {} : { "Content-Type": "application/json" }),
             ...(config?.headers || {}),
           },
           ...config,
@@ -56,10 +62,10 @@ export function useApi<T = any>() {
           loading: false,
         });
 
-        throw {
-          response: axiosError.response,
-          message: errorMessage,
-        };
+        const apiError = new Error(errorMessage) as ApiError;
+        apiError.status = axiosError.response?.status;
+        apiError.response = axiosError.response;
+        throw apiError;
       }
     },
     []

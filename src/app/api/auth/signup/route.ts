@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
 import Notification from "@/models/Notification";
 import { emailRegex, passwordRegex } from "@/lib/constants";
+import { badRequest } from "@/lib/server/http";
 
 export async function POST(req: Request) {
   try {
@@ -13,44 +14,26 @@ export async function POST(req: Request) {
     const { name, email, password } = await req.json();
 
     if (!name || !email || !password) {
-      return NextResponse.json(
-        { message: "All fields are required" },
-        { status: 400 }
-      );
+      return badRequest("All fields are required");
     }
 
     if (name.length < 3) {
-      return NextResponse.json(
-        {
-          message: "Your first name or last name should more than 2 characters",
-        },
-        { status: 400 }
-      );
+      return badRequest("Your full name should be at least 3 characters long.");
     }
 
     if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { message: "Enter a valid email!" },
-        { status: 400 }
-      );
+      return badRequest("Enter a valid email.");
     }
 
     if (!passwordRegex.test(password)) {
-      return NextResponse.json(
-        {
-          message:
-            "Password must have at least one uppercase, one lowercase, one number, one symbol, and be more than 8 characters!",
-        },
-        { status: 400 }
+      return badRequest(
+        "Password must be at least 8 characters and include uppercase, lowercase, a number, and a symbol."
       );
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return NextResponse.json(
-        { message: "Email already exists" },
-        { status: 400 }
-      );
+      return badRequest("Email already exists");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

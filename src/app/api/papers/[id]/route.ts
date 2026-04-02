@@ -1,10 +1,10 @@
-import jwt from "jsonwebtoken";
 import logger from "@/lib/logger";
 import Paper from "@/models/Paper";
-import { cookies } from "next/headers";
 import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
 import { getUserById } from "@/services/user-service";
+import { authErrorResponse, requireAuth } from "@/lib/server/auth";
+import { badRequest, notFound } from "@/lib/server/http";
 
 export async function GET(
   request: Request,
@@ -17,16 +17,13 @@ export async function GET(
     const { id } = await params;
 
     if (!id) {
-      return NextResponse.json(
-        { error: "Paper ID is required" },
-        { status: 400 }
-      );
+      return badRequest("Paper ID is required");
     }
 
     const paper = await Paper.findById(id);
 
     if (!paper) {
-      return NextResponse.json({ error: "Paper not found!" }, { status: 400 });
+      return notFound("Paper not found");
     }
 
     logger.info("Paper fetched successfully!");
@@ -59,36 +56,20 @@ export async function DELETE(
     const { id } = await params;
 
     if (!id) {
-      return NextResponse.json(
-        { error: "Paper ID is required" },
-        { status: 400 }
-      );
-    }
-
-    const cookieStore = cookies();
-    const token = (await cookieStore).get("token")?.value;
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Unauthorized - No token provided" },
-        { status: 401 }
-      );
+      return badRequest("Paper ID is required");
     }
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-        id: string;
-      };
-
-      const user = await getUserById(decoded.id);
+      const authUser = await requireAuth();
+      const user = await getUserById(authUser.id);
 
       if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+        return notFound("User not found");
       }
 
       const paper = await Paper.findOne({ _id: id, uploaderId: user.id });
 
       if (!paper) {
-        return NextResponse.json({ error: "Paper not found" }, { status: 404 });
+        return notFound("Paper not found");
       }
 
       await Paper.findByIdAndDelete(id);
@@ -98,25 +79,11 @@ export async function DELETE(
         { status: 200 }
       );
     } catch (error: any) {
-      logger.error("JWT Error: " + error);
-      if (error instanceof jwt.JsonWebTokenError) {
-        return NextResponse.json(
-          { error: "Unauthorized - Invalid token" },
-          { status: 401 }
-        );
+      if (error instanceof Error && ["UNAUTHORIZED", "TOKEN_EXPIRED"].includes(error.message)) {
+        return authErrorResponse(error);
       }
 
-      if (error instanceof jwt.TokenExpiredError) {
-        return NextResponse.json(
-          { error: "Token expired. Please login again." },
-          { status: 401 }
-        );
-      }
-
-      return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
   } catch (error) {
     logger.error("Error deleting paper: " + error);

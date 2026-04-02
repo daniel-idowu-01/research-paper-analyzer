@@ -1,14 +1,14 @@
 import axios from "axios";
-import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import logger from "@/lib/logger";
-import { cookies } from "next/headers";
 import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
 import { createPaper } from "@/usecases/paper";
 import Notification from "@/models/Notification";
 import { processResearchPaper } from "@/utils/pdfProcessor";
 import { fallbackPartialExtraction } from "@/utils/pdfProcessor";
+import { getTokenFromCookies, requireAuth } from "@/lib/server/auth";
+import { badRequest, serverError } from "@/lib/server/http";
 
 export const config = {
   api: {
@@ -23,20 +23,14 @@ export async function POST(request: Request) {
     logger.info("Processing PDF file...");
     await connectDB();
 
-    const cookieStore = cookies();
-    const token = (await cookieStore).get("token")?.value;
-
     let userId = null;
+    const token = await getTokenFromCookies();
     if (token) {
-      const decodedToken = jwt.verify(
-        token,
-        process.env.JWT_SECRET as string
-      ) as { id: string };
-
-      userId = decodedToken.id;
-
-      if (!decodedToken) {
-        return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+      try {
+        const authUser = await requireAuth();
+        userId = authUser.id;
+      } catch {
+        userId = null;
       }
     }
 
@@ -44,10 +38,15 @@ export async function POST(request: Request) {
     const file = formData.get("file") as File | null;
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No PDF file provided" },
-        { status: 400 }
-      );
+      return badRequest("No PDF file provided");
+    }
+
+    if (file.type !== "application/pdf") {
+      return badRequest("Only PDF files are supported");
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      return badRequest("File size exceeds 10MB limit");
     }
 
     const form = new FormData();
@@ -70,13 +69,15 @@ export async function POST(request: Request) {
 
       const paper = await createPaper(result, fileUrl, userId || null);
 
-      await Notification.createPaperAnalysisNotification(
-        new mongoose.Types.ObjectId(userId as string),
-        result.metadata.title,
-        paper._id
-      );
+      if (userId) {
+        await Notification.createPaperAnalysisNotification(
+          new mongoose.Types.ObjectId(userId),
+          result.metadata.title,
+          paper._id
+        );
 
-      logger.info("Notification created successfully!");
+        logger.info("Notification created successfully!");
+      }
 
       return NextResponse.json({
         success: true,
@@ -96,12 +97,9 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error("PDF processing error:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to process PDF",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
+    return serverError(
+      "Failed to process PDF",
+      error instanceof Error ? error.message : String(error)
     );
   }
 }

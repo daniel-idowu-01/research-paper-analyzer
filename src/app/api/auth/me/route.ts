@@ -1,24 +1,14 @@
-import jwt from "jsonwebtoken";
 import User from "@/models/User";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import Notification from "@/models/Notification";
 import { formatTime } from "@/utils/formatTime";
+import { connectDB } from "@/lib/mongo";
+import { authErrorResponse, requireAuth } from "@/lib/server/auth";
 
 export async function GET() {
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("token")?.value;
-
-  if (!token) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
-  }
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string;
-    };
-
-    const { id } = decoded;
+    await connectDB();
+    const { id } = await requireAuth();
 
     const [user, notifications] = await Promise.all([
       User.findById(id).select("name email role").lean(),
@@ -45,7 +35,7 @@ export async function GET() {
       { authenticated: true, user, notifications: formattedNotifications },
       { status: 200 }
     );
-  } catch {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+  } catch (error) {
+    return authErrorResponse(error);
   }
 }
