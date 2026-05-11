@@ -52,6 +52,8 @@ interface IMetadata {
 
 export interface IPaper extends Document {
   file_url: string;
+  /** Populated on new uploads; used server-side for search. */
+  extracted_text?: string;
   metadata: IMetadata;
   summary: string;
   key_findings: IKeyFindings;

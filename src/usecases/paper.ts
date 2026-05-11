@@ -13,8 +13,15 @@ export async function createPaper(
 ) {
   const uploaderId = userId ? new mongoose.Types.ObjectId(userId) : undefined;
 
+  const maxExtracted = parseInt(process.env.PAPER_MAX_EXTRACTED_CHARS || "1500000", 10);
+  const extracted =
+    typeof result?.extracted_text === "string"
+      ? result.extracted_text.slice(0, maxExtracted)
+      : undefined;
+
   const paper = new Paper({
     file_url: fileUrl,
+    ...(extracted ? { extracted_text: extracted } : {}),
     uploaderId,
     metadata: {
       title: normalizeText(result?.metadata?.title, "Untitled Research Paper"),

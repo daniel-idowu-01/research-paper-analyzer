@@ -232,6 +232,8 @@ interface ResearchPaper {
   novelty_assessment: NoveltyAssessment;
   related_areas: string[];
   performance_metrics: PerformanceComparison;
+  /** Plain PDF text for search (length capped for DB). */
+  extracted_text: string;
 }
 
 /** Plain text from a PDF buffer (used for safe fallbacks when structured processing fails). */
@@ -247,18 +249,23 @@ export async function processResearchPaper(pdfBuffer: Buffer): Promise<ResearchP
   const text = await extractPlainTextFromPdfBuffer(pdfBuffer);
   logger.info("PDF text extracted", { textLength: text.length });
 
+  const maxExtracted = parseInt(process.env.PAPER_MAX_EXTRACTED_CHARS || "1500000", 10);
   const cacheKey = getCacheKey(text, "full_paper");
   const cached = getCached<ResearchPaper>(cacheKey);
   if (cached) {
     logger.info("Cache hit for full paper");
-    return cached;
+    return { ...cached, extracted_text: text.slice(0, maxExtracted) };
   }
 
   logger.info("Using fallback extraction (regex-based)");
   const result = await fallbackPartialExtraction(text);
-  setCached(cacheKey, result);
+  const withText: ResearchPaper = {
+    ...result,
+    extracted_text: text.slice(0, maxExtracted),
+  };
+  setCached(cacheKey, withText);
   logger.info("Processing completed", { duration: Date.now() - startTime });
-  return result;
+  return withText;
 }
 
 // Fallback that uses minimal AI and mostly regex
@@ -331,6 +338,7 @@ export async function fallbackPartialExtraction(text: string): Promise<ResearchP
       previous_sota: { accuracy: "", parameters: "", training_time: "" },
       baseline: { accuracy: "", parameters: "", training_time: "" },
     },
+    extracted_text: "",
   };
 }
 

@@ -34,6 +34,7 @@ export async function GET(request: Request) {
 
     const total = await Paper.countDocuments(query);
     const papers = await Paper.find(query)
+      .select("-extracted_text")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);

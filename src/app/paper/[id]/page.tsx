@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCallback, useMemo, useState, useEffect } from "react";
-import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
@@ -24,6 +24,161 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import type { PaperSearchMatch } from "@/lib/paperSearch";
+
+function SnippetWithHighlight({
+  snippet,
+  query,
+}: {
+  snippet: string;
+  query: string;
+}) {
+  const q = query.trim();
+  if (!q) {
+    return <span className="text-sm break-words text-gray-700 dark:text-gray-300">{snippet}</span>;
+  }
+  const lower = snippet.toLowerCase();
+  const lowerQ = q.toLowerCase();
+  const idx = lower.indexOf(lowerQ);
+  if (idx < 0) {
+    return <span className="text-sm break-words text-gray-700 dark:text-gray-300">{snippet}</span>;
+  }
+  return (
+    <span className="text-sm break-words text-gray-700 dark:text-gray-300">
+      {snippet.slice(0, idx)}
+      <mark className="rounded bg-amber-200 px-0.5 text-gray-900 dark:bg-amber-900/70 dark:text-gray-100">
+        {snippet.slice(idx, idx + q.length)}
+      </mark>
+      {snippet.slice(idx + q.length)}
+    </span>
+  );
+}
+
+function PaperWithinSearch({ paperId }: { paperId: string }) {
+  const { sendRequest } = useApi();
+  const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
+  const [matches, setMatches] = useState<PaperSearchMatch[]>([]);
+  const [source, setSource] = useState<"full_text" | "analysis_only" | "none">("none");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(query.trim()), 380);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  useEffect(() => {
+    if (debounced.length < 2) {
+      setMatches([]);
+      setSource("none");
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    sendRequest(
+      `/api/papers/${encodeURIComponent(paperId)}/search?q=${encodeURIComponent(debounced)}`,
+      "GET"
+    )
+      .then((res: unknown) => {
+        if (cancelled) return;
+        const data = res as {
+          matches?: PaperSearchMatch[];
+          source?: "full_text" | "analysis_only";
+        };
+        setMatches(data.matches || []);
+        setSource(data.source ?? "none");
+      })
+      .catch((e: Error) => {
+        if (!cancelled) {
+          setError(e.message || "Search failed");
+          setMatches([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debounced, paperId, sendRequest]);
+
+  return (
+    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-gray-900 dark:text-white">
+          Search Within Paper
+        </CardTitle>
+        <CardDescription className="text-gray-600 dark:text-gray-400">
+          Find phrases in the PDF text or in saved analysis fields
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <Input
+            className="pl-8 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+            type="search"
+            placeholder="Type at least 2 characters…"
+            aria-label="Search within paper"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoComplete="off"
+          />
+        </div>
+
+        {source === "analysis_only" && debounced.length >= 2 && !error && (
+          <p className="text-xs text-amber-800 dark:text-amber-200/90">
+            Full PDF text is not stored for this upload. Showing matches in summary and
+            insights only — process the file again to enable full-document search.
+          </p>
+        )}
+
+        {loading && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">Searching…</p>
+        )}
+        {error && (
+          <p className="text-xs text-red-600 dark:text-red-400" role="alert">
+            {error}
+          </p>
+        )}
+
+        {!loading && debounced.length >= 2 && !error && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {matches.length} match{matches.length === 1 ? "" : "es"}
+          </p>
+        )}
+
+        {debounced.length >= 2 && matches.length > 0 && (
+          <ul
+            className="max-h-64 space-y-2 overflow-y-auto pr-1 text-left"
+            aria-label="Search results"
+          >
+            {matches.map((m, i) => (
+              <li
+                key={`${m.index}-${i}`}
+                className="rounded-md border border-gray-200 bg-gray-50 p-2 dark:border-gray-600 dark:bg-gray-900/40"
+              >
+                <SnippetWithHighlight snippet={m.snippet} query={debounced} />
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {!loading && debounced.length >= 2 && matches.length === 0 && !error && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">No matches found.</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
   <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
@@ -129,7 +284,13 @@ const ActionButtons = () => {
 
 export default function PaperPage() {
   const params = useParams();
-  const paperId = params.id;
+  const paperIdParam = params.id;
+  const paperId =
+    typeof paperIdParam === "string"
+      ? paperIdParam
+      : Array.isArray(paperIdParam)
+        ? paperIdParam[0]
+        : "";
   const { sendRequest } = useApi();
   const [paper, setPaper] = useState<IPaper | null>(null);
   const [isPaperLoading, setIsPaperLoading] = useState(false);
@@ -177,6 +338,30 @@ export default function PaperPage() {
     return <Spinner />;
   }
 
+  if (!paper) {
+    return (
+      <div className="container mx-auto flex min-h-screen flex-col bg-gray-50 px-4 py-6 dark:bg-gray-900">
+        <div className="mb-6 flex items-center">
+          <Link href="/" aria-label="Go back">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mr-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Research Paper Analysis
+          </h1>
+        </div>
+        <p className="text-gray-600 dark:text-gray-300">
+          This paper could not be loaded. It may have been removed or the link is invalid.
+        </p>
+      </div>
+    );
+  }
+
   const getWidth = (type: string) => {
     switch (
       type === "research"
@@ -220,24 +405,7 @@ export default function PaperPage() {
 
           <ActionButtons />
 
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-gray-900 dark:text-white">
-                Search Within Paper
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                <Input
-                  className="pl-8 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
-                  type="search"
-                  placeholder="Search terms..."
-                  aria-label="Search within paper"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {paperId ? <PaperWithinSearch paperId={paperId} /> : null}
         </div>
 
         {/* Main Content */}

@@ -80,6 +80,8 @@ const MetadataSchema = new Schema(
 const PaperSchema = new Schema<IPaper>(
   {
     file_url: { type: String, required: true },
+    /** Full plain text from PDF (for in-document search). Omitted from default API responses. */
+    extracted_text: { type: String },
     metadata: { type: MetadataSchema, required: true },
     summary: { type: String, required: true },
     key_findings: { type: KeyFindingsSchema, required: true },

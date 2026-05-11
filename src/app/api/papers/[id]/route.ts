@@ -20,7 +20,7 @@ export async function GET(
       return badRequest("Paper ID is required");
     }
 
-    const paper = await Paper.findById(id);
+    const paper = await Paper.findById(id).select("-extracted_text").lean();
 
     if (!paper) {
       return notFound("Paper not found");
