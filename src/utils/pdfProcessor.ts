@@ -1,8 +1,80 @@
 import pdf from "pdf-parse";
-import { hf, geminiPro } from "../lib/aiClients";
+import crypto from "crypto";
+import { hf } from "../lib/aiClients";
 import { cleanGeminiJsonResponse, isBoilerplate } from "@/lib/helpers";
+import logger from "@/lib/logger";
+
+class Semaphore {
+  private permits: number;
+  private waiting: (() => void)[] = [];
+
+  constructor(permits: number) {
+    this.permits = permits;
+  }
+
+  async acquire(): Promise<void> {
+    if (this.permits > 0) {
+      this.permits--;
+      return;
+    }
+    return new Promise((resolve) => {
+      this.waiting.push(resolve);
+    });
+  }
+
+  release(): void {
+    this.permits++;
+    if (this.waiting.length > 0) {
+      const resolve = this.waiting.shift()!;
+      this.permits--;
+      resolve();
+    }
+  }
+}
+
+// Global semaphore: limit to concurrent HF inference calls
+const apiSemaphore = new Semaphore(parseInt(process.env.MAX_CONCURRENT_API_CALLS || "2"));
+const DEFAULT_HF_MODEL = process.env.HF_DEFAULT_MODEL || "openai/gpt-oss-120b:together";
+const HF_FALLBACK_MODELS = (process.env.HF_FALLBACK_MODELS || "").split(",").map((model) => model.trim()).filter(Boolean);
+
+const cache = new Map<string, { data: any; expiry: number }>();
+const CACHE_TTL = parseInt(process.env.CACHE_TTL_MS || "3600000"); // 1 hour default
+
+function getCacheKey(text: string, type: string): string {
+  return crypto.createHash("md5").update(`${type}:${text}`).digest("hex");
+}
+
+function getCached<T>(key: string): T | null {
+  const entry = cache.get(key);
+  if (entry && Date.now() < entry.expiry) {
+    return entry.data;
+  }
+  cache.delete(key);
+  return null;
+}
+
+function setCached<T>(key: string, data: T): void {
+  cache.set(key, { data, expiry: Date.now() + CACHE_TTL });
+}
 
 // Retry helper with exponential backoff
+function isQuotaExhaustionError(error: any): boolean {
+  const message = String(error?.message || error).toLowerCase();
+  if (message.includes("quota exceeded") || message.includes("free_tier") || message.includes("limit: 0")) {
+    return true;
+  }
+
+  if (Array.isArray(error?.errorDetails)) {
+    return error.errorDetails.some((detail: any) =>
+      detail?.violations?.some((violation: any) =>
+        String(violation.quotaMetric || "").toLowerCase().includes("generate_content_free_tier")
+      )
+    );
+  }
+
+  return false;
+}
+
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
@@ -12,15 +84,92 @@ async function retryWithBackoff<T>(
     try {
       return await fn();
     } catch (error: any) {
+      if (isQuotaExhaustionError(error)) {
+        logger.error("Permanent quota exhaustion detected", { attempt, error: error.message });
+        throw error;
+      }
+
       if (attempt === maxRetries || !error?.status || error.status !== 429) {
+        logger.error("API call failed permanently", { attempt, error: error.message });
         throw error;
       }
       const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
-      console.warn(`Attempt ${attempt + 1} failed, retrying in ${delay}ms:`, error.message);
+      logger.warn("API call failed, retrying", { attempt: attempt + 1, delay, error: error.message });
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
   throw new Error("Max retries exceeded");
+}
+
+async function runHfTextGeneration(prompt: string, maxNewTokens: number = 512): Promise<string> {
+  if (!process.env.HUGGINGFACE_TOKEN) {
+    throw new Error("Missing HUGGINGFACE_TOKEN for text generation");
+  }
+
+  const models = [DEFAULT_HF_MODEL, ...HF_FALLBACK_MODELS];
+  let lastError: Error | null = null;
+
+  for (const model of models) {
+    try {
+      const response: any = await hf.chatCompletion({
+        model,
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        max_tokens: maxNewTokens,
+        temperature: 0,
+      });
+
+      if (Array.isArray(response?.choices) && response.choices.length > 0) {
+        return response.choices[0]?.message?.content || response.choices[0]?.text || "";
+      }
+
+      return "";
+    } catch (error: any) {
+      const message = String(error?.message || error).toLowerCase();
+      lastError = error;
+
+      if (message.includes("inference provider information") || message.includes("model not found") || message.includes("unknown model")) {
+        logger.warn("Hugging Face model unsupported, trying fallback model", { model, error: error?.message });
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  throw lastError || new Error("Hugging Face text generation failed");
+}
+
+async function withRateLimit<T>(fn: () => Promise<T>): Promise<T> {
+  await apiSemaphore.acquire();
+  try {
+    return await fn();
+  } finally {
+    apiSemaphore.release();
+  }
+}
+
+// Chunk text into manageable pieces
+function chunkText(text: string, maxChunkSize: number = 3000): string[] {
+  const chunks: string[] = [];
+  let start = 0;
+  while (start < text.length) {
+    let end = start + maxChunkSize;
+    if (end < text.length) {
+      // Try to break at sentence boundary
+      const lastPeriod = text.lastIndexOf(".", end);
+      if (lastPeriod > start + maxChunkSize * 0.7) {
+        end = lastPeriod + 1;
+      }
+    }
+    chunks.push(text.substring(start, end));
+    start = end;
+  }
+  return chunks;
 }
 
 interface PaperMetadata {
@@ -83,23 +232,112 @@ interface ResearchPaper {
 export async function processResearchPaper(
   pdfBuffer: Buffer
 ): Promise<ResearchPaper> {
+  const startTime = Date.now();
+  logger.info("Starting PDF processing", { bufferSize: pdfBuffer.length });
+
   const { text } = await pdf(pdfBuffer);
+  logger.info("PDF text extracted", { textLength: text.length });
+
+  // Check cache first
+  const cacheKey = getCacheKey(text, "full_paper");
+  const cached = getCached<ResearchPaper>(cacheKey);
+  if (cached) {
+    logger.info("Cache hit for full paper");
+    return cached;
+  }
 
   try {
-    return await extractFullPaperData(text);
-  } catch (error) {
-    console.error("Full extraction failed, falling back to partial:", error);
-    return fallbackPartialExtraction(text);
+    const result = await extractFullPaperData(text);
+    setCached(cacheKey, result);
+    logger.info("PDF processing completed successfully", { duration: Date.now() - startTime });
+    return result;
+  } catch (error: any) {
+    logger.error("Full extraction failed, falling back to partial", { error: error.message });
+    const result = await fallbackPartialExtraction(text);
+    setCached(cacheKey, result);
+    logger.info("Fallback processing completed", { duration: Date.now() - startTime });
+    return result;
   }
 }
 
 ///////////////////////////////
-// Extracts all paper data using parallel processing
+// Extracts all paper data using optimized single API call
 ///////////////////////////////
 async function extractFullPaperData(text: string): Promise<ResearchPaper> {
   const sections = identifySections(text);
   const abstract = sections["ABSTRACT"] || text.substring(0, 2000);
 
+  // Try combined extraction first
+  try {
+    return await extractCombinedData(text, abstract);
+  } catch (error: any) {
+    logger.warn("Combined extraction failed, falling back to individual:", { error: error.message });
+    // Fallback to parallel individual extractions
+    return await extractParallelData(text, abstract);
+  }
+}
+
+///////////////////////////////
+// Combined extraction using single API call
+///////////////////////////////
+async function extractCombinedData(text: string, abstract: string): Promise<ResearchPaper> {
+  const prompt = `Extract all research paper information as JSON from this text. Return ONLY valid JSON:
+
+{
+  "metadata": {
+    "title": "string",
+    "authors": ["string"],
+    "published_date": "Month Year",
+    "topics": ["string"]
+  },
+  "summary": "3-4 sentence summary",
+  "key_findings": {
+    "primary": "main finding",
+    "methodology_innovation": "methodological advance",
+    "practical_applications": ["application1", "application2"]
+  },
+  "research_impact": {
+    "significance": "string",
+    "level": "Low/Medium/High/Very High",
+    "limitations": "string"
+  },
+  "novelty_assessment": {
+    "level": "Low/Medium/High/Very High",
+    "comparison_to_prior_work": "string"
+  },
+  "related_areas": ["area1", "area2", "area3"],
+  "performance_metrics": {
+    "proposed_method": {
+      "accuracy": "value",
+      "parameters": "value",
+      "training_time": "value"
+    },
+    "previous_sota": {
+      "accuracy": "value",
+      "parameters": "value",
+      "training_time": "value"
+    },
+    "baseline": {
+      "accuracy": "value",
+      "parameters": "value",
+      "training_time": "value"
+    }
+  }
+}
+
+Text: ${text.substring(0, 8000)}`;
+
+  const resultText = await withRateLimit(() => retryWithBackoff(() => runHfTextGeneration(prompt, 1024)));
+  const parsed = JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
+
+  // Validate and sanitize
+  return sanitizeExtractedData(parsed);
+}
+
+///////////////////////////////
+// Fallback parallel extraction
+///////////////////////////////
+async function extractParallelData(text: string, abstract: string): Promise<ResearchPaper> {
   const [
     metadata,
     summary,
@@ -108,7 +346,6 @@ async function extractFullPaperData(text: string): Promise<ResearchPaper> {
     noveltyAssessment,
     relatedAreas,
     performanceData,
-    // references,
   ] = await Promise.all([
     extractMetadata(text),
     extractSummary(abstract),
@@ -117,7 +354,6 @@ async function extractFullPaperData(text: string): Promise<ResearchPaper> {
     extractNoveltyAssessment(abstract),
     extractRelatedAreas(abstract),
     extractPerformanceData(text),
-    // Promise.resolve(extractReferences(text)),
   ]);
 
   return {
@@ -128,14 +364,66 @@ async function extractFullPaperData(text: string): Promise<ResearchPaper> {
     novelty_assessment: noveltyAssessment,
     related_areas: relatedAreas,
     performance_metrics: performanceData,
-    // references,
   };
 }
 
 ///////////////////////////////
-// Core extraction functions
+// Sanitize and validate extracted data
+///////////////////////////////
+function sanitizeExtractedData(data: any): ResearchPaper {
+  const defaults = {
+    metadata: {
+      title: "Untitled Research Paper",
+      authors: [],
+      published_date: "Unknown",
+      topics: ["research"],
+    },
+    summary: "",
+    key_findings: {
+      primary: "",
+      methodology_innovation: "",
+      practical_applications: [],
+    },
+    research_impact: {
+      significance: "",
+      level: "Medium" as const,
+      limitations: "",
+    },
+    novelty_assessment: {
+      level: "Medium" as const,
+      comparison_to_prior_work: "",
+    },
+    related_areas: [],
+    performance_metrics: {
+      proposed_method: { accuracy: "", parameters: "", training_time: "" },
+      previous_sota: { accuracy: "", parameters: "", training_time: "" },
+      baseline: { accuracy: "", parameters: "", training_time: "" },
+    },
+  };
+
+  // Merge and validate
+  const result = { ...defaults, ...data };
+
+  // Validate levels
+  const validLevels = ["Low", "Medium", "High", "Very High"];
+  if (!validLevels.includes(result.research_impact.level)) {
+    result.research_impact.level = "Medium";
+  }
+  if (!validLevels.includes(result.novelty_assessment.level)) {
+    result.novelty_assessment.level = "Medium";
+  }
+
+  return result;
+}
+
+///////////////////////////////
+// Core extraction functions with caching and rate limiting
 ///////////////////////////////
 async function extractMetadata(text: string): Promise<PaperMetadata> {
+  const cacheKey = getCacheKey(text, "metadata");
+  const cached = getCached<PaperMetadata>(cacheKey);
+  if (cached) return cached;
+
   try {
     const prompt = `Extract research paper metadata as JSON:
       {
@@ -146,12 +434,15 @@ async function extractMetadata(text: string): Promise<PaperMetadata> {
       }
       Text: ${text.substring(0, 3000)}`;
 
-    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
-    const resultText = result.response.candidates?.[0]?.content.parts[0].text;
-    return JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
+    const resultText = await withRateLimit(() => retryWithBackoff(() => runHfTextGeneration(prompt, 1024)));
+    const data = JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
+    setCached(cacheKey, data);
+    return data;
   } catch (error) {
     console.error("Metadata extraction failed:", error);
-    return fallbackMetadataExtraction(text);
+    const fallback = await fallbackMetadataExtraction(text);
+    setCached(cacheKey, fallback);
+    return fallback;
   }
 }
 
@@ -159,14 +450,18 @@ async function extractMetadata(text: string): Promise<PaperMetadata> {
 // Provides a summary from paper text
 ///////////////////////////////
 async function extractSummary(text: string): Promise<string> {
+  const cacheKey = getCacheKey(text, "summary");
+  const cached = getCached<string>(cacheKey);
+  if (cached) return cached;
+
   try {
     const prompt = `Generate a 3-4 sentence summary of this research text:
       ${text.substring(0, 3000)}`;
 
-    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
-    return cleanGeminiJsonResponse(
-      result.response.candidates?.[0]?.content.parts[0].text || ""
-    );
+    const resultText = await withRateLimit(() => retryWithBackoff(() => runHfTextGeneration(prompt, 512)));
+    const summary = cleanGeminiJsonResponse(resultText || "");
+    setCached(cacheKey, summary);
+    return summary;
   } catch {
     // Fallback to Hugging Face if available
     if (process.env.HUGGINGFACE_TOKEN) {
@@ -176,13 +471,17 @@ async function extractSummary(text: string): Promise<string> {
           inputs: text.substring(0, 1024),
           parameters: { max_length: 150 },
         });
-        return hfSummary.summary_text;
+        const summary = hfSummary.summary_text;
+        setCached(cacheKey, summary);
+        return summary;
       } catch (hfError) {
         console.warn("Hugging Face summarization failed:", hfError);
       }
     }
     // Ultimate fallback: simple extract
-    return text.substring(0, 500) + "...";
+    const summary = text.substring(0, 500) + "...";
+    setCached(cacheKey, summary);
+    return summary;
   }
 }
 
@@ -190,6 +489,10 @@ async function extractSummary(text: string): Promise<string> {
 // Extracts key findings from paper text
 ///////////////////////////////
 async function extractKeyFindings(text: string): Promise<KeyFindings> {
+  const cacheKey = getCacheKey(text, "key_findings");
+  const cached = getCached<KeyFindings>(cacheKey);
+  if (cached) return cached;
+
   try {
     const prompt = `Extract key findings as JSON:
       {
@@ -199,15 +502,19 @@ async function extractKeyFindings(text: string): Promise<KeyFindings> {
       }
       Text: ${text.substring(0, 3000)}`;
 
-    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
-    const resultText = result.response.candidates?.[0]?.content.parts[0].text;
-    return JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
+    const resultText = await withRateLimit(() => retryWithBackoff(() => runHfTextGeneration(prompt, 1024)));
+
+    const data = JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
+    setCached(cacheKey, data);
+    return data;
   } catch {
-    return {
+    const fallback = {
       primary: "",
       methodology_innovation: "",
       practical_applications: [],
     };
+    setCached(cacheKey, fallback);
+    return fallback;
   }
 }
 
@@ -215,6 +522,10 @@ async function extractKeyFindings(text: string): Promise<KeyFindings> {
 // Enhanced research impact extraction
 ///////////////////////////////
 async function extractResearchImpact(text: string): Promise<ResearchImpact> {
+  const cacheKey = getCacheKey(text, "research_impact");
+  const cached = getCached<ResearchImpact>(cacheKey);
+  if (cached) return cached;
+
   try {
     const prompt = `Extract research impact as JSON:
         {
@@ -224,8 +535,8 @@ async function extractResearchImpact(text: string): Promise<ResearchImpact> {
         }
         Text: ${text.substring(0, 3000)}`;
 
-    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
-    const resultText = result.response.candidates?.[0]?.content.parts[0].text;
+    const resultText = await withRateLimit(() => retryWithBackoff(() => runHfTextGeneration(prompt, 1024)));
+
     const parsed = JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
 
     // Validate research impact level
@@ -233,22 +544,27 @@ async function extractResearchImpact(text: string): Promise<ResearchImpact> {
       parsed.level = "Medium";
     }
 
+    setCached(cacheKey, parsed);
     return parsed;
   } catch {
-    return {
+    const fallback = {
       significance: "",
-      level: "Medium",
+      level: "Medium" as const,
       limitations: "",
     };
+    setCached(cacheKey, fallback);
+    return fallback;
   }
 }
 
 ///////////////////////////////
 // Enhanced novelty assessment
 ///////////////////////////////
-async function extractNoveltyAssessment(
-  text: string
-): Promise<NoveltyAssessment> {
+async function extractNoveltyAssessment(text: string): Promise<NoveltyAssessment> {
+  const cacheKey = getCacheKey(text, "novelty_assessment");
+  const cached = getCached<NoveltyAssessment>(cacheKey);
+  if (cached) return cached;
+
   try {
     const prompt = `Assess novelty as JSON:
         {
@@ -257,8 +573,8 @@ async function extractNoveltyAssessment(
         }
         Text: ${text.substring(0, 3000)}`;
 
-    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
-    const resultText = result.response.candidates?.[0]?.content.parts[0].text;
+    const resultText = await withRateLimit(() => retryWithBackoff(() => runHfTextGeneration(prompt, 1024)));
+
     const parsed = JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
 
     // Validate novelty level
@@ -266,12 +582,15 @@ async function extractNoveltyAssessment(
       parsed.level = "Medium";
     }
 
+    setCached(cacheKey, parsed);
     return parsed;
   } catch {
-    return {
-      level: "Medium",
+    const fallback = {
+      level: "Medium" as const,
       comparison_to_prior_work: "",
     };
+    setCached(cacheKey, fallback);
+    return fallback;
   }
 }
 
@@ -279,15 +598,21 @@ async function extractNoveltyAssessment(
 // Extract related research areas from text
 ///////////////////////////////
 async function extractRelatedAreas(text: string): Promise<string[]> {
+  const cacheKey = getCacheKey(text, "related_areas");
+  const cached = getCached<string[]>(cacheKey);
+  if (cached) return cached;
+
   try {
     const prompt = `List 3-5 related research areas as JSON array:
       ["area1", "area2", "area3"]
       Text: ${text.substring(0, 2000)}`;
 
-    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
-    const resultText = result.response.candidates?.[0]?.content.parts[0].text;
-    return JSON.parse(cleanGeminiJsonResponse(resultText || "[]"));
+    const resultText = await withRateLimit(() => retryWithBackoff(() => runHfTextGeneration(prompt, 512)));
+    const data = JSON.parse(cleanGeminiJsonResponse(resultText || "[]"));
+    setCached(cacheKey, data);
+    return data;
   } catch {
+    setCached(cacheKey, []);
     return [];
   }
 }
@@ -295,13 +620,18 @@ async function extractRelatedAreas(text: string): Promise<string[]> {
 ///////////////////////////////
 // Extract performance data from text
 ///////////////////////////////
-async function extractPerformanceData(
-  text: string
-): Promise<PerformanceComparison> {
+async function extractPerformanceData(text: string): Promise<PerformanceComparison> {
+  const cacheKey = getCacheKey(text, "performance_metrics");
+  const cached = getCached<PerformanceComparison>(cacheKey);
+  if (cached) return cached;
+
   try {
     // First try to find explicit performance data
     const tableData = extractPerformanceFromTables(text);
-    if (tableData) return tableData;
+    if (tableData) {
+      setCached(cacheKey, tableData);
+      return tableData;
+    }
 
     // Fallback to Gemini extraction
     const prompt = `Extract performance metrics as JSON:
@@ -324,15 +654,19 @@ async function extractPerformanceData(
       }
       Text: ${text.substring(0, 4000)}`;
 
-    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
-    const resultText = result.response.candidates?.[0]?.content.parts[0].text;
-    return JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
+    const resultText = await withRateLimit(() => retryWithBackoff(() => runHfTextGeneration(prompt, 1024)));
+
+    const data = JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
+    setCached(cacheKey, data);
+    return data;
   } catch {
-    return {
+    const fallback = {
       proposed_method: { accuracy: "", parameters: "", training_time: "" },
       previous_sota: { accuracy: "", parameters: "", training_time: "" },
       baseline: { accuracy: "", parameters: "", training_time: "" },
     };
+    setCached(cacheKey, fallback);
+    return fallback;
   }
 }
 
@@ -434,10 +768,9 @@ async function extractReferencesWithAI(text: string): Promise<Reference[]> {
         Return ONLY valid JSON without any other text.
         Text: ${referenceSection.substring(0, 3000)}`;
 
-      const result = await geminiPro.generateContent(prompt);
-      const resultText = result.response.candidates?.[0]?.content.parts[0].text;
+      const resultText = await runHfTextGeneration(prompt, 1024);
       return JSON.parse(cleanGeminiJsonResponse(resultText || "[]"));
-    } catch (geminiError) {
+    } catch (hfError) {
       const hfResult = await hf.summarization({
         model: "facebook/bart-large-cnn",
         inputs: referenceSection.substring(0, 1024),
