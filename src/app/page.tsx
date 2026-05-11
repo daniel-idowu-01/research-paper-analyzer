@@ -149,177 +149,149 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.12),_transparent_35%),linear-gradient(180deg,_#f8fafc_0%,_#eef4ff_45%,_#f8fafc_100%)] dark:bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.18),_transparent_30%),linear-gradient(180deg,_#020617_0%,_#0f172a_50%,_#020617_100%)]">
-      <div className="container mx-auto flex min-h-screen flex-col px-4 py-12">
-        <section className="grid items-center gap-10 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-4 py-2 text-sm text-blue-700 shadow-sm backdrop-blur dark:border-blue-900/60 dark:bg-slate-900/60 dark:text-blue-300">
-              <Sparkles className="h-4 w-4" />
-              AI research companion for fast paper digestion
-            </div>
-            <div className="space-y-4">
-              <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-6xl">
-                Turn dense PDFs into usable research insight.
-              </h1>
-              <p className="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg">
-                Upload a research paper and get a structured summary, key findings,
-                novelty assessment, related topics, and a clean analysis page you
-                can return to later.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3 text-sm text-slate-600 dark:text-slate-300">
-              <div className="rounded-full border border-slate-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-900">
-                PDF upload up to 10MB
-              </div>
-              <div className="rounded-full border border-slate-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-900">
-                Metadata + summary extraction
-              </div>
-              <div className="rounded-full border border-slate-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-900">
-                Personal paper history
-              </div>
-            </div>
+    <div className="min-h-screen bg-slate-50 text-slate-950">
+      <div className="container mx-auto flex min-h-screen flex-col px-4 py-10">
+        <section className="relative flex flex-1 flex-col items-center justify-center gap-10 px-4 py-10 sm:px-6 lg:px-8">
+          <div className="absolute inset-x-0 top-0 h-[360px] bg-gradient-to-b from-slate-100 to-transparent" />
+
+          <div className="relative z-10 flex w-full max-w-3xl flex-col items-center text-center">
+            <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-slate-700 shadow-sm">
+              AI-powered paper analysis
+            </span>
+            <h1 className="mt-5 text-5xl font-semibold tracking-tight text-slate-950 sm:text-6xl">
+              Turn research papers into clear insights.
+            </h1>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
+              Upload a PDF and get summaries, findings, related topics, and structured analysis.
+            </p>
           </div>
 
-          <Card className="w-full border-slate-200 bg-white/90 shadow-xl shadow-blue-100/40 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80 dark:shadow-none">
-            <CardHeader>
-              <CardTitle className="text-slate-950 dark:text-white">
-                Upload Research Paper
-              </CardTitle>
-              <CardDescription className="text-slate-600 dark:text-slate-400">
-                Drag a PDF here or choose one from your computer.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div
-                className={`flex min-h-72 flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition-colors ${
-                  isDragging
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
-                    : file
-                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20"
-                    : "border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/70"
-                }`}
-                onDragEnter={handleDragEnter}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                {file ? (
-                  <>
-                    <FileText className="mb-4 h-12 w-12 text-emerald-600 dark:text-emerald-400" />
-                    <p className="mb-1 text-base font-medium text-slate-950 dark:text-white">
-                      {file.name}
+          <div className="relative z-10 w-full max-w-3xl">
+            <Card className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_35px_80px_-50px_rgba(15,23,42,0.2)] transition-all duration-200">
+              <div className="px-8 py-8 sm:px-10 sm:py-10">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-700">
+                      Upload a PDF
                     </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <FileUp className="mb-4 h-12 w-12 text-slate-500 dark:text-slate-400" />
-                    <p className="mb-2 text-base font-medium text-slate-950 dark:text-white">
-                      Drop your PDF here or click to browse
-                    </p>
-                    <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                      We extract structure and generate an analysis page for the paper.
-                    </p>
-                  </>
-                )}
-
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileSelect}
-                  accept=".pdf"
-                  className="hidden"
-                />
-
-                <div className="mt-6 flex flex-wrap justify-center gap-3">
-                  <Button
-                    onClick={handleButtonClick}
-                    disabled={isUploading}
-                    className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
-                  >
-                    {file ? "Choose Another File" : "Select PDF"}
-                  </Button>
-                  {file && !autoAnalyze && (
-                    <Button
-                      onClick={handleAnalyzeClick}
-                      disabled={isUploading}
-                      variant="outline"
-                      className="border-slate-300 bg-white hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
-                    >
-                      {isUploading ? "Analyzing..." : "Analyze Now"}
-                    </Button>
-                  )}
+                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                      Analyze papers instantly.
+                    </h2>
+                  </div>
+                  <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700">
+                    PDF only · up to 10MB
+                  </div>
                 </div>
 
-                {error && (
-                  <p className="mt-4 text-sm text-red-600 dark:text-red-400">
-                    {error}
-                  </p>
-                )}
+                <div className="mt-10">
+                  <div
+                    className={`group relative flex min-h-[320px] flex-col items-center justify-center rounded-[28px] border p-10 text-center transition-all duration-200 ${
+                      isDragging
+                        ? "border-blue-300 bg-blue-50 shadow-[0_20px_60px_-30px_rgba(37,99,235,0.35)]"
+                        : file
+                        ? "border-slate-300 bg-slate-50"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                    }`}
+                    onDragEnter={handleDragEnter}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    {file ? (
+                      <>
+                        <FileText className="mb-4 h-14 w-14 text-slate-700" />
+                        <p className="mb-1 text-base font-semibold text-slate-950">{file.name}</p>
+                        <p className="text-sm text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </>
+                    ) : (
+                      <>
+                        <FileUp className="mb-4 h-14 w-14 text-slate-500" />
+                        <p className="mb-2 text-base font-semibold text-slate-950">Drop your PDF here or click to browse.</p>
+                        <p className="max-w-sm text-sm leading-7 text-slate-500">
+                          The upload experience is the product — no clutter, no distractions.
+                        </p>
+                      </>
+                    )}
+
+                    <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept=".pdf" className="hidden" />
+
+                    <div className="mt-10 flex flex-wrap justify-center gap-3">
+                      <Button
+                        onClick={handleButtonClick}
+                        disabled={isUploading}
+                        className="rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                      >
+                        {file ? "Choose another PDF" : "Select PDF"}
+                      </Button>
+                      {file && !autoAnalyze && (
+                        <Button
+                          onClick={handleAnalyzeClick}
+                          disabled={isUploading}
+                          variant="outline"
+                          className="rounded-full border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+                        >
+                          {isUploading ? "Analyzing…" : "Analyze now"}
+                        </Button>
+                      )}
+                    </div>
+
+                    {isUploading && (
+                      <div className="mt-8 w-full rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left">
+                        <p className="mb-2 text-sm text-slate-600">Uploading and analyzing your paper…</p>
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                          <div className="h-full w-full animate-pulse rounded-full bg-blue-500/70" />
+                        </div>
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="mt-8 inline-flex items-center rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                        {error}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            </CardContent>
-            <CardFooter className="flex items-center justify-between gap-4 border-t border-slate-200 pt-6 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
-              <span>Auto-analysis follows your saved preference.</span>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4" />
-                Secure upload flow
-              </div>
-            </CardFooter>
-          </Card>
+            </Card>
+          </div>
         </section>
 
-        <div className="mt-16 grid w-full grid-cols-1 gap-6 md:grid-cols-3">
-          <Card className="border-slate-200 bg-white/80 dark:border-slate-800 dark:bg-slate-950/70">
-            <CardHeader className="space-y-1">
-              <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-950/40">
-                <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <CardTitle className="text-lg text-slate-950 dark:text-white">
-                AI Summaries
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                Distill the paper into a readable overview of purpose, method,
-                findings, and implications.
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-slate-200 bg-white/80 dark:border-slate-800 dark:bg-slate-950/70">
-            <CardHeader className="space-y-1">
-              <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-950/40">
-                <Search className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <CardTitle className="text-lg text-slate-950 dark:text-white">
-                Fast Triage
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                Quickly judge whether a paper is worth deeper reading with novelty
-                and impact signals.
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-slate-200 bg-white/80 dark:border-slate-800 dark:bg-slate-950/70">
-            <CardHeader className="space-y-1">
-              <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950/40">
-                <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <CardTitle className="text-lg text-slate-950 dark:text-white">
-                Reusable Records
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                Keep analyzed papers in one place so you can revisit them from your
-                profile and history views.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <section className="mt-10 px-4 sm:px-6 lg:px-8">
+          <div className="relative mx-auto flex max-w-4xl justify-center">
+            <div className="absolute inset-x-4 top-0 -z-10 h-24 rounded-[32px] bg-slate-100/80" />
+            <div className="relative z-10 grid gap-4 sm:grid-cols-3">
+              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-blue-600">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <CardTitle className="text-base font-semibold text-slate-950">Smart summaries</CardTitle>
+                <CardContent>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">Focus on the paper’s core contributions fast.</p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-blue-600">
+                  <Search className="h-5 w-5" />
+                </div>
+                <CardTitle className="text-base font-semibold text-slate-950">Fast triage</CardTitle>
+                <CardContent>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">Decide whether a paper deserves deeper reading.</p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-blue-600">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <CardTitle className="text-base font-semibold text-slate-950">Organized insights</CardTitle>
+                <CardContent>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">Build a clean library of analyzed papers.</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
