@@ -149,10 +149,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950">
-      <div className="container mx-auto flex min-h-screen flex-col px-4 py-10">
+    <div className="min-h-screen text-slate-950">
+      <div className="container mx-auto flex min-h-screen flex-col px-4 py-10 bg-slate-50">
         <section className="relative flex flex-1 flex-col items-center justify-center gap-10 px-4 py-10 sm:px-6 lg:px-8">
-          <div className="absolute inset-x-0 top-0 h-[360px] bg-gradient-to-b from-slate-100 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-[360px]" />
 
           <div className="relative z-10 flex w-full max-w-3xl flex-col items-center text-center">
             <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-slate-700 shadow-sm">
@@ -260,32 +260,32 @@ export default function Home() {
           <div className="relative mx-auto flex max-w-4xl justify-center">
             <div className="absolute inset-x-4 top-0 -z-10 h-24 rounded-[32px] bg-slate-100/80" />
             <div className="relative z-10 grid gap-4 sm:grid-cols-3">
-              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm gap-4">
                 <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-blue-600">
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <CardTitle className="text-base font-semibold text-slate-950">Smart summaries</CardTitle>
-                <CardContent>
+                <CardContent className="px-0">
                   <p className="mt-2 text-sm leading-6 text-slate-600">Focus on the paper’s core contributions fast.</p>
                 </CardContent>
               </Card>
 
-              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm gap-4">
                 <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-blue-600">
                   <Search className="h-5 w-5" />
                 </div>
                 <CardTitle className="text-base font-semibold text-slate-950">Fast triage</CardTitle>
-                <CardContent>
+                <CardContent className="px-0">
                   <p className="mt-2 text-sm leading-6 text-slate-600">Decide whether a paper deserves deeper reading.</p>
                 </CardContent>
               </Card>
 
-              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm gap-4">
                 <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-blue-600">
                   <FileText className="h-5 w-5" />
                 </div>
                 <CardTitle className="text-base font-semibold text-slate-950">Organized insights</CardTitle>
-                <CardContent>
+                <CardContent className="px-0">
                   <p className="mt-2 text-sm leading-6 text-slate-600">Build a clean library of analyzed papers.</p>
                 </CardContent>
               </Card>
