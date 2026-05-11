@@ -2,6 +2,27 @@ import pdf from "pdf-parse";
 import { hf, geminiPro } from "../lib/aiClients";
 import { cleanGeminiJsonResponse, isBoilerplate } from "@/lib/helpers";
 
+// Retry helper with exponential backoff
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      if (attempt === maxRetries || !error?.status || error.status !== 429) {
+        throw error;
+      }
+      const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
+      console.warn(`Attempt ${attempt + 1} failed, retrying in ${delay}ms:`, error.message);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error("Max retries exceeded");
+}
+
 interface PaperMetadata {
   title: string;
   authors: string[];
@@ -125,7 +146,7 @@ async function extractMetadata(text: string): Promise<PaperMetadata> {
       }
       Text: ${text.substring(0, 3000)}`;
 
-    const result = await geminiPro.generateContent(prompt);
+    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
     const resultText = result.response.candidates?.[0]?.content.parts[0].text;
     return JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
   } catch (error) {
@@ -142,17 +163,26 @@ async function extractSummary(text: string): Promise<string> {
     const prompt = `Generate a 3-4 sentence summary of this research text:
       ${text.substring(0, 3000)}`;
 
-    const result = await geminiPro.generateContent(prompt);
+    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
     return cleanGeminiJsonResponse(
       result.response.candidates?.[0]?.content.parts[0].text || ""
     );
   } catch {
-    const hfSummary = await hf.summarization({
-      model: "facebook/bart-large-cnn",
-      inputs: text.substring(0, 1024),
-      parameters: { max_length: 150 },
-    });
-    return hfSummary.summary_text;
+    // Fallback to Hugging Face if available
+    if (process.env.HUGGINGFACE_TOKEN) {
+      try {
+        const hfSummary = await hf.summarization({
+          model: "facebook/bart-large-cnn",
+          inputs: text.substring(0, 1024),
+          parameters: { max_length: 150 },
+        });
+        return hfSummary.summary_text;
+      } catch (hfError) {
+        console.warn("Hugging Face summarization failed:", hfError);
+      }
+    }
+    // Ultimate fallback: simple extract
+    return text.substring(0, 500) + "...";
   }
 }
 
@@ -169,7 +199,7 @@ async function extractKeyFindings(text: string): Promise<KeyFindings> {
       }
       Text: ${text.substring(0, 3000)}`;
 
-    const result = await geminiPro.generateContent(prompt);
+    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
     const resultText = result.response.candidates?.[0]?.content.parts[0].text;
     return JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
   } catch {
@@ -194,7 +224,7 @@ async function extractResearchImpact(text: string): Promise<ResearchImpact> {
         }
         Text: ${text.substring(0, 3000)}`;
 
-    const result = await geminiPro.generateContent(prompt);
+    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
     const resultText = result.response.candidates?.[0]?.content.parts[0].text;
     const parsed = JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
 
@@ -227,7 +257,7 @@ async function extractNoveltyAssessment(
         }
         Text: ${text.substring(0, 3000)}`;
 
-    const result = await geminiPro.generateContent(prompt);
+    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
     const resultText = result.response.candidates?.[0]?.content.parts[0].text;
     const parsed = JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
 
@@ -254,7 +284,7 @@ async function extractRelatedAreas(text: string): Promise<string[]> {
       ["area1", "area2", "area3"]
       Text: ${text.substring(0, 2000)}`;
 
-    const result = await geminiPro.generateContent(prompt);
+    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
     const resultText = result.response.candidates?.[0]?.content.parts[0].text;
     return JSON.parse(cleanGeminiJsonResponse(resultText || "[]"));
   } catch {
@@ -294,7 +324,7 @@ async function extractPerformanceData(
       }
       Text: ${text.substring(0, 4000)}`;
 
-    const result = await geminiPro.generateContent(prompt);
+    const result = await retryWithBackoff(() => geminiPro.generateContent(prompt));
     const resultText = result.response.candidates?.[0]?.content.parts[0].text;
     return JSON.parse(cleanGeminiJsonResponse(resultText || "{}"));
   } catch {
@@ -628,6 +658,17 @@ function extractPerformanceFromTables(
 async function fallbackMetadataExtraction(
   text: string
 ): Promise<PaperMetadata> {
+  // If no Hugging Face token, skip to regex fallback
+  if (!process.env.HUGGINGFACE_TOKEN) {
+    console.warn("No Hugging Face token provided, using regex fallback");
+    return {
+      title: extractTitleFromText(text),
+      authors: extractAuthorsWithRegex(text),
+      published_date: extractYear(text),
+      topics: ["research", "paper"],
+    };
+  }
+
   const modelAlternatives = [
     "dslim/bert-base-NER",
     "dbmdz/bert-large-cased-finetuned-conll03-english",
@@ -719,9 +760,16 @@ function extractYear(text: string): string {
 
 // 
 async function extractKeywords(text: string): Promise<string[]> {
-  const response = await hf.featureExtraction({
-    model: "sentence-transformers/all-MiniLM-L6-v2",
-    inputs: text.substring(0, 512),
-  });
-  return ["machine learning", "neural networks"]; // Simplified for example
+  if (!process.env.HUGGINGFACE_TOKEN) {
+    return ["research", "paper"];
+  }
+  try {
+    const response = await hf.featureExtraction({
+      model: "sentence-transformers/all-MiniLM-L6-v2",
+      inputs: text.substring(0, 512),
+    });
+    return ["machine learning", "neural networks"]; // Simplified for example
+  } catch {
+    return ["research", "paper"];
+  }
 }
