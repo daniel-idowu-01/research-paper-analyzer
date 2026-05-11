@@ -280,22 +280,50 @@ export async function fallbackPartialExtraction(text: string): Promise<ResearchP
     summary = abstract.substring(0, 500) + "...";
   }
 
+  let primary = extractFromSection(sections, ["RESULTS", "DISCUSSION", "CONCLUSION"]);
+  let methodology = extractFromSection(sections, ["METHODS"]);
+  if (!isUsefulExtraction(primary)) {
+    primary =
+      firstMeaningfulSnippet(abstract, 520) ||
+      firstMeaningfulSnippet(summary, 520) ||
+      firstMeaningfulSnippet(text.slice(0, 12000), 520) ||
+      abstract.slice(0, 400).trim();
+  }
+  if (!isUsefulExtraction(methodology)) {
+    methodology =
+      firstMeaningfulSnippet(sections["INTRODUCTION"] || "", 520) ||
+      firstMeaningfulSnippet(sections["HEADER"] || "", 520) ||
+      firstMeaningfulSnippet(text.slice(1500, 14000), 520) ||
+      summary.slice(0, 400).trim();
+  }
+
+  const applications = practicalApplicationsFromSummary(summary);
+
+  const impactSignificance =
+    summary.trim().length > 80
+      ? summary.slice(0, 600).trim() + (summary.length > 600 ? "…" : "")
+      : "Impact analysis not available";
+  const noveltyComparison =
+    summary.trim().length > 80
+      ? `Automated summary context: ${summary.slice(0, 420).trim()}${summary.length > 420 ? "…" : ""}`
+      : "Comparison not available";
+
   return {
     metadata,
     summary,
     key_findings: {
-      primary: extractFromSection(sections, ["RESULTS", "CONCLUSION"]),
-      methodology_innovation: extractFromSection(sections, ["METHODS"]),
-      practical_applications: [],
+      primary,
+      methodology_innovation: methodology,
+      practical_applications: applications,
     },
     research_impact: {
-      significance: "Impact analysis not available",
+      significance: impactSignificance,
       level: "Medium",
       limitations: "Limitations not extracted",
     },
     novelty_assessment: {
       level: "Medium",
-      comparison_to_prior_work: "Comparison not available",
+      comparison_to_prior_work: noveltyComparison,
     },
     related_areas: extractKeywordsFromText(text),
     performance_metrics: {
@@ -328,9 +356,6 @@ async function extractSummarySimple(text: string): Promise<string> {
 
 // Extract keywords using simple text analysis (no AI)
 function extractKeywordsFromText(text: string): string[] {
-  const words = text.toLowerCase().match(/\b[a-z]{5,}\b/g) || [];
-  const frequency = new Map<string, number>();
-  
   // Common research words
   const researchTerms = [
     "machine learning", "deep learning", "neural network", "algorithm",
@@ -345,26 +370,105 @@ function extractKeywordsFromText(text: string): string[] {
   return found.slice(0, 5);
 }
 
+function matchCanonicalHeading(lower: string): string | null {
+  if (/^abstract\b/.test(lower)) return "ABSTRACT";
+  if (/^highlights?\b/.test(lower)) return "ABSTRACT";
+  if (/^keywords?\b/.test(lower)) return null;
+  if (/^introduction\b/.test(lower)) return "INTRODUCTION";
+  if (/^background\b/.test(lower)) return "INTRODUCTION";
+  if (/^(related work|literature review)\b/.test(lower)) return "INTRODUCTION";
+  if (
+    /^(methods?|methodology|materials and methods|experimental (setup|design|methods)|patients and methods)\b/.test(
+      lower
+    )
+  ) {
+    return "METHODS";
+  }
+  if (/^(results?|results and discussion|experimental results?|findings)\b/.test(lower)) {
+    return "RESULTS";
+  }
+  if (/^discussion\b/.test(lower)) return "DISCUSSION";
+  if (/^(conclusions?|concluding remarks?|summary and conclusions?)\b/.test(lower)) {
+    return "CONCLUSION";
+  }
+  return null;
+}
+
+/** Map a line to a canonical bucket (Elsevier/ACM-style headings, numbering, title case). */
+function classifySectionLine(rawLine: string): string | null {
+  let line = rawLine.trim();
+  if (!line || line.length > 120) return null;
+
+  line = line.replace(/^#+\s*/, "");
+  line = line.replace(/^\s*\d+(?:[.)]\s*|\s{1,4})/, "").trim();
+  line = line.replace(/^section\s+\d+[.:)\s-]*/i, "").trim();
+
+  const byWords = matchCanonicalHeading(line.toLowerCase());
+  if (byWords) return byWords;
+
+  if (
+    line.length >= 5 &&
+    line.length <= 72 &&
+    line === line.toUpperCase() &&
+    /^[A-Z0-9][A-Z0-9\s:-]+$/.test(line.replace(/\s+/g, " "))
+  ) {
+    return matchCanonicalHeading(line.toLowerCase());
+  }
+
+  return null;
+}
+
 function identifySections(text: string): Record<string, string> {
-  const sectionTitles = ["ABSTRACT", "INTRODUCTION", "METHODS", "RESULTS", "CONCLUSION"];
   const sections: Record<string, string> = {};
   let currentSection = "HEADER";
 
   text.split("\n").forEach((line) => {
     const cleanLine = line.trim();
-    const isSection = sectionTitles.some((title) =>
-      cleanLine.toUpperCase().startsWith(title)
-    );
+    const bucket = classifySectionLine(cleanLine);
 
-    if (isSection) {
-      currentSection = cleanLine.toUpperCase();
-      sections[currentSection] = "";
+    if (bucket) {
+      currentSection = bucket;
+      sections[currentSection] = sections[currentSection] || "";
     } else {
       sections[currentSection] = (sections[currentSection] || "") + line + "\n";
     }
   });
 
   return sections;
+}
+
+function isUsefulExtraction(s: string): boolean {
+  const t = s.replace(/\s+/g, " ").trim();
+  return t.length >= 45 && !/^not extracted$/i.test(t);
+}
+
+/** Pull readable prose, skipping boilerplate lines (journals, DOI, page headers). */
+function firstMeaningfulSnippet(source: string, maxChars: number): string {
+  const cleaned = source.replace(/\[\d+(?:-\d+)?\]/g, " ");
+  const chunks = cleaned.split(/(?<=[.!?])\s+/);
+  let out = "";
+  for (const chunk of chunks) {
+    const t = chunk.replace(/\s+/g, " ").trim();
+    if (t.length < 42) continue;
+    if (
+      /^(page|figure|table|copyright|elsevier|journal|doi|http|www\.|contents|article info|science\s*direct)/i.test(
+        t
+      )
+    ) {
+      continue;
+    }
+    if (out.length + t.length + 1 > maxChars) break;
+    out += (out ? " " : "") + t;
+  }
+  return out.slice(0, maxChars).trim();
+}
+
+function practicalApplicationsFromSummary(summary: string): string[] {
+  const parts = summary
+    .split(/[.;]\s+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 35);
+  return parts.slice(0, 4);
 }
 
 function extractFromSection(

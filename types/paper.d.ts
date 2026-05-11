@@ -26,12 +26,6 @@ interface IReference {
   doi?: string | null;
 }
 
-interface IKeyFindings {
-  primary: string;
-  methodology: string;
-  applications: string;
-}
-
 interface INoveltyAssessment {
   level: "Low" | "Medium" | "High" | "Very High";
   comparison_to_prior_work: string;
