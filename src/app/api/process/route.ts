@@ -5,18 +5,22 @@ import { connectDB } from "@/lib/mongo";
 import { NextResponse } from "next/server";
 import { createPaper } from "@/usecases/paper";
 import Notification from "@/models/Notification";
-import { processResearchPaper } from "@/utils/pdfProcessor";
-import { fallbackPartialExtraction } from "@/utils/pdfProcessor";
+import {
+  extractPlainTextFromPdfBuffer,
+  fallbackPartialExtraction,
+  processResearchPaper,
+} from "@/utils/pdfProcessor";
 import { getTokenFromCookies, requireAuth } from "@/lib/server/auth";
 import { badRequest, serverError } from "@/lib/server/http";
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "10mb",
-    },
-  },
-};
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+function isPdfBuffer(buf: Buffer): boolean {
+  if (buf.length < 5) return false;
+  return buf.subarray(0, 5).toString("ascii") === "%PDF-";
+}
+
+export const maxDuration = 120;
 
 export async function POST(request: Request) {
   try {
@@ -45,23 +49,43 @@ export async function POST(request: Request) {
       return badRequest("Only PDF files are supported");
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > MAX_UPLOAD_BYTES) {
       return badRequest("File size exceeds 10MB limit");
     }
 
-    const form = new FormData();
-    form.append("file", file);
-    form.append("upload_preset", process.env.CLOUDINARY_UPLOAD_PRESET!);
-
-    logger.info("Uploading to cloudinary...");
-    const cloudinaryRequest = await axios.post(
-      `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload`,
-      form
-    );
-    const fileUrl = cloudinaryRequest?.data.secure_url;
-    logger.info("Uploaded successfully!");
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
+    const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET?.trim();
+    if (!cloudName || !uploadPreset) {
+      logger.error("Cloudinary env missing");
+      return serverError("File storage is not configured");
+    }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    if (!isPdfBuffer(buffer)) {
+      return badRequest("Invalid PDF file (missing PDF header)");
+    }
+
+    const form = new FormData();
+    form.append(
+      "file",
+      new File([buffer], file.name || "document.pdf", { type: "application/pdf" })
+    );
+    form.append("upload_preset", uploadPreset);
+
+    logger.info("Uploading to cloudinary...");
+    const cloudinaryRequest = await axios.post<{ secure_url?: string }>(
+      `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
+      form,
+      { timeout: 120_000, maxBodyLength: MAX_UPLOAD_BYTES + 256 * 1024 }
+    );
+    const fileUrl = cloudinaryRequest.data?.secure_url;
+    if (!fileUrl) {
+      logger.error("Cloudinary response missing secure_url", {
+        status: cloudinaryRequest.status,
+      });
+      return serverError("Upload did not return a file URL");
+    }
+    logger.info("Uploaded successfully!");
 
     try {
       const result = await processResearchPaper(buffer);
@@ -85,21 +109,28 @@ export async function POST(request: Request) {
       });
     } catch (processingError) {
       console.error("PDF processing failed:", processingError);
+      let partialText = "";
+      try {
+        partialText = await extractPlainTextFromPdfBuffer(buffer);
+      } catch {
+        partialText = "";
+      }
       return NextResponse.json(
         {
           error: "PDF processing failed",
           details:
             "We could not fully analyze the PDF. Basic information was extracted.",
-          partialData: await fallbackPartialExtraction(buffer.toString()),
+          partialData: await fallbackPartialExtraction(partialText),
         },
         { status: 206 }
       );
     }
   } catch (error) {
     console.error("PDF processing error:", error);
+    const exposeDetails = process.env.NODE_ENV === "development";
     return serverError(
       "Failed to process PDF",
-      error instanceof Error ? error.message : String(error)
+      exposeDetails && error instanceof Error ? error.message : undefined
     );
   }
 }

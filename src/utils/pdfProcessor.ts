@@ -1,7 +1,7 @@
 import pdf from "pdf-parse";
 import crypto from "crypto";
-import { cleanGeminiJsonResponse, isBoilerplate } from "@/lib/helpers";
 import logger from "@/lib/logger";
+import { createHfInferenceClient } from "@/lib/aiClients";
 
 class Semaphore {
   private permits: number;
@@ -31,23 +31,45 @@ class Semaphore {
   }
 }
 
-const apiSemaphore = new Semaphore(parseInt(process.env.MAX_CONCURRENT_API_CALLS || "2"));
+const apiSemaphore = new Semaphore(parseInt(process.env.MAX_CONCURRENT_API_CALLS || "2", 10));
 
-const WORKING_FREE_MODELS = [
-  "facebook/bart-large-cnn",        // Best for summarization
-  "google/flan-t5-base",            // Smaller, faster, more available
-  "t5-small",                        // Very small, very fast
-  "google/flan-t5-small",           // Fallback
+/** Models with working hf-inference summarization routing (smaller / faster first). */
+const DEFAULT_SUMMARIZATION_MODELS = [
+  "sshleifer/distilbart-cnn-12-6",
+  "facebook/bart-large-cnn",
 ];
 
-const DEFAULT_HF_MODEL = process.env.HF_DEFAULT_MODEL || "facebook/bart-large-cnn";
-const HF_FALLBACK_MODELS = (process.env.HF_FALLBACK_MODELS || WORKING_FREE_MODELS.slice(1).join(","))
-  .split(",")
-  .map((model) => model.trim())
-  .filter(Boolean);
+/**
+ * Comma-separated list → full control over model order. Use this for summarization-only IDs.
+ * If unset, we try proven defaults first, then HF_DEFAULT_MODEL / HF_FALLBACK_MODELS (legacy
+ * names like google/flan-t5-* often have no summarization provider mapping — they run last).
+ */
+function resolveSummarizationModelIds(): string[] {
+  const explicit = process.env.HF_SUMMARIZATION_MODELS?.trim();
+  if (explicit) {
+    return [...new Set(explicit.split(",").map((m) => m.trim()).filter(Boolean))];
+  }
+  const fromEnvPrimary = process.env.HF_DEFAULT_MODEL?.trim();
+  const fromEnvList = (process.env.HF_FALLBACK_MODELS || "")
+    .split(",")
+    .map((m) => m.trim())
+    .filter(Boolean);
+  const ordered = [
+    ...DEFAULT_SUMMARIZATION_MODELS,
+    ...(fromEnvPrimary ? [fromEnvPrimary] : []),
+    ...fromEnvList,
+  ];
+  return [...new Set(ordered)];
+}
 
-const cache = new Map<string, { data: any; expiry: number }>();
-const CACHE_TTL = parseInt(process.env.CACHE_TTL_MS || "3600000");
+function loggableError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return typeof error === "string" ? error : JSON.stringify(error);
+}
+
+const cache = new Map<string, { data: unknown; expiry: number }>();
+const CACHE_TTL = parseInt(process.env.CACHE_TTL_MS || "3600000", 10);
+const MAX_CACHE_ENTRIES = parseInt(process.env.PDF_CACHE_MAX_ENTRIES || "200", 10);
 
 function getCacheKey(text: string, type: string): string {
   return crypto.createHash("md5").update(`${type}:${text}`).digest("hex");
@@ -55,144 +77,77 @@ function getCacheKey(text: string, type: string): string {
 
 function getCached<T>(key: string): T | null {
   const entry = cache.get(key);
-  if (entry && Date.now() < entry.expiry) {
-    return entry.data;
+  if (!entry || Date.now() >= entry.expiry) {
+    cache.delete(key);
+    return null;
   }
   cache.delete(key);
-  return null;
+  cache.set(key, entry);
+  return entry.data as T;
 }
 
 function setCached<T>(key: string, data: T): void {
+  if (cache.has(key)) cache.delete(key);
   cache.set(key, { data, expiry: Date.now() + CACHE_TTL });
-}
-
-// Fetch with timeout to prevent hanging
-async function fetchWithTimeout(
-  url: string,
-  options: RequestInit,
-  timeoutMs: number = 30000
-): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-    return response;
-  } catch (error: any) {
-    clearTimeout(timeout);
-    if (error.name === "AbortError") {
-      throw new Error(`Request timeout after ${timeoutMs}ms`);
-    }
-    throw error;
+  while (cache.size > MAX_CACHE_ENTRIES) {
+    const oldest = cache.keys().next().value as string | undefined;
+    if (oldest === undefined) break;
+    cache.delete(oldest);
   }
 }
 
-// Direct HTTP API call to Hugging Face with proper timeout
-async function runHfTextGeneration(prompt: string, maxNewTokens: number = 512): Promise<string> {
-  if (!process.env.HUGGINGFACE_TOKEN) {
-    throw new Error("Missing HUGGINGFACE_TOKEN for text generation");
+/**
+ * Uses Hugging Face Inference Providers (router), not the decommissioned api-inference host.
+ * Task must be summarization so the hub can route to a compatible backend.
+ */
+async function summarizeWithHfRouter(text: string): Promise<string> {
+  const client = createHfInferenceClient();
+  if (!client) {
+    throw new Error("Missing HUGGINGFACE_TOKEN for summarization");
   }
 
-  const models = [DEFAULT_HF_MODEL, ...HF_FALLBACK_MODELS];
-  let lastError: Error | null = null;
+  const maxChars = parseInt(process.env.HF_SUMMARY_INPUT_MAX_CHARS || "3500", 10);
+  const input = text.length > maxChars ? text.slice(0, maxChars) : text;
+  const models = resolveSummarizationModelIds();
+  let lastError: unknown = null;
 
   for (const model of models) {
     try {
-      logger.info("Trying HF model", { model });
-      const API_URL = `https://api-inference.huggingface.co/models/${model}`;
-      
-      const response = await fetchWithTimeout(
-        API_URL,
+      logger.info("Trying HF summarization model", { model });
+      const result = await client.summarization(
         {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${process.env.HUGGINGFACE_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            inputs: prompt,
-            parameters: {
-              max_new_tokens: maxNewTokens,
-              temperature: 0.1,
-              return_full_text: false,
-            },
-            options: {
-              wait_for_model: true,
-              use_cache: false, // Disable cache to avoid stale models
-            },
-          }),
+          model,
+          inputs: input,
+          provider: "hf-inference",
         },
-        30000 // 30 second timeout
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        logger.warn("HF API error", { model, status: response.status, error: errorText });
-        
-        // Check if it's a model loading issue
-        if (response.status === 503 || errorText.includes("loading") || errorText.includes("unavailable")) {
-          logger.warn("Model loading or unavailable, trying next", { model });
-          continue;
+        {
+          retry_on_error: true,
+          signal: AbortSignal.timeout(
+            parseInt(process.env.HF_SUMMARY_TIMEOUT_MS || "45000", 10)
+          ),
         }
-        
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      );
+      const summary =
+        result && typeof result.summary_text === "string" ? result.summary_text.trim() : "";
+      if (summary) {
+        logger.info("HF summarization succeeded", { model, length: summary.length });
+        return summary;
       }
-
-      const data = await response.json();
-      logger.info("HF response received", { model, hasData: !!data });
-      
-      let result = "";
-      if (Array.isArray(data)) {
-        result = data[0]?.generated_text || data[0]?.summary_text || "";
-      } else if (data.generated_text) {
-        result = data.generated_text;
-      } else if (data.summary_text) {
-        result = data.summary_text;
-      } else if (data[0]?.generated_text) {
-        result = data[0].generated_text;
-      }
-
-      if (result) {
-        logger.info("Successfully generated text", { model, length: result.length });
-        return result;
-      }
-
-      logger.warn("Empty response from model", { model, data });
-      continue;
-      
-    } catch (error: any) {
-      const message = String(error?.message || error).toLowerCase();
+      logger.warn("Empty summarization output", { model });
+    } catch (error: unknown) {
       lastError = error;
-
-      logger.warn("Model failed", { model, error: message });
-
-      // Check if it's a timeout or loading issue - try next model
-      if (
-        message.includes("timeout") ||
-        message.includes("loading") ||
-        message.includes("503") ||
-        message.includes("unavailable") ||
-        message.includes("aborted")
-      ) {
-        logger.warn("Timeout or loading issue, trying next model", { model });
-        continue;
+      const detail = loggableError(error);
+      const message = detail.toLowerCase();
+      logger.warn("HF summarization model failed", { model, error: detail });
+      if (message.includes("rate limit") || message.includes("quota") || message.includes("402")) {
+        throw error instanceof Error ? error : new Error(String(error));
       }
-
-      // If it's a rate limit, throw immediately
-      if (message.includes("rate limit") || message.includes("quota")) {
-        throw error;
-      }
-
-      // Try next model for other errors too
-      continue;
     }
   }
 
-  throw lastError || new Error("All Hugging Face models failed or timed out");
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("All Hugging Face summarization models failed");
 }
 
 async function retryWithBackoff<T>(
@@ -279,11 +234,17 @@ interface ResearchPaper {
   performance_metrics: PerformanceComparison;
 }
 
+/** Plain text from a PDF buffer (used for safe fallbacks when structured processing fails). */
+export async function extractPlainTextFromPdfBuffer(pdfBuffer: Buffer): Promise<string> {
+  const { text } = await pdf(pdfBuffer);
+  return text;
+}
+
 export async function processResearchPaper(pdfBuffer: Buffer): Promise<ResearchPaper> {
   const startTime = Date.now();
   logger.info("Starting PDF processing", { bufferSize: pdfBuffer.length });
 
-  const { text } = await pdf(pdfBuffer);
+  const text = await extractPlainTextFromPdfBuffer(pdfBuffer);
   logger.info("PDF text extracted", { textLength: text.length });
 
   const cacheKey = getCacheKey(text, "full_paper");
@@ -308,18 +269,14 @@ export async function fallbackPartialExtraction(text: string): Promise<ResearchP
   logger.info("Extracting metadata with regex");
   const metadata = await fallbackMetadataExtraction(text);
 
-  // Try to get summary with timeout protection
+  // Summary timeouts are handled inside summarizeWithHfRouter (per-model AbortSignal).
+  // Do not wrap in a shorter Promise.race — that aborted BART before HF_SUMMARY_TIMEOUT_MS.
   let summary = "";
   try {
     logger.info("Attempting AI summary");
-    summary = await Promise.race([
-      extractSummarySimple(abstract),
-      new Promise<string>((_, reject) =>
-        setTimeout(() => reject(new Error("Summary timeout")), 15000)
-      ),
-    ]);
+    summary = await extractSummarySimple(abstract);
   } catch (error) {
-    logger.warn("AI summary failed, using text extraction", { error });
+    logger.warn("AI summary failed, using text extraction", { error: loggableError(error) });
     summary = abstract.substring(0, 500) + "...";
   }
 
@@ -356,17 +313,15 @@ async function extractSummarySimple(text: string): Promise<string> {
   if (cached) return cached;
 
   try {
-    const prompt = `Summarize in 2 sentences:\n\n${text.substring(0, 1000)}`;
-    
     const result = await withRateLimit(() =>
-      retryWithBackoff(() => runHfTextGeneration(prompt, 150), 1) // Only 1 retry
+      retryWithBackoff(() => summarizeWithHfRouter(text), 1)
     );
     
     const summary = result.trim() || text.substring(0, 400) + "...";
     setCached(cacheKey, summary);
     return summary;
   } catch (error) {
-    logger.warn("Summary generation failed completely", { error });
+    logger.warn("Summary generation failed completely", { error: loggableError(error) });
     return text.substring(0, 400) + "...";
   }
 }
