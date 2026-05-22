@@ -234,7 +234,7 @@ const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
           ))}
         </div>
       </div>
-      {/* {paper.topic_clusters?.length ? (
+      {paper.topic_clusters?.length ? (
         <div>
           <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-white">
             Topic clusters
@@ -263,7 +263,7 @@ const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
             ))}
           </div>
         </div>
-      ) : null} */}
+      ) : null}
     </CardContent>
   </Card>
 );
