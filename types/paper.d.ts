@@ -55,6 +55,14 @@ interface ITopicCluster {
   topics: string[];
 }
 
+interface IAnalysisQuality {
+  mode: "grounded_ai" | "fallback_extraction";
+  confidence: "high" | "medium" | "low";
+  extracted_characters: number;
+  source_sections: string[];
+  warnings: string[];
+}
+
 export interface IPaper extends Document {
   file_url: string;
   /** Populated on new uploads; used server-side for search. */
@@ -68,6 +76,7 @@ export interface IPaper extends Document {
   topic_clusters?: ITopicCluster[];
   performance_metrics: IPerformanceMetrics;
   references: IReference[];
+  analysis_quality?: IAnalysisQuality;
   status: "processing" | "completed" | "failed";
   createdAt: Date;
   updatedAt: Date;

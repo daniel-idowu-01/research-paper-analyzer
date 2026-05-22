@@ -1,7 +1,8 @@
 import pdf from "pdf-parse";
 import crypto from "crypto";
 import logger from "@/lib/logger";
-import { createHfInferenceClient } from "@/lib/aiClients";
+import { SchemaType, type ResponseSchema } from "@google/generative-ai";
+import { createGeminiClient, createHfInferenceClient } from "@/lib/aiClients";
 import type { TopicCluster } from "@/lib/semantic";
 import { generateTopicClusters } from "@/lib/semantic";
 
@@ -226,6 +227,14 @@ interface PerformanceComparison {
   baseline: PerformanceMetrics;
 }
 
+interface AnalysisQuality {
+  mode: "grounded_ai" | "fallback_extraction";
+  confidence: "high" | "medium" | "low";
+  extracted_characters: number;
+  source_sections: string[];
+  warnings: string[];
+}
+
 interface ResearchPaper {
   metadata: PaperMetadata;
   summary: string;
@@ -235,6 +244,7 @@ interface ResearchPaper {
   related_areas: string[];
   topic_clusters: TopicCluster[];
   performance_metrics: PerformanceComparison;
+  analysis_quality: AnalysisQuality;
   /** Plain PDF text for search (length capped for DB). */
   extracted_text: string;
 }
@@ -242,7 +252,7 @@ interface ResearchPaper {
 /** Plain text from a PDF buffer (used for safe fallbacks when structured processing fails). */
 export async function extractPlainTextFromPdfBuffer(pdfBuffer: Buffer): Promise<string> {
   const { text } = await pdf(pdfBuffer);
-  return text;
+  return normalizeExtractedPdfText(text);
 }
 
 export async function processResearchPaper(pdfBuffer: Buffer): Promise<ResearchPaper> {
@@ -260,8 +270,8 @@ export async function processResearchPaper(pdfBuffer: Buffer): Promise<ResearchP
     return { ...cached, extracted_text: text.slice(0, maxExtracted) };
   }
 
-  logger.info("Using fallback extraction (regex-based)");
-  const result = await fallbackPartialExtraction(text);
+  const sections = identifySections(text);
+  const result = await analyzeOrFallback(text, sections);
   const withText: ResearchPaper = {
     ...result,
     extracted_text: text.slice(0, maxExtracted),
@@ -269,6 +279,394 @@ export async function processResearchPaper(pdfBuffer: Buffer): Promise<ResearchP
   setCached(cacheKey, withText);
   logger.info("Processing completed", { duration: Date.now() - startTime });
   return withText;
+}
+
+async function analyzeOrFallback(
+  text: string,
+  sections: Record<string, string>
+): Promise<ResearchPaper> {
+  try {
+    const result = await analyzeWithGemini(text, sections);
+    logger.info("Grounded Gemini analysis completed", {
+      confidence: result.analysis_quality.confidence,
+      sourceSections: result.analysis_quality.source_sections,
+    });
+    return result;
+  } catch (error) {
+    logger.warn("Grounded analysis unavailable, using fallback extraction", {
+      error: loggableError(error),
+    });
+    return fallbackPartialExtraction(text);
+  }
+}
+
+type StructuredAnalysis = Omit<
+  ResearchPaper,
+  "topic_clusters" | "analysis_quality" | "extracted_text"
+>;
+
+const RESPONSE_TEXT: ResponseSchema = { type: SchemaType.STRING };
+const RESPONSE_STRING_LIST: ResponseSchema = {
+  type: SchemaType.ARRAY,
+  items: RESPONSE_TEXT,
+};
+const RESPONSE_METRIC: ResponseSchema = {
+  type: SchemaType.OBJECT,
+  properties: {
+    accuracy: RESPONSE_TEXT,
+    parameters: RESPONSE_TEXT,
+    training_time: RESPONSE_TEXT,
+  },
+  required: ["accuracy", "parameters", "training_time"],
+};
+
+const ANALYSIS_RESPONSE_SCHEMA: ResponseSchema = {
+  type: SchemaType.OBJECT,
+  properties: {
+    metadata: {
+      type: SchemaType.OBJECT,
+      properties: {
+        title: RESPONSE_TEXT,
+        authors: RESPONSE_STRING_LIST,
+        published_date: RESPONSE_TEXT,
+        topics: RESPONSE_STRING_LIST,
+      },
+      required: ["title", "authors", "published_date", "topics"],
+    },
+    summary: RESPONSE_TEXT,
+    key_findings: {
+      type: SchemaType.OBJECT,
+      properties: {
+        primary: RESPONSE_TEXT,
+        methodology_innovation: RESPONSE_TEXT,
+        practical_applications: RESPONSE_STRING_LIST,
+      },
+      required: ["primary", "methodology_innovation", "practical_applications"],
+    },
+    research_impact: {
+      type: SchemaType.OBJECT,
+      properties: {
+        significance: RESPONSE_TEXT,
+        level: RESPONSE_TEXT,
+        limitations: RESPONSE_TEXT,
+      },
+      required: ["significance", "level", "limitations"],
+    },
+    novelty_assessment: {
+      type: SchemaType.OBJECT,
+      properties: {
+        level: RESPONSE_TEXT,
+        comparison_to_prior_work: RESPONSE_TEXT,
+      },
+      required: ["level", "comparison_to_prior_work"],
+    },
+    related_areas: RESPONSE_STRING_LIST,
+    performance_metrics: {
+      type: SchemaType.OBJECT,
+      properties: {
+        proposed_method: RESPONSE_METRIC,
+        previous_sota: RESPONSE_METRIC,
+        baseline: RESPONSE_METRIC,
+      },
+      required: ["proposed_method", "previous_sota", "baseline"],
+    },
+  },
+  required: [
+    "metadata",
+    "summary",
+    "key_findings",
+    "research_impact",
+    "novelty_assessment",
+    "related_areas",
+    "performance_metrics",
+  ],
+};
+
+async function analyzeWithGemini(
+  text: string,
+  sections: Record<string, string>
+): Promise<ResearchPaper> {
+  const client = createGeminiClient();
+  if (!client) {
+    throw new Error("Missing GEMINI_API_KEY for grounded analysis");
+  }
+
+  const fallbackMetadata = await fallbackMetadataExtraction(text);
+  const context = buildGroundingContext(text, sections);
+  if (context.text.length < 1800) {
+    throw new Error("PDF extraction produced too little text for grounded analysis");
+  }
+
+  const model = client.getGenerativeModel({
+    model: process.env.GEMINI_ANALYSIS_MODEL?.trim() || "gemini-2.5-flash",
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: 4096,
+      responseMimeType: "application/json",
+      responseSchema: ANALYSIS_RESPONSE_SCHEMA,
+    },
+  });
+
+  const response = await withTimeout(
+    model.generateContent(buildGroundedAnalysisPrompt(context.text)),
+    parseInt(process.env.GEMINI_ANALYSIS_TIMEOUT_MS || "60000", 10),
+    "Gemini paper analysis timed out"
+  );
+  const raw = response.response.text();
+  const parsed = JSON.parse(raw) as unknown;
+  const structured = normalizeStructuredAnalysis(parsed, fallbackMetadata);
+  const topicClusters = await generateTopicClusters(
+    text,
+    structured.metadata.topics.length
+      ? structured.metadata.topics
+      : structured.related_areas
+  );
+
+  return {
+    ...structured,
+    topic_clusters: topicClusters,
+    analysis_quality: groundedAnalysisQuality(text, context.sourceSections, sections),
+    extracted_text: "",
+  };
+}
+
+function buildGroundedAnalysisPrompt(context: string): string {
+  return [
+    "Analyze the research paper only from the extracted PDF text below.",
+    "Do not use outside knowledge or invent claims, metrics, authors, comparisons, limitations, or applications.",
+    "If the extracted text does not directly support a field, use 'Not available in extracted text'.",
+    "Use 'unknown' for missing performance metric values.",
+    "Keep the summary factual and specific to the supplied text.",
+    "Only assign High or Very High impact or novelty when the supplied text explicitly supports that rating.",
+    "Do not treat author affiliations, references, page headers, or OCR noise as findings.",
+    "",
+    "EXTRACTED PDF TEXT",
+    context,
+  ].join("\n");
+}
+
+function buildGroundingContext(
+  text: string,
+  sections: Record<string, string>
+): { text: string; sourceSections: string[] } {
+  const budgets: Array<[string, number]> = [
+    ["HEADER", 2800],
+    ["ABSTRACT", 4500],
+    ["INTRODUCTION", 5200],
+    ["METHODS", 6200],
+    ["RESULTS", 7600],
+    ["DISCUSSION", 5200],
+    ["CONCLUSION", 4200],
+  ];
+  const excerpts: string[] = [];
+  const sourceSections: string[] = [];
+
+  for (const [section, maxChars] of budgets) {
+    const excerpt = modelExcerpt(sections[section] || "", maxChars);
+    if (!excerpt) continue;
+    sourceSections.push(section);
+    excerpts.push(`[${section}]\n${excerpt}`);
+  }
+
+  if (excerpts.length === 0) {
+    return {
+      text: `[PDF_TEXT]\n${modelExcerpt(text, 28000)}`,
+      sourceSections: ["PDF_TEXT"],
+    };
+  }
+
+  return { text: excerpts.join("\n\n"), sourceSections };
+}
+
+function normalizeStructuredAnalysis(
+  value: unknown,
+  fallbackMetadata: PaperMetadata
+): StructuredAnalysis {
+  const record = asRecord(value);
+  const metadata = asRecord(record.metadata);
+  const keyFindings = asRecord(record.key_findings);
+  const impact = asRecord(record.research_impact);
+  const novelty = asRecord(record.novelty_assessment);
+  const metrics = asRecord(record.performance_metrics);
+
+  return {
+    metadata: {
+      title: normalizedModelText(metadata.title, fallbackMetadata.title),
+      authors: normalizedModelList(metadata.authors, fallbackMetadata.authors, 12),
+      published_date: normalizedModelText(
+        metadata.published_date,
+        fallbackMetadata.published_date
+      ),
+      topics: normalizedModelList(metadata.topics, fallbackMetadata.topics, 10),
+    },
+    summary: normalizedModelText(record.summary),
+    key_findings: {
+      primary: normalizedModelText(keyFindings.primary),
+      methodology_innovation: normalizedModelText(
+        keyFindings.methodology_innovation
+      ),
+      practical_applications: normalizedModelList(
+        keyFindings.practical_applications,
+        [],
+        6
+      ),
+    },
+    research_impact: {
+      significance: normalizedModelText(impact.significance),
+      level: normalizeAssessmentLevel(impact.level),
+      limitations: normalizedModelText(impact.limitations),
+    },
+    novelty_assessment: {
+      level: normalizeAssessmentLevel(novelty.level),
+      comparison_to_prior_work: normalizedModelText(
+        novelty.comparison_to_prior_work
+      ),
+    },
+    related_areas: normalizedModelList(record.related_areas, [], 10),
+    performance_metrics: {
+      proposed_method: normalizePerformanceMetric(metrics.proposed_method),
+      previous_sota: normalizePerformanceMetric(metrics.previous_sota),
+      baseline: normalizePerformanceMetric(metrics.baseline),
+    },
+  };
+}
+
+function normalizePerformanceMetric(value: unknown): PerformanceMetrics {
+  const metric = asRecord(value);
+  return {
+    accuracy: normalizedMetricText(metric.accuracy),
+    parameters: normalizedMetricText(metric.parameters),
+    training_time: normalizedMetricText(metric.training_time),
+  };
+}
+
+function normalizeAssessmentLevel(value: unknown): ResearchImpact["level"] {
+  const level = String(value || "").trim();
+  return level === "Medium" || level === "High" || level === "Very High"
+    ? level
+    : "Low";
+}
+
+function normalizedModelText(
+  value: unknown,
+  fallback = "Not available in extracted text"
+): string {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  return text || fallback;
+}
+
+function normalizedMetricText(value: unknown): string {
+  const text = normalizedModelText(value, "unknown");
+  return /not available|not reported|unknown/i.test(text) ? "unknown" : text;
+}
+
+function normalizedModelList(
+  value: unknown,
+  fallback: string[],
+  maxItems: number
+): string[] {
+  if (!Array.isArray(value)) return fallback;
+  const items = value
+    .map((item) => normalizedModelText(item, ""))
+    .filter(Boolean);
+  return [...new Set(items)].slice(0, maxItems);
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function groundedAnalysisQuality(
+  text: string,
+  sourceSections: string[],
+  sections: Record<string, string>
+): AnalysisQuality {
+  const warnings = extractionWarnings(text, sections);
+  const hasCoreSections =
+    sourceSections.includes("ABSTRACT") &&
+    sourceSections.includes("METHODS") &&
+    sourceSections.some((section) =>
+      ["RESULTS", "DISCUSSION", "CONCLUSION"].includes(section)
+    );
+
+  return {
+    mode: "grounded_ai",
+    confidence: hasCoreSections && text.length >= 7000 ? "high" : "medium",
+    extracted_characters: text.length,
+    source_sections: sourceSections,
+    warnings,
+  };
+}
+
+function fallbackAnalysisQuality(
+  text: string,
+  sections: Record<string, string>
+): AnalysisQuality {
+  return {
+    mode: "fallback_extraction",
+    confidence: "low",
+    extracted_characters: text.length,
+    source_sections: Object.keys(sections).filter((section) => sections[section]?.trim()),
+    warnings: [
+      "Structured grounded AI analysis was unavailable for this upload.",
+      ...extractionWarnings(text, sections),
+    ],
+  };
+}
+
+function extractionWarnings(text: string, sections: Record<string, string>): string[] {
+  const warnings: string[] = [];
+  if (text.length < 7000) {
+    warnings.push("PDF text extraction was short; scanned or malformed pages may be missing.");
+  }
+  if (!sections["ABSTRACT"]) {
+    warnings.push("No abstract heading was detected in extracted text.");
+  }
+  if (!sections["METHODS"]) {
+    warnings.push("No methods section heading was detected in extracted text.");
+  }
+  if (!sections["RESULTS"] && !sections["DISCUSSION"] && !sections["CONCLUSION"]) {
+    warnings.push("No results, discussion, or conclusion heading was detected.");
+  }
+  return warnings;
+}
+
+function modelExcerpt(value: string, maxChars: number): string {
+  return value
+    .replace(/\u0000/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+    .slice(0, maxChars);
+}
+
+function normalizeExtractedPdfText(text: string): string {
+  return text
+    .replace(/\u0000/g, "")
+    .replace(/([A-Za-z])-\s*\n\s*([a-z])/g, "$1$2")
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{4,}/g, "\n\n")
+    .trim();
+}
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  message: string
+): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timer = new Promise<never>((_, reject) => {
+    timeout = setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timer]);
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
 }
 
 // Fallback that uses minimal AI and mostly regex
@@ -330,13 +728,15 @@ export async function fallbackPartialExtraction(text: string): Promise<ResearchP
       practical_applications: applications,
     },
     research_impact: {
-      significance: impactSignificance,
-      level: "Medium",
-      limitations: "Limitations not extracted",
+      significance:
+        "Impact was not assessed because grounded full-paper analysis was unavailable.",
+      level: "Low",
+      limitations: "Limitations were not extracted in fallback mode.",
     },
     novelty_assessment: {
-      level: "Medium",
-      comparison_to_prior_work: noveltyComparison,
+      level: "Low",
+      comparison_to_prior_work:
+        "Novelty was not assessed because fallback extraction cannot compare the paper to prior work.",
     },
     related_areas: extractedTopics,
     topic_clusters: topicClusters,
@@ -345,6 +745,7 @@ export async function fallbackPartialExtraction(text: string): Promise<ResearchP
       previous_sota: { accuracy: "", parameters: "", training_time: "" },
       baseline: { accuracy: "", parameters: "", training_time: "" },
     },
+    analysis_quality: fallbackAnalysisQuality(text, sections),
     extracted_text: "",
   };
 }

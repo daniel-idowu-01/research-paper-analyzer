@@ -318,6 +318,52 @@ const ActionButtons = () => {
   );
 };
 
+const AnalysisQualityNotice = ({ paper }: { paper: IPaper }) => {
+  const quality = paper.analysis_quality;
+  if (!quality) {
+    return null;
+  }
+
+  const fallback = quality.mode === "fallback_extraction";
+  const label = fallback ? "Fallback extraction" : "Grounded AI analysis";
+
+  return (
+    <div
+      className={`rounded-lg border p-4 ${
+        fallback
+          ? "border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20"
+          : "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20"
+      }`}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+          Analysis basis
+        </h2>
+        <Badge variant="secondary">{label}</Badge>
+        <Badge variant="outline">{quality.confidence} confidence</Badge>
+      </div>
+      <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+        {fallback
+          ? "This upload used partial extraction. Treat impact, novelty, and missing metrics as not assessed."
+          : "This analysis was generated from extracted sections of the uploaded PDF and is limited to that evidence."}
+      </p>
+      <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+        {quality.extracted_characters.toLocaleString()} extracted characters
+        {quality.source_sections.length
+          ? ` from ${quality.source_sections.join(", ")}`
+          : ""}
+      </p>
+      {quality.warnings.length ? (
+        <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-gray-600 dark:text-gray-400">
+          {quality.warnings.slice(0, 4).map((warning) => (
+            <li key={warning}>{warning}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+};
+
 export default function PaperPage() {
   const params = useParams();
   const paperIdParam = params.id;
@@ -416,6 +462,7 @@ export default function PaperPage() {
         return "0%";
     }
   };
+  const assessmentRated = paper.analysis_quality?.mode !== "fallback_extraction";
 
   return (
     <div className="container flex flex-col min-h-screen px-4 py-6 mx-auto bg-gray-50 dark:bg-gray-900">
@@ -446,6 +493,8 @@ export default function PaperPage() {
 
         {/* Main Content */}
         <div className="space-y-6">
+          <AnalysisQualityNotice paper={paper} />
+
           <Tabs defaultValue="summary">
             <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-800">
               <TabsTrigger
@@ -474,7 +523,9 @@ export default function PaperPage() {
                     AI-Generated Summary
                   </CardTitle>
                   <CardDescription className="text-gray-600 dark:text-gray-400">
-                    Generated using advanced natural language processing
+                    {paper.analysis_quality?.mode === "fallback_extraction"
+                      ? "Fallback summary from available extracted text"
+                      : "Grounded in extracted text from this PDF"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-gray-700 dark:text-gray-300">
@@ -579,8 +630,7 @@ export default function PaperPage() {
                             {
                               paper?.performance_metrics.proposed_method
                                 .training_time
-                            }{" "}
-                            hours
+                            }
                           </td>
                         </tr>
                         <tr className="bg-gray-50 border-b dark:bg-gray-700 dark:border-gray-600">
@@ -600,8 +650,7 @@ export default function PaperPage() {
                             {
                               paper?.performance_metrics.previous_sota
                                 .training_time
-                            }{" "}
-                            hours
+                            }
                           </td>
                         </tr>
                         <tr className="bg-white dark:bg-gray-800">
@@ -615,8 +664,7 @@ export default function PaperPage() {
                             {paper?.performance_metrics.baseline.parameters}
                           </td>
                           <td className="px-6 py-4">
-                            {paper?.performance_metrics.baseline.training_time}{" "}
-                            hours
+                            {paper?.performance_metrics.baseline.training_time}
                           </td>
                         </tr>
                       </tbody>
@@ -690,17 +738,21 @@ export default function PaperPage() {
                   <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
                     Research Impact
                   </h3>
-                  <div className="flex items-center gap-2">
-                    <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-                      <div
-                        className="h-2 rounded-full bg-blue-600 dark:bg-blue-500"
-                        style={{ width: getWidth("research") }}
-                      ></div>
+                  {assessmentRated ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                        <div
+                          className="h-2 rounded-full bg-blue-600 dark:bg-blue-500"
+                          style={{ width: getWidth("research") }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        {paper?.research_impact.level}
+                      </span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {paper?.research_impact.level}
-                    </span>
-                  </div>
+                  ) : (
+                    <Badge variant="outline">Not rated</Badge>
+                  )}
                   <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     {paper?.research_impact.significance}
                   </p>
@@ -709,17 +761,21 @@ export default function PaperPage() {
                   <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
                     Novelty Assessment
                   </h3>
-                  <div className="flex items-center gap-2">
-                    <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
-                      <div
-                        className="h-2 rounded-full bg-blue-600 dark:bg-blue-500"
-                        style={{ width: getWidth("novelty") }}
-                      ></div>
+                  {assessmentRated ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                        <div
+                          className="h-2 rounded-full bg-blue-600 dark:bg-blue-500"
+                          style={{ width: getWidth("novelty") }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        {paper?.novelty_assessment.level}
+                      </span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {paper?.novelty_assessment.level}
-                    </span>
-                  </div>
+                  ) : (
+                    <Badge variant="outline">Not rated</Badge>
+                  )}
                   <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     {paper?.novelty_assessment.comparison_to_prior_work}
                   </p>

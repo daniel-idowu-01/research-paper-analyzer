@@ -6,6 +6,9 @@ import {
   normalizeText,
 } from "@/lib/paper";
 
+const ANALYSIS_MODES = new Set(["grounded_ai", "fallback_extraction"]);
+const ANALYSIS_CONFIDENCE = new Set(["high", "medium", "low"]);
+
 export async function createPaper(
   result: any,
   fileUrl: string,
@@ -92,6 +95,25 @@ export async function createPaper(
           EMPTY_PERFORMANCE_METRICS.baseline.training_time,
       },
     },
+    ...(result?.analysis_quality
+      ? {
+          analysis_quality: {
+            mode: ANALYSIS_MODES.has(result.analysis_quality.mode)
+              ? result.analysis_quality.mode
+              : "fallback_extraction",
+            confidence: ANALYSIS_CONFIDENCE.has(result.analysis_quality.confidence)
+              ? result.analysis_quality.confidence
+              : "low",
+            extracted_characters: Number.isFinite(
+              result.analysis_quality.extracted_characters
+            )
+              ? Math.max(0, result.analysis_quality.extracted_characters)
+              : extracted?.length || 0,
+            source_sections: normalizeList(result.analysis_quality.source_sections),
+            warnings: normalizeList(result.analysis_quality.warnings),
+          },
+        }
+      : {}),
     references: Array.isArray(result?.references) ? result.references : [],
     status: "completed",
   });

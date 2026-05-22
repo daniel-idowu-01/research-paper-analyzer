@@ -77,6 +77,25 @@ const MetadataSchema = new Schema(
   { _id: false }
 );
 
+const AnalysisQualitySchema = new Schema(
+  {
+    mode: {
+      type: String,
+      enum: ["grounded_ai", "fallback_extraction"],
+      required: true,
+    },
+    confidence: {
+      type: String,
+      enum: ["high", "medium", "low"],
+      required: true,
+    },
+    extracted_characters: { type: Number, required: true },
+    source_sections: { type: [String], default: [] },
+    warnings: { type: [String], default: [] },
+  },
+  { _id: false }
+);
+
 const PaperSchema = new Schema<IPaper>(
   {
     file_url: { type: String, required: true },
@@ -104,6 +123,7 @@ const PaperSchema = new Schema<IPaper>(
       type: PerformanceMetricSchema,
       required: true,
     },
+    analysis_quality: { type: AnalysisQualitySchema },
     references: { type: [ReferenceSchema], default: [] },
     uploaderId: { type: Schema.Types.ObjectId, ref: "User" },
     status: {
