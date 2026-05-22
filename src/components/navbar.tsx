@@ -11,7 +11,7 @@ export function Navbar() {
   const router = useRouter();
   const { sendRequest } = useApi();
   const { user, setUser, clearUser } = useUserStore();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const isAuthenticated = Boolean(user);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -19,14 +19,11 @@ export function Navbar() {
         const response = await sendRequest("/api/auth/me", "GET");
         if (response.authenticated) {
           setUser(response.user);
-          setIsAuthenticated(true);
         } else {
           clearUser();
-          setIsAuthenticated(false);
         }
       } catch (error) {
         clearUser();
-        setIsAuthenticated(false);
       }
     };
 
@@ -36,7 +33,6 @@ export function Navbar() {
   const handleLogout = async () => {
     await sendRequest("/api/auth/logout", "GET");
     clearUser();
-    setIsAuthenticated(false);
     router.push("/");
   };
 
