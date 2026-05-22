@@ -172,16 +172,16 @@ export default function Home() {
             <Card className="glass-panel glass-highlight overflow-hidden rounded-[32px] border border-white/10 shadow-[0_35px_90px_-50px_rgba(15,23,42,0.55)] transition-all duration-300 hover:-translate-y-1">
               <div className="relative overflow-hidden px-8 py-8 sm:px-10 sm:py-10">
                 <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-cyan-400/10 blur-3xl" />
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
+                <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+                  <div className=" text-start">
                     <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-200">
                       Upload a PDF
                     </p>
-                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
+                    <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
                       Analyze papers instantly.
                     </h2>
                   </div>
-                  <div className="rounded-full bg-slate-900/80 px-4 py-2 text-sm font-medium text-slate-300 ring-1 ring-cyan-500/15">
+                  <div className="self-start rounded-full bg-slate-900/80 px-4 py-2 text-sm font-medium text-slate-300 ring-1 ring-cyan-500/15">
                     PDF only · up to 10MB
                   </div>
                 </div>
