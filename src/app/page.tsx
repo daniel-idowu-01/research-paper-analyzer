@@ -149,48 +149,51 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen text-slate-950">
-      <div className="container mx-auto flex min-h-screen flex-col px-4 py-10 bg-slate-50">
-        <section className="relative flex flex-1 flex-col items-center justify-center gap-10 px-4 py-10 sm:px-6 lg:px-8">
-          <div className="absolute inset-x-0 top-0 h-[360px]" />
+    <div className="min-h-screen overflow-hidden text-slate-100">
+      <div className="container mx-auto flex min-h-screen flex-col px-4 py-10 sm:px-6 lg:px-8">
+        <section className="relative flex flex-1 flex-col items-center justify-center gap-12 pt-8 pb-16 text-center">
+          <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="absolute right-0 top-24 h-60 w-60 rounded-full bg-amber-400/12 blur-3xl" />
+          <div className="absolute inset-x-0 top-20 -z-10 h-[420px] bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.12),transparent_60%)]" />
 
-          <div className="relative z-10 flex w-full max-w-3xl flex-col items-center text-center">
-            <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-slate-700 shadow-sm">
-              AI-powered paper analysis
+          <div className="relative z-10 flex w-full max-w-3xl flex-col items-center gap-6">
+            <span className="inline-flex rounded-full border border-cyan-400/25 bg-slate-900/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200 shadow-[0_10px_30px_-20px_rgba(96,228,215,0.7)]">
+              AI-powered research synthesis
             </span>
-            <h1 className="mt-5 text-5xl font-semibold tracking-tight text-slate-950 sm:text-6xl">
-              Turn research papers into clear insights.
+            <h1 className="text-5xl font-semibold leading-tight tracking-[-0.04em] text-slate-50 sm:text-6xl">
+              Transform papers into lucid, actionable insight.
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-              Upload a PDF and get summaries, findings, related topics, and structured analysis.
+            <p className="max-w-2xl text-lg leading-8 text-slate-300">
+              Upload a PDF and unlock concise summaries, evidence maps, and topic-driven analysis without the usual overwhelm.
             </p>
           </div>
 
           <div className="relative z-10 w-full max-w-3xl">
-            <Card className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_35px_80px_-50px_rgba(15,23,42,0.2)] transition-all duration-200">
-              <div className="px-8 py-8 sm:px-10 sm:py-10">
+            <Card className="glass-panel glass-highlight overflow-hidden rounded-[32px] border border-white/10 shadow-[0_35px_90px_-50px_rgba(15,23,42,0.55)] transition-all duration-300 hover:-translate-y-1">
+              <div className="relative overflow-hidden px-8 py-8 sm:px-10 sm:py-10">
+                <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-cyan-400/10 blur-3xl" />
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-700">
+                    <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-200">
                       Upload a PDF
                     </p>
-                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                    <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
                       Analyze papers instantly.
                     </h2>
                   </div>
-                  <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700">
+                  <div className="rounded-full bg-slate-900/80 px-4 py-2 text-sm font-medium text-slate-300 ring-1 ring-cyan-500/15">
                     PDF only · up to 10MB
                   </div>
                 </div>
 
                 <div className="mt-10">
                   <div
-                    className={`group relative flex min-h-[320px] flex-col items-center justify-center rounded-[28px] border p-10 text-center transition-all duration-200 ${
+                    className={`group relative flex min-h-[320px] flex-col items-center justify-center rounded-[28px] border border-white/10 bg-slate-950/95 p-10 text-center shadow-[0_40px_120px_-64px_rgba(0,0,0,0.65)] transition-all duration-200 ${
                       isDragging
-                        ? "border-blue-300 bg-blue-50 shadow-[0_20px_60px_-30px_rgba(37,99,235,0.35)]"
+                        ? "border-cyan-300/40 bg-slate-900/95 shadow-[0_25px_90px_-45px_rgba(96,228,215,0.35)]"
                         : file
-                        ? "border-slate-300 bg-slate-50"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                        ? "border-slate-700 bg-slate-950"
+                        : "border-white/10 bg-slate-950/85 hover:border-cyan-300/30 hover:bg-slate-900"
                     }`}
                     onDragEnter={handleDragEnter}
                     onDragOver={handleDragOver}
@@ -199,16 +202,16 @@ export default function Home() {
                   >
                     {file ? (
                       <>
-                        <FileText className="mb-4 h-14 w-14 text-slate-700" />
-                        <p className="mb-1 text-base font-semibold text-slate-950">{file.name}</p>
-                        <p className="text-sm text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <FileText className="mb-4 h-14 w-14 text-cyan-300" />
+                        <p className="mb-1 text-base font-semibold text-slate-50">{file.name}</p>
+                        <p className="text-sm text-slate-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                       </>
                     ) : (
                       <>
-                        <FileUp className="mb-4 h-14 w-14 text-slate-500" />
-                        <p className="mb-2 text-base font-semibold text-slate-950">Drop your PDF here or click to browse.</p>
-                        <p className="max-w-sm text-sm leading-7 text-slate-500">
-                          The upload experience is the product — no clutter, no distractions.
+                        <FileUp className="mb-4 h-14 w-14 text-slate-400" />
+                        <p className="mb-2 text-base font-semibold text-slate-50">Drop your PDF here or click to browse.</p>
+                        <p className="max-w-sm text-sm leading-7 text-slate-400">
+                          The upload experience is the product — minimal, confident, and polished.
                         </p>
                       </>
                     )}
@@ -219,7 +222,7 @@ export default function Home() {
                       <Button
                         onClick={handleButtonClick}
                         disabled={isUploading}
-                        className="rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                        className="rounded-full bg-gradient-to-r from-cyan-400 to-amber-300 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:from-cyan-300 hover:to-amber-200"
                       >
                         {file ? "Choose another PDF" : "Select PDF"}
                       </Button>
@@ -228,7 +231,7 @@ export default function Home() {
                           onClick={handleAnalyzeClick}
                           disabled={isUploading}
                           variant="outline"
-                          className="rounded-full border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+                          className="rounded-full border border-white/10 bg-slate-900/90 px-6 py-3 text-sm font-semibold text-slate-100 transition hover:border-cyan-300/30 hover:bg-slate-800"
                         >
                           {isUploading ? "Analyzing…" : "Analyze now"}
                         </Button>
@@ -236,16 +239,16 @@ export default function Home() {
                     </div>
 
                     {isUploading && (
-                      <div className="mt-8 w-full rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left">
-                        <p className="mb-2 text-sm text-slate-600">Uploading and analyzing your paper…</p>
-                        <div className="h-2 overflow-hidden rounded-full bg-slate-200">
-                          <div className="h-full w-full animate-pulse rounded-full bg-blue-500/70" />
+                      <div className="mt-8 w-full rounded-3xl border border-white/10 bg-slate-900/90 p-4 text-left">
+                        <p className="mb-2 text-sm text-slate-400">Uploading and analyzing your paper…</p>
+                        <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                          <div className="h-full w-full animate-pulse rounded-full bg-gradient-to-r from-cyan-400 via-amber-300 to-rose-400" />
                         </div>
                       </div>
                     )}
 
                     {error && (
-                      <div className="mt-8 inline-flex items-center rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                      <div className="mt-8 inline-flex items-center rounded-3xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
                         {error}
                       </div>
                     )}
@@ -256,39 +259,39 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mt-10 px-4 sm:px-6 lg:px-8">
+        <section className="mt-12 px-4 sm:px-6 lg:px-8">
           <div className="relative mx-auto flex max-w-4xl justify-center">
-            <div className="absolute inset-x-4 top-0 -z-10 h-24 rounded-[32px] bg-slate-100/80" />
+            <div className="absolute inset-x-4 top-0 -z-10 h-24 rounded-[32px] bg-slate-900/70 shadow-[0_20px_50px_-34px_rgba(0,0,0,0.6)]" />
             <div className="relative z-10 grid gap-4 sm:grid-cols-3">
-              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm gap-4">
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-blue-600">
+              <div className="rounded-[24px] border border-white/10 bg-slate-950/95 p-5 shadow-[0_25px_80px_-55px_rgba(0,0,0,0.45)] gap-4">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-300">
                   <Sparkles className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-base font-semibold text-slate-950">Smart summaries</CardTitle>
+                <CardTitle className="text-base font-semibold text-slate-50">Smart summaries</CardTitle>
                 <CardContent className="px-0">
-                  <p className="mt-2 text-sm leading-6 text-slate-600">Focus on the paper’s core contributions fast.</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">Focus on the paper’s core contributions fast.</p>
                 </CardContent>
-              </Card>
+              </div>
 
-              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm gap-4">
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-blue-600">
+              <div className="rounded-[24px] border border-white/10 bg-slate-950/95 p-5 shadow-[0_25px_80px_-55px_rgba(0,0,0,0.45)] gap-4">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-400/15 text-amber-300">
                   <Search className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-base font-semibold text-slate-950">Fast triage</CardTitle>
+                <CardTitle className="text-base font-semibold text-slate-50">Fast triage</CardTitle>
                 <CardContent className="px-0">
-                  <p className="mt-2 text-sm leading-6 text-slate-600">Decide whether a paper deserves deeper reading.</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">Decide whether a paper deserves deeper reading.</p>
                 </CardContent>
-              </Card>
+              </div>
 
-              <Card className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm gap-4">
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-blue-600">
+              <div className="rounded-[24px] border border-white/10 bg-slate-950/95 p-5 shadow-[0_25px_80px_-55px_rgba(0,0,0,0.45)] gap-4">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-400/15 text-violet-300">
                   <FileText className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-base font-semibold text-slate-950">Organized insights</CardTitle>
+                <CardTitle className="text-base font-semibold text-slate-50">Organized insights</CardTitle>
                 <CardContent className="px-0">
-                  <p className="mt-2 text-sm leading-6 text-slate-600">Build a clean library of analyzed papers.</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">Build a clean library of analyzed papers.</p>
                 </CardContent>
-              </Card>
+              </div>
             </div>
           </div>
         </section>

@@ -41,34 +41,34 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
-      <div className="container mx-auto flex h-14 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2 text-base font-semibold text-slate-950">
-          <FileText className="h-5 w-5 text-blue-600" />
-          Research Analyzer
+    <header className="sticky top-0 z-50 border-b border-slate-800/70 bg-slate-950/95 backdrop-blur-xl shadow-[0_20px_80px_-42px_rgba(0,0,0,0.45)]">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+        <Link href="/" className="flex items-center gap-3 text-base font-semibold text-slate-100">
+          <FileText className="h-5 w-5 text-cyan-300" />
+          <span className="text-slate-100">Research Analyzer</span>
         </Link>
 
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
             <>
               <Link href="/my-papers">
-                <Button variant="ghost" className="text-slate-700 hover:bg-slate-100 px-3 py-2 text-sm">
+                <Button variant="ghost" className="text-slate-200 hover:bg-slate-800/80 px-3 py-2 text-sm">
                   My Papers
                 </Button>
               </Link>
-              <Button variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-100 px-3 py-2 text-sm" onClick={handleLogout}>
+              <Button variant="outline" className="border-slate-700 text-slate-200 hover:bg-slate-800/80 px-3 py-2 text-sm" onClick={handleLogout}>
                 Log out
               </Button>
             </>
           ) : (
             <>
               <Link href="/auth/login">
-                <Button variant="ghost" className="text-slate-700 hover:bg-slate-100 px-3 py-2 text-sm">
+                <Button variant="ghost" className="text-slate-200 hover:bg-slate-800/80 px-3 py-2 text-sm">
                   Log in
                 </Button>
               </Link>
               <Link href="/auth/signup">
-                <Button className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+                <Button className="rounded-full bg-gradient-to-r from-cyan-400 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/15 hover:from-cyan-300 hover:to-amber-200">
                   Sign up
                 </Button>
               </Link>
