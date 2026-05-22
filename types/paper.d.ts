@@ -50,6 +50,11 @@ interface IMetadata {
   topics: string[];
 }
 
+interface ITopicCluster {
+  label: string;
+  topics: string[];
+}
+
 export interface IPaper extends Document {
   file_url: string;
   /** Populated on new uploads; used server-side for search. */
@@ -60,6 +65,7 @@ export interface IPaper extends Document {
   research_impact: IResearchImpact;
   novelty_assessment: INoveltyAssessment;
   related_areas: string[];
+  topic_clusters?: ITopicCluster[];
   performance_metrics: IPerformanceMetrics;
   references: IReference[];
   status: "processing" | "completed" | "failed";

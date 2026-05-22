@@ -51,6 +51,12 @@ export async function createPaper(
       ),
     },
     related_areas: normalizeList(result?.related_areas),
+    topic_clusters: Array.isArray(result?.topic_clusters)
+      ? result.topic_clusters.map((cluster: any) => ({
+          label: normalizeText(cluster.label, "Topic cluster"),
+          topics: normalizeList(cluster.topics),
+        }))
+      : [],
     performance_metrics: {
       proposed_method: {
         accuracy:

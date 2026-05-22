@@ -88,6 +88,18 @@ const PaperSchema = new Schema<IPaper>(
     research_impact: { type: ResearchImpactSchema, required: true },
     novelty_assessment: { type: NoveltyAssessmentSchema, required: true },
     related_areas: { type: [String], required: true },
+    topic_clusters: {
+      type: [
+        new Schema(
+          {
+            label: { type: String, required: true },
+            topics: { type: [String], required: true },
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
     performance_metrics: {
       type: PerformanceMetricSchema,
       required: true,

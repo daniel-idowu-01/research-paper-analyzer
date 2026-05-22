@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongo";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { buildAnalysisCorpus, findMatchesInText } from "@/lib/paperSearch";
+import { isPineconeConfigured, semanticSearchPaper } from "@/lib/semantic";
 import { badRequest, notFound } from "@/lib/server/http";
 
 export const maxDuration = 45;
@@ -51,12 +52,29 @@ export async function GET(
         : "";
 
     const corpus = full || buildAnalysisCorpus(plain);
-    const source = full ? ("full_text" as const) : ("analysis_only" as const);
-
-    const matches = findMatchesInText(corpus, q, {
+    let matches = findMatchesInText(corpus, q, {
       contextChars: parseInt(process.env.PAPER_SEARCH_CONTEXT_CHARS || "160", 10),
       maxMatches: parseInt(process.env.PAPER_SEARCH_MAX_MATCHES || "25", 10),
     });
+    let source: "full_text" | "analysis_only" | "semantic" = full
+      ? "full_text"
+      : "analysis_only";
+
+    if (isPineconeConfigured()) {
+      try {
+        const semanticMatches = await semanticSearchPaper(id, q, 10);
+        if (semanticMatches.length > 0) {
+          matches = semanticMatches;
+          source = "semantic" as const;
+        }
+      } catch (searchError) {
+        logger.warn("Semantic search failed, falling back to local text search", {
+          error: searchError instanceof Error ? searchError.message : String(searchError),
+          id,
+          query: q,
+        });
+      }
+    }
 
     logger.info("Paper text search", {
       id,

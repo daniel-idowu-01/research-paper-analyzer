@@ -10,6 +10,7 @@ import {
   fallbackPartialExtraction,
   processResearchPaper,
 } from "@/utils/pdfProcessor";
+import { indexPaperToPinecone, isPineconeConfigured } from "@/lib/semantic";
 import { getTokenFromCookies, requireAuth } from "@/lib/server/auth";
 import { badRequest, serverError } from "@/lib/server/http";
 
@@ -92,6 +93,24 @@ export async function POST(request: Request) {
       logger.info("File processed successfully!");
 
       const paper = await createPaper(result, fileUrl, userId || null);
+
+      if (isPineconeConfigured()) {
+        try {
+          await indexPaperToPinecone(
+            paper._id.toString(),
+            result.metadata.title,
+            result.extracted_text
+          );
+        } catch (semanticError) {
+          logger.error("Semantic indexing failed", {
+            error:
+              semanticError instanceof Error
+                ? semanticError.message
+                : String(semanticError),
+            paperId: paper._id.toString(),
+          });
+        }
+      }
 
       if (userId) {
         await Notification.createPaperAnalysisNotification(

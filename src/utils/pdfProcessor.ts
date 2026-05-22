@@ -2,6 +2,8 @@ import pdf from "pdf-parse";
 import crypto from "crypto";
 import logger from "@/lib/logger";
 import { createHfInferenceClient } from "@/lib/aiClients";
+import type { TopicCluster } from "@/lib/semantic";
+import { generateTopicClusters } from "@/lib/semantic";
 
 class Semaphore {
   private permits: number;
@@ -231,6 +233,7 @@ interface ResearchPaper {
   research_impact: ResearchImpact;
   novelty_assessment: NoveltyAssessment;
   related_areas: string[];
+  topic_clusters: TopicCluster[];
   performance_metrics: PerformanceComparison;
   /** Plain PDF text for search (length capped for DB). */
   extracted_text: string;
@@ -315,6 +318,9 @@ export async function fallbackPartialExtraction(text: string): Promise<ResearchP
       ? `Automated summary context: ${summary.slice(0, 420).trim()}${summary.length > 420 ? "…" : ""}`
       : "Comparison not available";
 
+  const extractedTopics = extractKeywordsFromText(text);
+  const topicClusters = await generateTopicClusters(text, extractedTopics);
+
   return {
     metadata,
     summary,
@@ -332,7 +338,8 @@ export async function fallbackPartialExtraction(text: string): Promise<ResearchP
       level: "Medium",
       comparison_to_prior_work: noveltyComparison,
     },
-    related_areas: extractKeywordsFromText(text),
+    related_areas: extractedTopics,
+    topic_clusters: topicClusters,
     performance_metrics: {
       proposed_method: { accuracy: "", parameters: "", training_time: "" },
       previous_sota: { accuracy: "", parameters: "", training_time: "" },

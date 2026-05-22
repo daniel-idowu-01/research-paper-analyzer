@@ -60,7 +60,7 @@ function PaperWithinSearch({ paperId }: { paperId: string }) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
   const [matches, setMatches] = useState<PaperSearchMatch[]>([]);
-  const [source, setSource] = useState<"full_text" | "analysis_only" | "none">("none");
+  const [source, setSource] = useState<"full_text" | "analysis_only" | "semantic" | "none">("none");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,7 +90,7 @@ function PaperWithinSearch({ paperId }: { paperId: string }) {
         if (cancelled) return;
         const data = res as {
           matches?: PaperSearchMatch[];
-          source?: "full_text" | "analysis_only";
+          source?: "full_text" | "analysis_only" | "semantic";
         };
         setMatches(data.matches || []);
         setSource(data.source ?? "none");
@@ -138,6 +138,12 @@ function PaperWithinSearch({ paperId }: { paperId: string }) {
           <p className="text-xs text-amber-800 dark:text-amber-200/90">
             Full PDF text is not stored for this upload. Showing matches in summary and
             insights only — process the file again to enable full-document search.
+          </p>
+        )}
+
+        {source === "semantic" && debounced.length >= 2 && !error && (
+          <p className="text-xs text-cyan-700 dark:text-cyan-200/90">
+            Semantic retrieval is active. Results are ranked by meaning instead of exact text.
           </p>
         )}
 
@@ -228,6 +234,36 @@ const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
           ))}
         </div>
       </div>
+      {paper.topic_clusters?.length ? (
+        <div>
+          <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-white">
+            Topic clusters
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {paper.topic_clusters.map((cluster) => (
+              <div
+                key={cluster.label}
+                className="rounded-2xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/80"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
+                  {cluster.label}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {cluster.topics.map((topic) => (
+                    <Badge
+                      key={`${cluster.label}-${topic}`}
+                      variant="secondary"
+                      className="bg-slate-100 dark:bg-slate-800"
+                    >
+                      {topic}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </CardContent>
   </Card>
 );
