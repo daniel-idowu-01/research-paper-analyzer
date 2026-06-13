@@ -222,7 +222,7 @@ export default function Home() {
                       <Button
                         onClick={handleButtonClick}
                         disabled={isUploading}
-                        className="rounded-full bg-gradient-to-r from-cyan-400 to-amber-300 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:from-cyan-300 hover:to-amber-200"
+                        className="rounded-full bg-cyan-300 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-200"
                       >
                         {file ? "Choose another PDF" : "Select PDF"}
                       </Button>

@@ -64,7 +64,7 @@ export function Navbar() {
                 </Button>
               </Link>
               <Link href="/auth/signup">
-                <Button className="rounded-full bg-gradient-to-r from-cyan-400 to-amber-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/15 hover:from-cyan-300 hover:to-amber-200">
+                <Button className="rounded-full bg-cyan-300 px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/15 hover:bg-cyan-200">
                   Sign up
                 </Button>
               </Link>
