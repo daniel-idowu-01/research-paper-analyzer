@@ -1,113 +1,162 @@
 # Research Paper Analyzer
 
-This repository contains the Research Paper Analyzer — a Next.js app that extracts, summarizes, and semantically indexes uploaded research PDFs to provide concise AI-powered insights and searchable content.
+Research Paper Analyzer is a Next.js application for PDF ingestion, grounded paper analysis, semantic indexing, search, and research-oriented RAG experimentation.
 
-## Recent updates (summary)
-
-- Frontend: visual redesign of the hero and upload card for a richer aesthetic. Upload card header alignment and badge positioning improved (grid-based top alignment).
-- Authentication: navbar now derives auth state from the persisted user store so login/signup updates immediately.
-- Semantic search & indexing: added Pinecone integration and Hugging Face embeddings for semantic indexing and retrieval. Papers are chunked, embedded, and upserted into Pinecone after processing when configured.
-- Topic clustering: basic topic candidate extraction and k-means clustering added; clusters are stored on `paper.topic_clusters` and displayed in the paper detail UI.
-- Fallback: local text search (analysis and full text) remains available and used when Pinecone is not configured or semantic search fails.
-
-Note: A LangChain-style RAG orchestration has not been implemented yet — the project now provides the retrieval plumbing (embeddings, Pinecone, topic clusters) that you can use to build a RAG flow.
+The original upload, analysis, embeddings, Pinecone indexing, semantic search, authentication, and paper-management flows are preserved. The project now also includes a modular experimentation platform for comparing retrieval, chunking, grounding, GraphRAG, and evaluation settings.
 
 ## Features
 
 - Upload PDFs and extract text/metadata
 - AI-driven summarization and key-finding extraction
-- Semantic indexing (Pinecone) with Hugging Face embeddings
-- In-app semantic search fallback to local matches
+- Semantic indexing with Pinecone and Hugging Face embeddings
+- Local text search fallback when Pinecone is unavailable
+- Runtime-selectable retrieval strategies: dense, BM25, hybrid, hybrid plus reranking, and optional GraphRAG
+- Fixed-size, sliding-window, semantic, and section-aware chunking strategies
+- RAG metrics for Precision@K, Recall@K, MRR, relevance, faithfulness, citation accuracy, latency, and token usage
+- Citation grounding helpers that detect unsupported claims, missing citations, and hallucinated citations
+- Experiment runner that stores configurations, outputs, metrics, and timestamps in MongoDB
+- Research dashboard at `/research-dashboard`
+- Markdown research report export for completed experiment runs
 - Topic candidate extraction and clustering persisted on paper documents
 - User authentication, profile, and paper management
-- Polished, responsive UI with Tailwind CSS and Radix components
 
-## Tech stack
+## Tech Stack
 
 - Next.js 15, React 19
 - TypeScript
 - Tailwind CSS, shadcn-ui, Lucide icons
 - MongoDB + Mongoose
-- Pinecone (optional) for semantic indexing
-- Hugging Face Inference (embeddings)
+- Pinecone for optional vector indexing
+- Hugging Face Inference for embeddings
+- Google Gemini for grounded paper analysis when configured
 
 ## Quickstart
 
-1. Install dependencies
+1. Install dependencies:
 
 ```bash
 npm install
 ```
 
-2. Create environment file `.env.local` and add required variables (see below).
+2. Create `.env.local` and add the required variables.
 
-3. Run dev server
+3. Run the development server:
 
 ```bash
 npm run dev
 ```
 
-4. Build for production
+4. Build for production:
 
 ```bash
 npm run build
 npm start
 ```
 
-## Environment variables
+## Environment Variables
 
 Minimum recommended variables:
 
-- `MONGODB_URI` — MongoDB connection URI
-- `JWT_SECRET` — secret used to sign JWT tokens
-- `HUGGINGFACE_TOKEN` — Hugging Face API token (required for embeddings)
-- `GEMINI_API_KEY` — (optional) Google Gemini / generative AI key if used elsewhere
-- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` — optional, if using Cloudinary for storage
-- `NEXT_PUBLIC_BASE_URL` — e.g. `http://localhost:3000`
+- `MONGODB_URI`: MongoDB connection URI
+- `JWT_SECRET`: secret used to sign JWT tokens
+- `HUGGINGFACE_TOKEN`: Hugging Face API token for embeddings
+- `GEMINI_API_KEY`: optional Google Gemini key for grounded analysis
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`: optional, if using Cloudinary for storage
+- `NEXT_PUBLIC_BASE_URL`: for example `http://localhost:3000`
 
-Pinecone-specific variables (optional; required for semantic indexing/search):
+Pinecone-specific variables:
 
-- `PINECONE_API_KEY` — your Pinecone API key
-- `PINECONE_ENVIRONMENT` — environment short name (used to construct a controller host when `PINECONE_CONTROLLER_HOST` is not provided)
-- `PINECONE_CONTROLLER_HOST` — optional full controller host (e.g. `https://controller.us-west1-gcp.pinecone.io`)
-- `PINECONE_INDEX_NAME` — index name to upsert/query vectors
-- `HF_EMBEDDING_MODEL` — optional Hugging Face embedding model (defaults to `sentence-transformers/all-MiniLM-L6-v2`)
-- `TOPIC_CLUSTER_COUNT` — optional integer to control number of topic clusters (default small value)
+- `PINECONE_API_KEY`
+- `PINECONE_ENVIRONMENT`
+- `PINECONE_CONTROLLER_HOST`
+- `PINECONE_INDEX_NAME`
+- `HF_EMBEDDING_MODEL`
+- `TOPIC_CLUSTER_COUNT`
 
-When Pinecone env variables are not present, the app will gracefully fall back to local text-based search.
+When Pinecone variables are not present, the app falls back to local text-based search and local experiment retrieval.
 
-## Notable files and responsibilities
+## Research Architecture
 
-- `src/lib/semantic.ts` — Pinecone + embeddings helpers: chunking, embedding, upsert, query, and topic clustering logic.
-- `src/app/api/papers/[id]/search/route.ts` — search route that uses local matching and falls back to `semanticSearchPaper()` when Pinecone is configured.
-- `src/app/api/process/route.ts` and `src/usecases/paper.ts` — paper processing flow that persists analysis and kicks off Pinecone indexing.
-- `src/utils/pdfProcessor.ts` — PDF extraction and minimal topic-candidate generation for clustering.
-- `src/models/Paper.ts` & `types/paper.d.ts` — schema and type updates to include `topic_clusters`.
-- `src/app/page.tsx` — updated hero and upload card visuals and improved upload header alignment.
+- `src/lib/research/types.ts`: shared interfaces including `Retriever`, `ChunkingStrategy`, `RetrievedChunk`, and `EvaluationResult`.
+- `src/lib/research/retrieval.ts`: dense, BM25, hybrid, and hybrid-rerank retrievers.
+- `src/lib/research/chunking.ts`: fixed, sliding-window, semantic, and section-aware chunking.
+- `src/lib/research/evaluation.ts`: retrieval, generation, and performance metric calculation.
+- `src/lib/research/citations.ts`: citation extraction and grounding verification.
+- `src/lib/research/experiments.ts`: experiment runner for retrieval/chunking combinations.
+- `src/lib/research/graph.ts`: lightweight optional GraphRAG entity and relationship layer.
+- `src/lib/research/report.ts`: Markdown research report generation.
+- `src/models/ExperimentRun.ts`: MongoDB schema for experiment configurations, outputs, metrics, and timestamps.
 
-## Dependencies added/changed
+Existing core files:
 
-- `@pinecone-database/pinecone` — client used for connecting to Pinecone
-- Uses Hugging Face embeddings via the inference API (`HUGGINGFACE_TOKEN` required)
+- `src/lib/semantic.ts`: Pinecone and embedding helpers.
+- `src/app/api/papers/[id]/search/route.ts`: paper search with optional retrieval strategy selection.
+- `src/app/api/process/route.ts` and `src/usecases/paper.ts`: paper processing and persistence.
+- `src/utils/pdfProcessor.ts`: PDF extraction and grounded/fallback analysis.
+- `src/models/Paper.ts` and `types/paper.d.ts`: paper schema and app types.
 
-Check `package.json` for the full dependency list.
+## Research APIs
 
-## Known limitations & next steps
+Run retrieval with a selected strategy:
 
-- LangChain-style RAG orchestration (QA + generation using retrieved chunks) is not yet implemented — the retrieval layer is in place and ready.
-- UI: some additional layout tweaks (e.g., make hero/upload header left-aligned across viewports) were requested and can be applied on demand.
+```http
+POST /api/research/retrieve
+Content-Type: application/json
+
+{
+  "paperId": "<paper-id>",
+  "query": "What is the main contribution?",
+  "retrievalStrategy": "hybrid_rerank",
+  "chunkingStrategy": "section_aware",
+  "topK": 6
+}
+```
+
+Run a full experiment across retrieval and chunking combinations:
+
+```http
+POST /api/research/experiments
+Content-Type: application/json
+
+{
+  "name": "Chunking and retrieval comparison",
+  "documentIds": ["<paper-id>"],
+  "retrievalStrategies": ["dense", "bm25", "hybrid", "hybrid_rerank"],
+  "chunkingStrategies": ["fixed", "sliding_window", "semantic", "section_aware"],
+  "model": "local-baseline",
+  "topK": 5
+}
+```
+
+List recent experiments:
+
+```http
+GET /api/research/experiments
+```
+
+Export a Markdown report:
+
+```http
+GET /api/research/experiments/<experiment-id>/report
+```
+
+## Database Additions
+
+- `ExperimentRun`: stores experiment `name`, `status`, full `config`, per-query `outputs`, flattened metrics, `startedAt`, `completedAt`, and errors.
+- Existing `Paper` documents remain unchanged for core analysis. Experiment chunks are derived from stored `extracted_text` at run time.
+
+## Known Limitations
+
+- The `hybrid_rerank` retriever currently uses a deterministic lexical relevance proxy behind the reranker interface. Replace `HybridRerankRetriever` with a hosted or local cross-encoder when model infrastructure is available.
+- Generation-quality metrics are local heuristic evaluators by default. For publication-quality evaluation, add curated ground-truth labels and optional LLM-as-judge evaluators.
+- GraphRAG extraction is intentionally lightweight and local; production GraphRAG should persist graph entities and relationships in a dedicated graph store or graph collection.
 
 ## Troubleshooting
 
 - If semantic search fails, the app logs a warning and falls back to local text search.
-- If TypeScript reports errors after dependency changes, run `npm install` and `npx tsc --noEmit` to surface issues.
-
-## Contributing
-
-Contributions are welcome. Please open issues or PRs for feature requests or fixes.
+- If PowerShell blocks `npx`, run `npx.cmd tsc --noEmit`.
+- If TypeScript reports errors after dependency changes, run `npm install` and `npx.cmd tsc --noEmit`.
 
 ## License
 
 This project is licensed under the MIT License.
-
-```
