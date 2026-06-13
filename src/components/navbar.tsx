@@ -48,18 +48,18 @@ export function Navbar() {
           {isAuthenticated ? (
             <>
               <Link href="/my-papers">
-                <Button variant="ghost" className="text-slate-200 hover:bg-slate-800/80 px-3 py-2 text-sm">
+                <Button variant="ghost" className="text-cyan-100 hover:bg-cyan-300/15 px-3 py-2 text-sm">
                   My Papers
                 </Button>
               </Link>
-              <Button variant="outline" className="border-slate-700 text-slate-200 hover:bg-slate-800/80 px-3 py-2 text-sm" onClick={handleLogout}>
+              <Button variant="outline" className="border-cyan-300/50 text-cyan-100 hover:bg-cyan-300/15 px-3 py-2 text-sm" onClick={handleLogout}>
                 Log out
               </Button>
             </>
           ) : (
             <>
               <Link href="/auth/login">
-                <Button variant="ghost" className="text-slate-200 hover:bg-slate-800/80 px-3 py-2 text-sm">
+                <Button variant="ghost" className="text-cyan-100 hover:bg-cyan-300/15 px-3 py-2 text-sm">
                   Log in
                 </Button>
               </Link>

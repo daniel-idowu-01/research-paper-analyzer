@@ -87,7 +87,7 @@ export default function SignupPage() {
   const getPasswordStrengthColor = () => {
     if (passwordStrength <= 25) return "bg-red-500";
     if (passwordStrength <= 50) return "bg-yellow-500";
-    if (passwordStrength <= 75) return "bg-blue-500";
+    if (passwordStrength <= 75) return "bg-cyan-300";
     return "bg-green-500";
   };
 
@@ -99,7 +99,7 @@ export default function SignupPage() {
   return (
     <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-5">
-        {/* <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" /> */}
+        {/* <FileText className="w-6 h-6 mr-2 text-cyan-300 dark:text-cyan-300" /> */}
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Research Analyzer
         </h1>
@@ -209,7 +209,7 @@ export default function SignupPage() {
                 onCheckedChange={(checked) =>
                   setAgreedToTerms(checked as boolean)
                 }
-                className="border-gray-300 dark:border-gray-600 data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                className="border-gray-300 dark:border-gray-600 data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
               />
               <Label
                 htmlFor="terms"
@@ -218,14 +218,14 @@ export default function SignupPage() {
                 I agree to the
                 <Link
                   href="/terms-of-service"
-                  className="text-blue-600 dark:text-blue-400 hover:underline ml-1"
+                  className="text-cyan-300 dark:text-cyan-300 hover:underline ml-1"
                 >
                   Terms of Service
                 </Link>{" "}
                 and{" "}
                 <Link
                   href="/privacy-policy"
-                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                  className="text-cyan-300 dark:text-cyan-300 hover:underline"
                 >
                   Privacy Policy
                 </Link>
@@ -234,7 +234,7 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+              className="w-full bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
               disabled={isFormIncomplete}
             >
               {loading ? (
@@ -281,7 +281,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link
               href="/auth/login"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-cyan-300 dark:text-cyan-300 hover:underline"
             >
               Log in
             </Link>

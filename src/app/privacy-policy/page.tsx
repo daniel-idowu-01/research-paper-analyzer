@@ -35,7 +35,7 @@ export default function PrivacyPolicyPage() {
           </Button>
         </Link>
         <div className="flex items-center">
-          <Shield className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+          <Shield className="w-5 h-5 mr-2 text-cyan-300 dark:text-cyan-300" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Privacy Policy
           </h1>
@@ -60,7 +60,7 @@ export default function PrivacyPolicyPage() {
                   <Link
                     key={item.id}
                     href={`#${item.id}`}
-                    className="block py-1 text-sm text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
+                    className="block py-1 text-sm text-gray-700 hover:text-cyan-300 dark:text-gray-300 dark:hover:text-cyan-300 transition-colors"
                   >
                     {item.title}
                   </Link>
@@ -334,7 +334,7 @@ export default function PrivacyPolicyPage() {
                   contact us at{" "}
                   <a
                     href="mailto:danielidowu414@gmail.com"
-                    className="text-blue-600 hover:underline dark:text-blue-400"
+                    className="text-cyan-300 hover:underline dark:text-cyan-300"
                   >
                     privacy@researchanalyzer.com
                   </a>

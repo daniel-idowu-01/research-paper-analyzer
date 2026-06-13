@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-8">
-         {/* <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" /> */}
+         {/* <FileText className="w-6 h-6 mr-2 text-cyan-300 dark:text-cyan-300" /> */}
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Research Analyzer
         </h1>
@@ -86,8 +86,8 @@ export default function ForgotPasswordPage() {
           {isSubmitted ? (
             <div className="space-y-4">
               <div className="flex justify-center">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                  <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-cyan-300/15 dark:bg-cyan-300/15">
+                  <Mail className="w-6 h-6 text-cyan-300 dark:text-cyan-300" />
                 </div>
               </div>
               <div className="text-center space-y-2">
@@ -125,7 +125,7 @@ export default function ForgotPasswordPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+                className="w-full bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -143,7 +143,7 @@ export default function ForgotPasswordPage() {
         <CardFooter className="flex justify-center">
           <Link
             href="/login"
-            className="flex items-center text-sm text-blue-600 hover:underline dark:text-blue-400"
+            className="flex items-center text-sm text-cyan-300 hover:underline dark:text-cyan-300"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
             Back to login

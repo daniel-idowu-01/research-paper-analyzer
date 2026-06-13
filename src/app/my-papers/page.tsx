@@ -131,7 +131,7 @@ export default function MyPapersPage() {
         </h1>
         <Button
           onClick={() => router.push("/")}
-          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+          className="bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
         >
           <Upload className="w-4 h-4 mr-2" />
           Upload New Paper
@@ -206,7 +206,7 @@ export default function MyPapersPage() {
                           className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
                         >
                           <DropdownMenuItem className="hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <BookOpen className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                            <BookOpen className="w-4 h-4 mr-2 text-cyan-300 dark:text-cyan-300" />
                             <Link
                               href={`/paper/${paper.id}`}
                               className="text-gray-700 dark:text-gray-300"
@@ -218,7 +218,7 @@ export default function MyPapersPage() {
                             onClick={() => handleDownload(paper)}
                             className="hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
-                            <Download className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                            <Download className="w-4 h-4 mr-2 text-cyan-300 dark:text-cyan-300" />
                             <span className="text-gray-700 dark:text-gray-300">
                               Download
                             </span>
@@ -227,7 +227,7 @@ export default function MyPapersPage() {
                             onClick={() => handleShare(paper)}
                             className="hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
-                            <Share2 className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                            <Share2 className="w-4 h-4 mr-2 text-cyan-300 dark:text-cyan-300" />
                             <span className="text-gray-700 dark:text-gray-300">
                               Share
                             </span>
@@ -278,9 +278,9 @@ export default function MyPapersPage() {
                     <Link href={`/paper/${paper.id}`} className="w-full">
                       <Button
                         variant="outline"
-                        className="w-full border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full border-cyan-300/50 text-cyan-100 hover:bg-cyan-300/15 dark:border-cyan-300/50 dark:text-cyan-100 dark:hover:bg-cyan-300/15"
                       >
-                        <Sparkles className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                        <Sparkles className="w-4 h-4 mr-2 text-cyan-300 dark:text-cyan-300" />
                         View Analysis
                       </Button>
                     </Link>
@@ -339,7 +339,7 @@ export default function MyPapersPage() {
                         <Button
                           variant="default"
                           size="sm"
-                          className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+                          className="w-full bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
                         >
                           <Sparkles className="w-4 h-4 mr-2" />
                           Analysis
@@ -363,7 +363,7 @@ export default function MyPapersPage() {
                             onClick={() => handleDownload(paper)}
                             className="hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
-                            <Download className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                            <Download className="w-4 h-4 mr-2 text-cyan-300 dark:text-cyan-300" />
                             <span className="text-gray-700 dark:text-gray-300">
                               Download
                             </span>
@@ -372,7 +372,7 @@ export default function MyPapersPage() {
                             onClick={() => handleShare(paper)}
                             className="hover:bg-gray-100 dark:hover:bg-gray-700"
                           >
-                            <Share2 className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                            <Share2 className="w-4 h-4 mr-2 text-cyan-300 dark:text-cyan-300" />
                             <span className="text-gray-700 dark:text-gray-300">
                               Share
                             </span>

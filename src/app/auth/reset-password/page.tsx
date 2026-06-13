@@ -78,7 +78,7 @@ export default function ResetPasswordPage() {
   const getPasswordStrengthColor = () => {
     if (passwordStrength <= 25) return "bg-red-500";
     if (passwordStrength <= 50) return "bg-yellow-500";
-    if (passwordStrength <= 75) return "bg-blue-500";
+    if (passwordStrength <= 75) return "bg-cyan-300";
     return "bg-green-500";
   };
 
@@ -119,7 +119,7 @@ export default function ResetPasswordPage() {
     return (
       <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center mb-8">
-          {/* <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" /> */}
+          {/* <FileText className="w-6 h-6 mr-2 text-cyan-300 dark:text-cyan-300" /> */}
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Research Analyzer
           </h1>
@@ -135,7 +135,7 @@ export default function ResetPasswordPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center py-8">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-cyan-300 dark:text-cyan-300" />
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
               This will only take a moment...
             </p>
@@ -149,7 +149,7 @@ export default function ResetPasswordPage() {
     return (
       <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center mb-8">
-          {/* <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" /> */}
+          {/* <FileText className="w-6 h-6 mr-2 text-cyan-300 dark:text-cyan-300" /> */}
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Research Analyzer
           </h1>
@@ -182,7 +182,7 @@ export default function ResetPasswordPage() {
           <CardFooter className="flex justify-center">
             <Button
               asChild
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+              className="bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
             >
               <Link href="/auth/forgot-password">Request New Link</Link>
             </Button>
@@ -196,7 +196,7 @@ export default function ResetPasswordPage() {
     return (
       <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center mb-8">
-          {/* <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" /> */}
+          {/* <FileText className="w-6 h-6 mr-2 text-cyan-300 dark:text-cyan-300" /> */}
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Research Analyzer
           </h1>
@@ -224,7 +224,7 @@ export default function ResetPasswordPage() {
           <CardFooter className="flex justify-center">
             <Button
               asChild
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+              className="bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
             >
               <Link href="/auth/login">Log In</Link>
             </Button>
@@ -237,7 +237,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-8">
-        {/* <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" /> */}
+        {/* <FileText className="w-6 h-6 mr-2 text-cyan-300 dark:text-cyan-300" /> */}
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Research Analyzer
         </h1>
@@ -246,8 +246,8 @@ export default function ResetPasswordPage() {
       <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30">
-              <LockKeyhole className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-cyan-300/15 dark:bg-cyan-300/15">
+              <LockKeyhole className="w-6 h-6 text-cyan-300 dark:text-cyan-300" />
             </div>
           </div>
           <CardTitle className="text-2xl text-center text-gray-900 dark:text-white">
@@ -325,7 +325,7 @@ export default function ResetPasswordPage() {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+              className="w-full bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -342,7 +342,7 @@ export default function ResetPasswordPage() {
         <CardFooter className="flex justify-center">
           <Link
             href="/auth/login"
-            className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+            className="text-sm text-cyan-300 hover:underline dark:text-cyan-300"
           >
             Back to login
           </Link>

@@ -81,19 +81,19 @@ export default function SettingsPage() {
         <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <TabsTrigger
             value="preferences"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:data-[state=active]:bg-blue-700"
+            className="data-[state=active]:bg-cyan-300 data-[state=active]:text-slate-950 dark:data-[state=active]:bg-cyan-300"
           >
             Preferences
           </TabsTrigger>
           <TabsTrigger
             value="notifications"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:data-[state=active]:bg-blue-700"
+            className="data-[state=active]:bg-cyan-300 data-[state=active]:text-slate-950 dark:data-[state=active]:bg-cyan-300"
           >
             Notifications
           </TabsTrigger>
           <TabsTrigger
             value="account"
-            className="data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:data-[state=active]:bg-blue-700"
+            className="data-[state=active]:bg-cyan-300 data-[state=active]:text-slate-950 dark:data-[state=active]:bg-cyan-300"
           >
             Account
           </TabsTrigger>
@@ -210,7 +210,7 @@ export default function SettingsPage() {
                     handlePreferenceChange("autoAnalyze", val)
                   }
                   disabled={isUpdating}
-                  className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                  className="data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
                 />
               </div>
 
@@ -233,7 +233,7 @@ export default function SettingsPage() {
                     handlePreferenceChange("findSimilar", val)
                   }
                   disabled={isUpdating}
-                  className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                  className="data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
                 />
               </div>
 
@@ -328,7 +328,7 @@ export default function SettingsPage() {
                         handleNotificationChange("paperAnalysis", val)
                       }
                       disabled={isUpdating}
-                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                      className="data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
                     />
                   </div>
 
@@ -347,7 +347,7 @@ export default function SettingsPage() {
                         handleNotificationChange("similarPapers", val)
                       }
                       disabled={isUpdating}
-                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                      className="data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
                     />
                   </div>
                 </div>
@@ -375,7 +375,7 @@ export default function SettingsPage() {
                         handleNotificationChange("newFeatures", val)
                       }
                       disabled={isUpdating}
-                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                      className="data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
                     />
                   </div>
 
@@ -394,7 +394,7 @@ export default function SettingsPage() {
                         handleNotificationChange("marketing", val)
                       }
                       disabled={isUpdating}
-                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                      className="data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
                     />
                   </div>
                 </div>
@@ -422,7 +422,7 @@ export default function SettingsPage() {
                         handleNotificationChange("email", val)
                       }
                       disabled={isUpdating}
-                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                      className="data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
                     />
                   </div>
 
@@ -441,7 +441,7 @@ export default function SettingsPage() {
                         handleNotificationChange("browser", val)
                       }
                       disabled={isUpdating}
-                      className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                      className="data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
                     />
                   </div>
                 </div>
@@ -526,7 +526,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   defaultChecked
-                  className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                  className="data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
                 />
               </div>
 
@@ -541,7 +541,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch
                   defaultChecked
-                  className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-700"
+                  className="data-[state=checked]:bg-cyan-300 dark:data-[state=checked]:bg-cyan-300"
                 />
               </div>
 

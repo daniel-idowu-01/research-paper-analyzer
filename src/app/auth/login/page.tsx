@@ -71,7 +71,7 @@ export default function SignupPage() {
   return (
     <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-20 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-5">
-         {/* <FileText className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" /> */}
+         {/* <FileText className="w-6 h-6 mr-2 text-cyan-300 dark:text-cyan-300" /> */}
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Research Analyzer
         </h1>
@@ -130,7 +130,7 @@ export default function SignupPage() {
                 </Label>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-xs text-blue-600 dark:text-blue-400 underline-offset-4 hover:underline"
+                  className="text-xs text-cyan-300 dark:text-cyan-300 underline-offset-4 hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -162,7 +162,7 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+              className="w-full bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
               disabled={isFormIncomplete}
             >
               {loading ? (
@@ -188,11 +188,11 @@ export default function SignupPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="w-full border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <Button variant="outline" className="w-full border-cyan-300/50 text-cyan-100 hover:bg-cyan-300/15 dark:border-cyan-300/50 dark:text-cyan-100 dark:hover:bg-cyan-300/15">
               <Google />
               Google
             </Button>
-            <Button variant="outline" className="w-full border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <Button variant="outline" className="w-full border-cyan-300/50 text-cyan-100 hover:bg-cyan-300/15 dark:border-cyan-300/50 dark:text-cyan-100 dark:hover:bg-cyan-300/15">
               <Github className="w-4 h-4 mr-2" />
               GitHub
             </Button>
@@ -203,7 +203,7 @@ export default function SignupPage() {
             Don't have an account?{" "}
             <Link
               href="/auth/signup"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-cyan-300 dark:text-cyan-300 hover:underline"
             >
               Sign Up
             </Link>
@@ -212,14 +212,14 @@ export default function SignupPage() {
             By logging in, you agree to our{" "}
             <Link
               href="/terms-of-service"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-cyan-300 dark:text-cyan-300 hover:underline"
             >
               Terms of Service
             </Link>{" "}
             and{" "}
             <Link
               href="/privacy-policy"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-cyan-300 dark:text-cyan-300 hover:underline"
             >
               Privacy Policy
             </Link>

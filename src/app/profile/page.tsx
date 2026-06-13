@@ -256,7 +256,7 @@ const TabTrigger = ({
 }) => (
   <TabsTrigger
     value={value}
-    className="data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
+    className="data-[state=active]:bg-cyan-300 data-[state=active]:text-slate-950"
   >
     <Icon className="w-4 h-4 mr-2" />
     {label}
@@ -309,7 +309,7 @@ const StatItem = ({ label, value }: { label: string; value: string }) => (
     <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
     <Badge
       variant="secondary"
-      className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
+      className="bg-cyan-300/15 text-cyan-200"
     >
       {value}
     </Badge>
@@ -345,7 +345,7 @@ const PersonalInfoTab = ({
           onClick={onEditToggle}
           className={
             isEditing
-              ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+              ? "bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
               : ""
           }
         >
@@ -527,13 +527,13 @@ const ResearchInterestsCard = ({
           interests.map((interest) => (
             <Badge
               key={interest}
-              className="flex items-center gap-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
+              className="flex items-center gap-1 bg-cyan-300/15 text-cyan-200"
             >
               {interest}
               {isEditing && (
                 <button
                   onClick={() => onRemoveInterest(interest)}
-                  className="rounded-full hover:bg-blue-200 dark:hover:bg-blue-800/50"
+                  className="rounded-full hover:bg-cyan-300/20"
                   disabled={isLoading}
                 >
                   <X className="w-3 h-3" />
@@ -561,7 +561,7 @@ const ResearchInterestsCard = ({
             onClick={onAddInterest}
             disabled={!newInterest.trim() || isLoading}
             size="sm"
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+            className="bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add"}
           </Button>
@@ -644,7 +644,7 @@ const PasswordChangeCard = ({
       <Button
         disabled={isSaving}
         onClick={onSave}
-        className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 dark:text-white"
+        className="bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
       >
         {isSaving ? (
           <>
@@ -689,8 +689,8 @@ const ActivityCard = () => (
 
 const ActivityItem = () => (
   <div className="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
-    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30">
-      <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-cyan-300/15 dark:bg-cyan-300/15">
+      <FileText className="w-5 h-5 text-cyan-300 dark:text-cyan-300" />
     </div>
     <div className="flex-1 space-y-1">
       <div className="flex items-center justify-between">

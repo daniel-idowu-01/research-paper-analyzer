@@ -547,7 +547,7 @@ export default function PaperPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                  <div className="p-4 border rounded-lg bg-cyan-300/10 dark:bg-cyan-300/10 border-cyan-300/30 dark:border-cyan-300/30">
                     <h3 className="mb-2 font-medium text-gray-900 dark:text-white">
                       Primary Finding
                     </h3>
@@ -745,7 +745,7 @@ export default function PaperPage() {
                     <div className="flex items-center gap-2">
                       <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
                         <div
-                          className="h-2 rounded-full bg-blue-600 dark:bg-blue-500"
+                          className="h-2 rounded-full bg-cyan-300 dark:bg-cyan-300"
                           style={{ width: getWidth("research") }}
                         ></div>
                       </div>
@@ -768,7 +768,7 @@ export default function PaperPage() {
                     <div className="flex items-center gap-2">
                       <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
                         <div
-                          className="h-2 rounded-full bg-blue-600 dark:bg-blue-500"
+                          className="h-2 rounded-full bg-cyan-300 dark:bg-cyan-300"
                           style={{ width: getWidth("novelty") }}
                         ></div>
                       </div>

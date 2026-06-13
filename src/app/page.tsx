@@ -231,7 +231,7 @@ export default function Home() {
                           onClick={handleAnalyzeClick}
                           disabled={isUploading}
                           variant="outline"
-                          className="rounded-full border border-white/10 bg-slate-900/90 px-6 py-3 text-sm font-semibold text-slate-100 transition hover:border-cyan-300/30 hover:bg-slate-800"
+                          className="rounded-full border border-cyan-300/50 bg-transparent px-6 py-3 text-sm font-semibold text-cyan-100 transition hover:border-cyan-300 hover:bg-cyan-300 hover:text-slate-950"
                         >
                           {isUploading ? "Analyzing…" : "Analyze now"}
                         </Button>

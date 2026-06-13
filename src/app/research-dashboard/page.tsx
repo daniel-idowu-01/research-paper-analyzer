@@ -160,7 +160,7 @@ export default function ResearchDashboardPage() {
                     <td>{average(run.outputs, "citationAccuracy").toFixed(3)}</td>
                     <td>
                       <Link
-                        className="text-blue-600 hover:underline dark:text-blue-300"
+                        className="text-cyan-300 hover:underline dark:text-cyan-300"
                         href={`/api/research/experiments/${run._id}/report`}
                       >
                         Markdown
@@ -198,7 +198,7 @@ function Metric({
             {suffix}
           </p>
         </div>
-        <Icon className="h-5 w-5 text-blue-600 dark:text-blue-300" />
+        <Icon className="h-5 w-5 text-cyan-300 dark:text-cyan-300" />
       </CardContent>
     </Card>
   );
