@@ -1,5 +1,4 @@
 "use client";
-import { useTheme } from "next-themes";
 import Spinner from "@/components/spinner";
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
@@ -9,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
 import { useUserStore } from "@/stores/user-store";
 import { Separator } from "@/components/ui/separator";
-import { CreditCard, Download, Moon, Sun, Trash2 } from "lucide-react";
+import { CreditCard, Download, Moon, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -28,7 +27,6 @@ import {
 } from "@/components/ui/select";
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
   const { updateSettings, isUpdating, fetchSettings, settings, user } =
     useSettings();
@@ -62,15 +60,6 @@ export default function SettingsPage() {
       [key]: value,
     };
     await updateSettings("preferences", updatedPreferences);
-  };
-
-  // Theme change handler
-  const handleThemeChange = async (newTheme: string) => {
-    await updateSettings("appearance", {
-      ...settings.appearance,
-      theme: newTheme,
-    });
-    setTheme(newTheme);
   };
 
   // Language change handler
@@ -125,82 +114,21 @@ export default function SettingsPage() {
                 <Label className="text-gray-700 dark:text-gray-300">
                   Theme
                 </Label>
-                <div className="flex gap-4">
-                  <Button
-                    variant={
-                      settings.appearance.theme === "light"
-                        ? "default"
-                        : "outline"
-                    }
-                    className={`flex-1 justify-start ${
-                      settings.appearance.theme === "light"
-                        ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
-                        : "border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
-                    }`}
-                    onClick={() => handleThemeChange("light")}
-                    disabled={isUpdating}
-                  >
-                    <Sun className="w-4 h-4 mr-2" />
-                    <span className="text-white">Light</span>
-                  </Button>
-                  <Button
-                    variant={
-                      settings.appearance.theme === "dark"
-                        ? "default"
-                        : "outline"
-                    }
-                    className={`flex-1 justify-start ${
-                      settings.appearance.theme === "dark"
-                        ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
-                        : "border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
-                    }`}
-                    onClick={() => handleThemeChange("dark")}
-                    disabled={isUpdating}
-                  >
-                    <Moon className="w-4 h-4 mr-2" />
-                    <span className="text-gray-900 dark:text-white">Dark</span>
-                  </Button>
-                  <Button
-                    variant={
-                      settings.appearance.theme === "system"
-                        ? "default"
-                        : "outline"
-                    }
-                    className={`flex-1 justify-start ${
-                      settings.appearance.theme === "system"
-                        ? "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
-                        : "border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
-                    }`}
-                    onClick={() => handleThemeChange("system")}
-                    disabled={isUpdating}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="w-4 h-4 mr-2"
-                    >
-                      <rect
-                        x="2"
-                        y="3"
-                        width="20"
-                        height="14"
-                        rx="2"
-                        ry="2"
-                      ></rect>
-                      <line x1="8" y1="21" x2="16" y2="21"></line>
-                      <line x1="12" y1="17" x2="12" y2="21"></line>
-                    </svg>
-                    <span className="text-gray-900 dark:text-white">
-                      System
-                    </span>
-                  </Button>
+                <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-full bg-cyan-300 p-2 text-slate-950">
+                      <Moon className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        Dark theme
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        The interface uses one consistent dark research workspace.
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant="secondary">Active</Badge>
                 </div>
               </div>
 

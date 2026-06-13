@@ -422,7 +422,8 @@ export default function PaperPage() {
 
   if (!paper) {
     return (
-      <div className="container mx-auto flex min-h-screen flex-col bg-gray-50 px-4 py-6 dark:bg-gray-900">
+      <div className="dark flex min-h-screen flex-col bg-slate-950 px-4 py-6 text-slate-100">
+        <div className="container mx-auto">
         <div className="mb-6 flex items-center">
           <Link href="/" aria-label="Go back">
             <Button
@@ -440,6 +441,7 @@ export default function PaperPage() {
         <p className="text-gray-600 dark:text-gray-300">
           This paper could not be loaded. It may have been removed or the link is invalid.
         </p>
+        </div>
       </div>
     );
   }
@@ -465,7 +467,8 @@ export default function PaperPage() {
   const assessmentRated = paper.analysis_quality?.mode !== "fallback_extraction";
 
   return (
-    <div className="container flex flex-col min-h-screen px-4 py-6 mx-auto bg-gray-50 dark:bg-gray-900">
+    <div className="dark min-h-screen bg-slate-950 px-4 py-6 text-slate-100">
+      <div className="container mx-auto flex min-h-screen flex-col">
       <div className="flex items-center mb-6">
         <Link href="/" aria-label="Go back">
           <Button
@@ -801,6 +804,7 @@ export default function PaperPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </div>
   );
