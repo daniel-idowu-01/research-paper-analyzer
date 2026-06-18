@@ -7,8 +7,9 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
 import { useUserStore } from "@/stores/user-store";
+import { useTheme } from "next-themes";
 import { Separator } from "@/components/ui/separator";
-import { CreditCard, Download, Moon, Trash2 } from "lucide-react";
+import { CreditCard, Download, Moon, Sun, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -30,6 +31,7 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { updateSettings, isUpdating, fetchSettings, settings, user } =
     useSettings();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -116,19 +118,38 @@ export default function SettingsPage() {
                 </Label>
                 <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-full bg-cyan-300 p-2 text-slate-950">
-                      <Moon className="h-4 w-4" />
+                    <div className="rounded-full bg-primary p-2 text-primary-foreground">
+                      {theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        Dark theme
+                        Theme
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        The interface uses one consistent dark research workspace.
+                        Switch between light and dark mode
                       </p>
                     </div>
                   </div>
-                  <Badge variant="secondary">Active</Badge>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={theme === "light" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setTheme("light")}
+                      className={theme === "light" ? "bg-primary text-primary-foreground" : ""}
+                    >
+                      <Sun className="h-4 w-4 mr-1" />
+                      Light
+                    </Button>
+                    <Button
+                      variant={theme === "dark" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setTheme("dark")}
+                      className={theme === "dark" ? "bg-primary text-primary-foreground" : ""}
+                    >
+                      <Moon className="h-4 w-4 mr-1" />
+                      Dark
+                    </Button>
+                  </div>
                 </div>
               </div>
 

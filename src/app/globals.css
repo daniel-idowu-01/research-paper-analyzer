@@ -50,6 +50,40 @@
   --font-serif: "Spectral", ui-serif, Georgia, Cambria, "Times New Roman", serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
+  --background: #f8f9fc;
+  --foreground: #1e2235;
+  --card: #ffffff;
+  --card-foreground: #1e2235;
+  --popover: #ffffff;
+  --popover-foreground: #1e2235;
+  --primary: #0d9488;
+  --primary-foreground: #ffffff;
+  --secondary: #d97706;
+  --secondary-foreground: #ffffff;
+  --muted: rgba(0, 0, 0, 0.05);
+  --muted-foreground: #6b7280;
+  --accent: #d97706;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: rgba(0, 0, 0, 0.08);
+  --ring: rgba(13, 148, 136, 0.3);
+  --chart-1: #0d9488;
+  --chart-2: #7c3aed;
+  --chart-3: #d97706;
+  --chart-4: #06b6d4;
+  --chart-5: #dc2626;
+  --sidebar: #f1f5f9;
+  --sidebar-foreground: #1e2235;
+  --sidebar-primary: #0d9488;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(217, 119, 6, 0.1);
+  --sidebar-accent-foreground: #d97706;
+  --sidebar-border: rgba(0, 0, 0, 0.1);
+  --sidebar-ring: rgba(13, 148, 136, 0.3);
+}
+
+.dark {
   --background: #090b14;
   --foreground: #f4efe8;
   --card: rgba(18, 22, 42, 0.92);
@@ -90,6 +124,10 @@
 
   html {
     scroll-behavior: smooth;
+    color-scheme: light;
+  }
+
+  .dark html {
     color-scheme: dark;
   }
 
@@ -97,6 +135,9 @@
     font-family: var(--font-sans);
     @apply bg-background text-foreground antialiased;
     min-height: 100vh;
+  }
+
+  .dark body {
     background-image:
       radial-gradient(circle at top left, rgba(96, 228, 215, 0.18), transparent 24%),
       radial-gradient(circle at 80% 20%, rgba(249, 185, 66, 0.18), transparent 18%),
@@ -106,7 +147,7 @@
     background-size: cover;
   }
 
-  body::before {
+  .dark body::before {
     content: "";
     position: fixed;
     inset: 0;
