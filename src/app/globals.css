@@ -166,6 +166,35 @@
     box-shadow: 0 24px 90px rgba(0, 0, 0, 0.25);
   }
 
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
+  }
+  @keyframes slide-up-fade {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slide-down-fade {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes line-grow {
+    0% { transform: scaleX(0); }
+    50%, 100% { transform: scaleX(1); }
+  }
+  .animate-float { animation: float 3s ease-in-out infinite; }
+  .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+  .animate-slide-up-fade { animation: slide-up-fade 0.6s ease-out both; }
+  .animate-slide-down-fade { animation: slide-down-fade 0.5s ease-out both; }
+  .animate-line-grow { animation: line-grow 2s ease-in-out infinite; transform-origin: left; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-600 { animation-delay: 600ms; }
+
   @keyframes hero-fade-in {
     from {
       opacity: 0;

@@ -26,6 +26,63 @@ function getAnonymousBrowserId(): string {
   return browserId;
 }
 
+function ConceptAnimation() {
+  return (
+    <div className="relative z-10 w-full max-w-3xl">
+      <div className="flex items-center justify-center gap-3 sm:gap-6 py-6">
+        {/* Step 1: Upload */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="animate-float flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-card shadow-sm sm:h-16 sm:w-16">
+            <FileUp className="h-6 w-6 text-primary sm:h-7 sm:w-7" />
+          </div>
+          <span className="text-xs font-medium text-muted-foreground sm:text-sm">Upload</span>
+        </div>
+
+        {/* Arrow */}
+        <div className="relative flex items-center">
+          <div className="animate-line-grow h-px w-8 bg-primary/40 sm:w-16" />
+          <div className="absolute left-full top-1/2 -translate-y-1/2 h-1.5 w-1.5 rotate-45 border-b border-r border-primary/40" />
+        </div>
+
+        {/* Step 2: Analyze */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="animate-pulse-glow flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-card shadow-sm sm:h-16 sm:w-16">
+            <Sparkles className="h-6 w-6 text-secondary sm:h-7 sm:w-7" />
+          </div>
+          <span className="text-xs font-medium text-muted-foreground sm:text-sm">Analyze</span>
+        </div>
+
+        {/* Arrow */}
+        <div className="relative flex items-center">
+          <div className="animate-line-grow h-px w-8 bg-primary/40 sm:w-16" style={{ animationDelay: "0.3s" }} />
+          <div className="absolute left-full top-1/2 -translate-y-1/2 h-1.5 w-1.5 rotate-45 border-b border-r border-primary/40" />
+        </div>
+
+        {/* Step 3: Discover */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-card shadow-sm sm:h-16 sm:w-16">
+            <FileText className="h-6 w-6 text-chart-2 sm:h-7 sm:w-7" />
+          </div>
+          <span className="text-xs font-medium text-muted-foreground sm:text-sm">Discover</span>
+        </div>
+      </div>
+
+      {/* Result labels */}
+      <div className="flex justify-center gap-2 sm:gap-4">
+        <span className="animate-slide-up-fade rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+          Summaries
+        </span>
+        <span className="animate-slide-up-fade delay-200 rounded-full bg-secondary/10 px-3 py-1 text-xs font-medium text-secondary">
+          Key Findings
+        </span>
+        <span className="animate-slide-up-fade delay-400 rounded-full bg-chart-2/10 px-3 py-1 text-xs font-medium text-chart-2">
+          Organized Insights
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const router = useRouter();
   const { sendRequest } = useApi();
@@ -183,6 +240,8 @@ export default function Home() {
               Upload a PDF and unlock concise summaries, evidence maps, and topic-driven analysis without the usual overwhelm.
             </p>
           </div>
+
+          <ConceptAnimation />
 
           <div className="relative z-10 w-full max-w-3xl">
             <Card className="overflow-hidden rounded-[32px] border border-border bg-card shadow-[0_35px_90px_-50px_rgba(15,23,42,0.55)] transition-all duration-300 hover:-translate-y-1">
