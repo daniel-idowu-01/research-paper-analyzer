@@ -15,6 +15,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+const ANONYMOUS_BROWSER_ID_KEY = "research_analyzer_browser_id";
+
+function getAnonymousBrowserId(): string {
+  const existingId = window.localStorage.getItem(ANONYMOUS_BROWSER_ID_KEY);
+  if (existingId) return existingId;
+
+  const browserId = crypto.randomUUID();
+  window.localStorage.setItem(ANONYMOUS_BROWSER_ID_KEY, browserId);
+  return browserId;
+}
+
 export default function Home() {
   const router = useRouter();
   const { sendRequest } = useApi();
@@ -131,6 +142,7 @@ export default function Home() {
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("browserId", getAnonymousBrowserId());
 
     try {
       const response = await sendRequest("/api/process", "POST", formData, {

@@ -19,6 +19,8 @@ import AnonymousDevice from "@/models/AnonymousDevice";
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const FREE_SCAN_LIMIT_MESSAGE =
   "You must sign in to process more than one paper. Only one free scan is available per device.";
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function isPdfBuffer(buf: Buffer): boolean {
   if (buf.length < 5) return false;
@@ -56,19 +58,37 @@ export async function POST(request: Request) {
       }
     }
 
+    const formData = await request.formData();
+    const file = formData.get("file") as File | null;
+
     if (!userId) {
       const deviceId = await getOrCreateAnonymousDeviceId();
       const networkFingerprint = getAnonymousNetworkFingerprint(request);
+      const submittedBrowserId = formData.get("browserId");
+      const browserId =
+        typeof submittedBrowserId === "string" &&
+        UUID_PATTERN.test(submittedBrowserId)
+          ? submittedBrowserId
+          : undefined;
+      const deviceSelectors = [
+        { deviceId },
+        { networkFingerprint },
+        ...(browserId ? [{ browserId }] : []),
+      ];
       let device;
       try {
         device = await AnonymousDevice.findOneAndUpdate(
           {
-            $or: [{ deviceId }, { networkFingerprint }],
+            $or: deviceSelectors,
             scanCount: { $lt: 1 },
           },
           {
             $inc: { scanCount: 1 },
-            $set: { lastScanAt: new Date(), networkFingerprint },
+            $set: {
+              lastScanAt: new Date(),
+              networkFingerprint,
+              ...(browserId ? { browserId } : {}),
+            },
           },
           { new: true }
         );
@@ -84,7 +104,7 @@ export async function POST(request: Request) {
 
       if (!device) {
         const previousDevice = await AnonymousDevice.exists({
-          $or: [{ deviceId }, { networkFingerprint }],
+          $or: deviceSelectors,
         });
         if (previousDevice) {
           return tooManyRequests(FREE_SCAN_LIMIT_MESSAGE);
@@ -94,6 +114,7 @@ export async function POST(request: Request) {
           await AnonymousDevice.create({
             deviceId,
             networkFingerprint,
+            ...(browserId ? { browserId } : {}),
             scanCount: 1,
             lastScanAt: new Date(),
           });
@@ -108,9 +129,6 @@ export async function POST(request: Request) {
         }
       }
     }
-
-    const formData = await request.formData();
-    const file = formData.get("file") as File | null;
 
     if (!file) {
       return badRequest("No PDF file provided");
