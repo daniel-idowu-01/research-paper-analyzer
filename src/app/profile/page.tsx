@@ -256,7 +256,7 @@ const TabTrigger = ({
 }) => (
   <TabsTrigger
     value={value}
-    className="data-[state=active]:bg-cyan-300 data-[state=active]:text-slate-950"
+    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
   >
     <Icon className="w-4 h-4 mr-2" />
     {label}
@@ -343,11 +343,6 @@ const PersonalInfoTab = ({
         <Button
           variant={isEditing ? "default" : "outline"}
           onClick={onEditToggle}
-          className={
-            isEditing
-              ? "bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
-              : ""
-          }
         >
           {isEditing ? (
             <>
@@ -561,7 +556,6 @@ const ResearchInterestsCard = ({
             onClick={onAddInterest}
             disabled={!newInterest.trim() || isLoading}
             size="sm"
-            className="bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add"}
           </Button>
@@ -644,7 +638,6 @@ const PasswordChangeCard = ({
       <Button
         disabled={isSaving}
         onClick={onSave}
-        className="bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
       >
         {isSaving ? (
           <>
@@ -677,10 +670,7 @@ const ActivityCard = () => (
       </div>
     </CardContent>
     <CardFooter>
-      <Button
-        variant="outline"
-        className="w-full border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-      >
+      <Button variant="outline" className="w-full">
         View All Activity
       </Button>
     </CardFooter>

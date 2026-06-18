@@ -234,7 +234,7 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
+              className="w-full"
               disabled={isFormIncomplete}
             >
               {loading ? (

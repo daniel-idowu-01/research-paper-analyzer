@@ -129,10 +129,7 @@ export default function MyPapersPage() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           My Papers
         </h1>
-        <Button
-          onClick={() => router.push("/")}
-          className="bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
-        >
+        <Button onClick={() => router.push("/")}>
           <Upload className="w-4 h-4 mr-2" />
           Upload New Paper
         </Button>
@@ -196,7 +193,7 @@ export default function MyPapersPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="-mr-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                            className="-mr-2"
                           >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
@@ -276,11 +273,8 @@ export default function MyPapersPage() {
                   </CardContent>
                   <CardFooter className="pt-0">
                     <Link href={`/paper/${paper.id}`} className="w-full">
-                      <Button
-                        variant="outline"
-                        className="w-full border-cyan-600/50 text-cyan-700 hover:bg-cyan-600/15 dark:border-cyan-300/50 dark:text-cyan-100 dark:hover:bg-cyan-300/15"
-                      >
-                        <Sparkles className="w-4 h-4 mr-2 text-cyan-600 dark:text-cyan-300" />
+                      <Button variant="outline" className="w-full">
+                        <Sparkles className="w-4 h-4 mr-2" />
                         View Analysis
                       </Button>
                     </Link>
@@ -336,11 +330,7 @@ export default function MyPapersPage() {
                     </div>
                     <div className="flex flex-row gap-2 mt-4 sm:flex-col sm:mt-0">
                       <Link href={`/paper/${paper.id}`}>
-                        <Button
-                          variant="default"
-                          size="sm"
-                          className="w-full bg-cyan-300 text-slate-950 hover:bg-cyan-200 dark:bg-cyan-300 dark:text-slate-950 dark:hover:bg-cyan-200"
-                        >
+                        <Button variant="default" size="sm" className="w-full">
                           <Sparkles className="w-4 h-4 mr-2" />
                           Analysis
                         </Button>
@@ -350,7 +340,7 @@ export default function MyPapersPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
+                            className="w-full"
                           >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
@@ -410,7 +400,6 @@ export default function MyPapersPage() {
               variant="outline"
               disabled={currentPage === 1}
               onClick={() => fetchPapers(currentPage - 1)}
-              className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
             >
               Previous
             </Button>
@@ -418,7 +407,6 @@ export default function MyPapersPage() {
               variant="outline"
               disabled={currentPage * papersPerPage >= totalPapers}
               onClick={() => fetchPapers(currentPage + 1)}
-              className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
             >
               Next
             </Button>

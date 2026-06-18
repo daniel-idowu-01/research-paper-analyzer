@@ -298,19 +298,19 @@ const ActionButtons = () => {
       <Button
         size="sm"
         variant="outline"
-        className="w-full text-gray-700 border-gray-300 hover:bg-gray-100 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+        className="w-full"
         onClick={handleDownload}
       >
-        <Download className="w-4 h-4 mr-2 text-gray-700 dark:text-gray-300" />
+        <Download className="w-4 h-4 mr-2" />
         Download
       </Button>
       <Button
         size="sm"
         variant="outline"
-        className="w-full text-gray-700 border-gray-300 hover:bg-gray-100 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+        className="w-full"
         onClick={handleShare}
       >
-        <Share2 className="w-4 h-4 mr-2 text-gray-700 dark:text-gray-300" />
+        <Share2 className="w-4 h-4 mr-2" />
         Share
       </Button>
     </div>
@@ -428,7 +428,7 @@ export default function PaperPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="mr-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+              className="mr-2"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -473,7 +473,7 @@ export default function PaperPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="mr-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="mr-2"
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>

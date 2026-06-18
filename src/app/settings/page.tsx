@@ -83,19 +83,19 @@ export default function SettingsPage() {
         <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <TabsTrigger
             value="preferences"
-            className="data-[state=active]:bg-cyan-300 data-[state=active]:text-slate-950 dark:data-[state=active]:bg-cyan-300"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Preferences
           </TabsTrigger>
           <TabsTrigger
             value="notifications"
-            className="data-[state=active]:bg-cyan-300 data-[state=active]:text-slate-950 dark:data-[state=active]:bg-cyan-300"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Notifications
           </TabsTrigger>
           <TabsTrigger
             value="account"
-            className="data-[state=active]:bg-cyan-300 data-[state=active]:text-slate-950 dark:data-[state=active]:bg-cyan-300"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Account
           </TabsTrigger>
@@ -135,7 +135,6 @@ export default function SettingsPage() {
                       variant={theme === "light" ? "default" : "outline"}
                       size="sm"
                       onClick={() => setTheme("light")}
-                      className={theme === "light" ? "bg-primary text-primary-foreground" : ""}
                     >
                       <Sun className="h-4 w-4 mr-1" />
                       Light
@@ -144,7 +143,6 @@ export default function SettingsPage() {
                       variant={theme === "dark" ? "default" : "outline"}
                       size="sm"
                       onClick={() => setTheme("dark")}
-                      className={theme === "dark" ? "bg-primary text-primary-foreground" : ""}
                     >
                       <Moon className="h-4 w-4 mr-1" />
                       Dark
@@ -516,10 +514,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-4">
-                <Button
-                  variant="outline"
-                  className="border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700"
-                >
+                <Button variant="outline">
                   Change Email
                 </Button>
               </div>
@@ -567,10 +562,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-4 space-y-4">
-                <Button
-                  variant="destructive"
-                  className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
-                >
+                <Button variant="destructive">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete Account
                 </Button>
