@@ -23,6 +23,10 @@ export function ok<T>(data: T, init?: { message?: string; status?: number }) {
   );
 }
 
+export function tooManyRequests(error: string) {
+  return NextResponse.json({ error }, { status: 429 });
+}
+
 export function serverError(error: string, details?: unknown) {
   return NextResponse.json({ error, details }, { status: 500 });
 }

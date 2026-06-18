@@ -11,8 +11,9 @@ import {
   processResearchPaper,
 } from "@/utils/pdfProcessor";
 import { indexPaperToPinecone, isPineconeConfigured } from "@/lib/semantic";
-import { getTokenFromCookies, requireAuth } from "@/lib/server/auth";
-import { badRequest, serverError } from "@/lib/server/http";
+import { getOrCreateAnonymousDeviceId, getTokenFromCookies, requireAuth } from "@/lib/server/auth";
+import { badRequest, serverError, tooManyRequests } from "@/lib/server/http";
+import AnonymousDevice from "@/models/AnonymousDevice";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
@@ -36,6 +37,20 @@ export async function POST(request: Request) {
         userId = authUser.id;
       } catch {
         userId = null;
+      }
+    }
+
+    if (!userId) {
+      const deviceId = await getOrCreateAnonymousDeviceId();
+      const result = await AnonymousDevice.updateOne(
+        { deviceId, scanCount: { $lt: 1 } },
+        { $inc: { scanCount: 1 }, $set: { lastScanAt: new Date() } },
+        { upsert: true }
+      );
+      if (result.modifiedCount === 0 && result.upsertedCount === 0) {
+        return tooManyRequests(
+          "Free scan limit reached. Sign up for unlimited scans."
+        );
       }
     }
 

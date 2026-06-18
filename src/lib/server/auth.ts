@@ -1,6 +1,7 @@
 import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { v4 as uuidv4 } from "uuid";
 
 const JWT_SECRET = (() => {
   const secret = process.env.JWT_SECRET;
@@ -64,6 +65,24 @@ export async function setAuthCookie(token: string, rememberMe = false) {
 export async function clearAuthCookie() {
   const cookieStore = await cookies();
   cookieStore.delete("token");
+}
+
+export async function getOrCreateAnonymousDeviceId(): Promise<string> {
+  const cookieStore = await cookies();
+  let deviceId = cookieStore.get("anonymous_device_id")?.value;
+
+  if (!deviceId) {
+    deviceId = uuidv4();
+    cookieStore.set("anonymous_device_id", deviceId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+  }
+
+  return deviceId;
 }
 
 export function authErrorResponse(error: unknown) {

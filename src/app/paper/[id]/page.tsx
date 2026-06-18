@@ -238,13 +238,13 @@ const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
           <h3 className="mb-1 text-sm font-medium text-gray-900 dark:text-white">
             Topic clusters
           </h3>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3">
             {paper.topic_clusters.map((cluster) => (
               <div
                 key={cluster.label}
                 className="rounded-2xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/80"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-400">
+                <p className="break-words text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-400">
                   {cluster.label}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -252,6 +252,7 @@ const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
                     <Badge
                       key={`${cluster.label}-${topic}`}
                       variant="secondary"
+                      className="max-w-full shrink whitespace-normal break-words text-left"
                     >
                       {topic}
                     </Badge>
