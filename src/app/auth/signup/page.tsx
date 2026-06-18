@@ -99,7 +99,7 @@ export default function SignupPage() {
   return (
     <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-5">
-        {/* <FileText className="w-6 h-6 mr-2 text-cyan-300 dark:text-cyan-300" /> */}
+        {/* <FileText className="w-6 h-6 mr-2 text-cyan-600 dark:text-cyan-300" /> */}
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Research Analyzer
         </h1>
@@ -218,14 +218,14 @@ export default function SignupPage() {
                 I agree to the
                 <Link
                   href="/terms-of-service"
-                  className="text-cyan-300 dark:text-cyan-300 hover:underline ml-1"
+                  className="text-cyan-600 dark:text-cyan-300 hover:underline ml-1"
                 >
                   Terms of Service
                 </Link>{" "}
                 and{" "}
                 <Link
                   href="/privacy-policy"
-                  className="text-cyan-300 dark:text-cyan-300 hover:underline"
+                  className="text-cyan-600 dark:text-cyan-300 hover:underline"
                 >
                   Privacy Policy
                 </Link>
@@ -281,7 +281,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link
               href="/auth/login"
-              className="text-cyan-300 dark:text-cyan-300 hover:underline"
+              className="text-cyan-600 dark:text-cyan-300 hover:underline"
             >
               Log in
             </Link>

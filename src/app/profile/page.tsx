@@ -309,7 +309,7 @@ const StatItem = ({ label, value }: { label: string; value: string }) => (
     <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
     <Badge
       variant="secondary"
-      className="bg-cyan-300/15 text-cyan-200"
+      className="bg-cyan-300/15 text-cyan-600 dark:text-cyan-200"
     >
       {value}
     </Badge>
@@ -527,7 +527,7 @@ const ResearchInterestsCard = ({
           interests.map((interest) => (
             <Badge
               key={interest}
-              className="flex items-center gap-1 bg-cyan-300/15 text-cyan-200"
+              className="flex items-center gap-1 bg-cyan-300/15 text-cyan-600 dark:text-cyan-200"
             >
               {interest}
               {isEditing && (
@@ -690,7 +690,7 @@ const ActivityCard = () => (
 const ActivityItem = () => (
   <div className="flex items-start gap-4 pb-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-cyan-300/15 dark:bg-cyan-300/15">
-      <FileText className="w-5 h-5 text-cyan-300 dark:text-cyan-300" />
+      <FileText className="w-5 h-5 text-cyan-600 dark:text-cyan-300" />
     </div>
     <div className="flex-1 space-y-1">
       <div className="flex items-center justify-between">

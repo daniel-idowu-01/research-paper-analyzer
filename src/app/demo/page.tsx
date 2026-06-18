@@ -102,15 +102,15 @@ const PaperDetailsCard = ({ paper }: { paper: Paper }) => (
     <CardContent className="space-y-4">
       <div>
         <h3 className="mb-1 text-sm font-medium">Title</h3>
-        <p className="text-sm text-gray-500">{paper.title}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{paper.title}</p>
       </div>
       <div>
         <h3 className="mb-1 text-sm font-medium">Authors</h3>
-        <p className="text-sm text-gray-500">{paper.authors.join(", ")}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{paper.authors.join(", ")}</p>
       </div>
       <div>
         <h3 className="mb-1 text-sm font-medium">Published</h3>
-        <p className="text-sm text-gray-500">{paper.publishedDate}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{paper.publishedDate}</p>
       </div>
       <div>
         <h3 className="mb-1 text-sm font-medium">Topics</h3>
@@ -223,7 +223,7 @@ export default function DemoPage() {
             </CardHeader>
             <CardContent>
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
                 <Input
                   className="pl-8"
                   type="search"
@@ -388,9 +388,9 @@ export default function DemoPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg border-gray-200 dark:border-gray-800">
-                    <FileText className="w-12 h-12 mb-4 text-gray-500" />
+                    <FileText className="w-12 h-12 mb-4 text-gray-500 dark:text-gray-400" />
                     <p className="mb-2 text-sm font-medium">PDF Preview</p>
-                    <p className="mb-4 text-xs text-center text-gray-500">
+                    <p className="mb-4 text-xs text-center text-gray-500 dark:text-gray-400">
                       This is where the PDF preview would be displayed. The
                       actual implementation would render the first few pages of
                       the document.
@@ -457,7 +457,7 @@ export default function DemoPage() {
                     </div>
                     <span className="text-sm font-medium">High</span>
                   </div>
-                  <p className="mt-2 text-xs text-gray-500">
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     This paper is likely to have significant impact based on
                     methodology innovation and performance improvements.
                   </p>
@@ -473,7 +473,7 @@ export default function DemoPage() {
                     </div>
                     <span className="text-sm font-medium">Medium-High</span>
                   </div>
-                  <p className="mt-2 text-xs text-gray-500">
+                  <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     Builds on existing attention mechanisms but introduces
                     significant innovations in architecture.
                   </p>

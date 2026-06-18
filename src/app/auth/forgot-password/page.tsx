@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-12 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-8">
-         {/* <FileText className="w-6 h-6 mr-2 text-cyan-300 dark:text-cyan-300" /> */}
+         {/* <FileText className="w-6 h-6 mr-2 text-cyan-600 dark:text-cyan-300" /> */}
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Research Analyzer
         </h1>
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
             <div className="space-y-4">
               <div className="flex justify-center">
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-cyan-300/15 dark:bg-cyan-300/15">
-                  <Mail className="w-6 h-6 text-cyan-300 dark:text-cyan-300" />
+                  <Mail className="w-6 h-6 text-cyan-600 dark:text-cyan-300" />
                 </div>
               </div>
               <div className="text-center space-y-2">

@@ -50,7 +50,7 @@ export default function LogoutPage() {
         <CardContent className="space-y-4">
           <div className="p-4 border rounded-lg bg-muted/50">
             <div className="flex gap-2">
-              <Info className="w-5 h-5 text-cyan-300" />
+              <Info className="w-5 h-5 text-cyan-600 dark:text-cyan-300" />
               <div className="space-y-1">
                 <p className="text-sm font-medium">
                   What happens when you log out?

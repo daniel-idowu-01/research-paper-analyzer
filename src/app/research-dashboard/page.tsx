@@ -144,7 +144,7 @@ export default function ResearchDashboardPage() {
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <table className="w-full min-w-[780px] text-left text-sm">
-              <thead className="border-b text-xs uppercase text-gray-500">
+              <thead className="border-b text-xs uppercase text-gray-500 dark:text-gray-400">
                 <tr>
                   <th className="py-3">Run</th>
                   <th>Retrieval</th>
@@ -225,13 +225,13 @@ function Metric({
     <Card>
       <CardContent className="flex items-center justify-between p-5">
         <div>
-          <p className="text-sm text-gray-500">{title}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
           <p className="mt-1 text-2xl font-semibold">
             {suffix ? Math.round(value) : value.toFixed(3)}
             {suffix}
           </p>
         </div>
-        <Icon className="h-5 w-5 text-cyan-300 dark:text-cyan-300" />
+        <Icon className="h-5 w-5 text-cyan-600 dark:text-cyan-300" />
       </CardContent>
     </Card>
   );

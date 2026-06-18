@@ -71,7 +71,7 @@ export default function SignupPage() {
   return (
     <div className="container flex flex-col items-center justify-center min-h-screen px-4 py-20 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center mb-5">
-         {/* <FileText className="w-6 h-6 mr-2 text-cyan-300 dark:text-cyan-300" /> */}
+         {/* <FileText className="w-6 h-6 mr-2 text-cyan-600 dark:text-cyan-300" /> */}
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Research Analyzer
         </h1>
@@ -130,7 +130,7 @@ export default function SignupPage() {
                 </Label>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-xs text-cyan-300 dark:text-cyan-300 underline-offset-4 hover:underline"
+                  className="text-xs text-cyan-600 dark:text-cyan-300 underline-offset-4 hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -203,7 +203,7 @@ export default function SignupPage() {
             Don't have an account?{" "}
             <Link
               href="/auth/signup"
-              className="text-cyan-300 dark:text-cyan-300 hover:underline"
+              className="text-cyan-600 dark:text-cyan-300 hover:underline"
             >
               Sign Up
             </Link>
@@ -212,14 +212,14 @@ export default function SignupPage() {
             By logging in, you agree to our{" "}
             <Link
               href="/terms-of-service"
-              className="text-cyan-300 dark:text-cyan-300 hover:underline"
+              className="text-cyan-600 dark:text-cyan-300 hover:underline"
             >
               Terms of Service
             </Link>{" "}
             and{" "}
             <Link
               href="/privacy-policy"
-              className="text-cyan-300 dark:text-cyan-300 hover:underline"
+              className="text-cyan-600 dark:text-cyan-300 hover:underline"
             >
               Privacy Policy
             </Link>
