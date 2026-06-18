@@ -422,7 +422,7 @@ export default function PaperPage() {
 
   if (!paper) {
     return (
-      <div className="dark flex min-h-screen flex-col bg-slate-950 px-4 py-6 text-slate-100">
+      <div className="flex min-h-screen flex-col bg-background px-4 py-6 text-foreground">
         <div className="container mx-auto">
         <div className="mb-6 flex items-center">
           <Link href="/" aria-label="Go back">
@@ -467,7 +467,7 @@ export default function PaperPage() {
   const assessmentRated = paper.analysis_quality?.mode !== "fallback_extraction";
 
   return (
-    <div className="dark min-h-screen bg-slate-950 px-4 py-6 text-slate-100">
+    <div className="min-h-screen bg-background px-4 py-6 text-foreground">
       <div className="container mx-auto flex min-h-screen flex-col">
       <div className="flex items-center mb-6">
         <Link href="/" aria-label="Go back">
