@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import type React from "react";
-import { useApi } from "@/hooks/use-api";
+import { useApi, ApiError } from "@/hooks/use-api";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useCallback, useEffect } from "react";
@@ -142,7 +142,11 @@ export default function Home() {
       router.push(`/paper/${response.data}`);
     } catch (error) {
       console.log("Upload failed:", error);
-      setError("Failed to upload file. Please try again.");
+      if ((error as ApiError).status === 429) {
+        setError("You must sign in to process more than one paper. Only one free scan is available per device.");
+      } else {
+        setError("Failed to upload file. Please try again.");
+      }
     } finally {
       setIsUploading(false);
     }

@@ -16,6 +16,8 @@ import { badRequest, serverError, tooManyRequests } from "@/lib/server/http";
 import AnonymousDevice from "@/models/AnonymousDevice";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const FREE_SCAN_LIMIT_MESSAGE =
+  "You must sign in to process more than one paper. Only one free scan is available per device.";
 
 function isPdfBuffer(buf: Buffer): boolean {
   if (buf.length < 5) return false;
@@ -42,15 +44,28 @@ export async function POST(request: Request) {
 
     if (!userId) {
       const deviceId = await getOrCreateAnonymousDeviceId();
-      const result = await AnonymousDevice.updateOne(
+      const device = await AnonymousDevice.findOneAndUpdate(
         { deviceId, scanCount: { $lt: 1 } },
         { $inc: { scanCount: 1 }, $set: { lastScanAt: new Date() } },
-        { upsert: true }
+        { new: true }
       );
-      if (result.modifiedCount === 0 && result.upsertedCount === 0) {
-        return tooManyRequests(
-          "Free scan limit reached. Sign up for unlimited scans."
-        );
+
+      if (!device) {
+        try {
+          await AnonymousDevice.create({
+            deviceId,
+            scanCount: 1,
+            lastScanAt: new Date(),
+          });
+        } catch (error) {
+          if (
+            error instanceof mongoose.mongo.MongoServerError &&
+            error.code === 11000
+          ) {
+            return tooManyRequests(FREE_SCAN_LIMIT_MESSAGE);
+          }
+          throw error;
+        }
       }
     }
 
