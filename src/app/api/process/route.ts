@@ -1,4 +1,5 @@
 import axios from "axios";
+import { createHash } from "crypto";
 import mongoose from "mongoose";
 import logger from "@/lib/logger";
 import { connectDB } from "@/lib/mongo";
@@ -24,6 +25,19 @@ function isPdfBuffer(buf: Buffer): boolean {
   return buf.subarray(0, 5).toString("ascii") === "%PDF-";
 }
 
+function getAnonymousNetworkFingerprint(request: Request): string {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const ip =
+    forwardedFor?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+  const userAgent = request.headers.get("user-agent") || "unknown";
+
+  return createHash("sha256")
+    .update(`${ip}:${userAgent}`)
+    .digest("hex");
+}
+
 export const maxDuration = 120;
 
 export async function POST(request: Request) {
@@ -44,16 +58,42 @@ export async function POST(request: Request) {
 
     if (!userId) {
       const deviceId = await getOrCreateAnonymousDeviceId();
-      const device = await AnonymousDevice.findOneAndUpdate(
-        { deviceId, scanCount: { $lt: 1 } },
-        { $inc: { scanCount: 1 }, $set: { lastScanAt: new Date() } },
-        { new: true }
-      );
+      const networkFingerprint = getAnonymousNetworkFingerprint(request);
+      let device;
+      try {
+        device = await AnonymousDevice.findOneAndUpdate(
+          {
+            $or: [{ deviceId }, { networkFingerprint }],
+            scanCount: { $lt: 1 },
+          },
+          {
+            $inc: { scanCount: 1 },
+            $set: { lastScanAt: new Date(), networkFingerprint },
+          },
+          { new: true }
+        );
+      } catch (error) {
+        if (
+          error instanceof mongoose.mongo.MongoServerError &&
+          error.code === 11000
+        ) {
+          return tooManyRequests(FREE_SCAN_LIMIT_MESSAGE);
+        }
+        throw error;
+      }
 
       if (!device) {
+        const previousDevice = await AnonymousDevice.exists({
+          $or: [{ deviceId }, { networkFingerprint }],
+        });
+        if (previousDevice) {
+          return tooManyRequests(FREE_SCAN_LIMIT_MESSAGE);
+        }
+
         try {
           await AnonymousDevice.create({
             deviceId,
+            networkFingerprint,
             scanCount: 1,
             lastScanAt: new Date(),
           });

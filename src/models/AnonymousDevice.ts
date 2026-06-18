@@ -7,6 +7,11 @@ const AnonymousDeviceSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    networkFingerprint: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     scanCount: {
       type: Number,
       default: 0,
