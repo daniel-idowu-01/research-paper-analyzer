@@ -1,5 +1,4 @@
 import type { Chunk, RetrievedChunk, RetrievalOptions, Retriever } from "./types";
-import { createRetriever } from "./retrieval";
 import { lexicalOverlap } from "./text";
 
 export type GraphEntity = {
@@ -60,7 +59,7 @@ function inferEntityType(label: string): GraphEntity["type"] {
 }
 
 export class GraphRagRetriever implements Retriever {
-  constructor(private readonly vectorRetriever = createRetriever("hybrid")) {}
+  constructor(private readonly vectorRetriever: Retriever) {}
 
   async retrieve(query: string, options: RetrievalOptions = {}): Promise<RetrievedChunk[]> {
     const chunks = options.chunks || [];

@@ -18,9 +18,17 @@ const MetricSchema = new Schema(
 const ExperimentOutputSchema = new Schema(
   {
     documentId: { type: String, required: true },
+    retrievalStrategy: { type: String, default: "unknown" },
+    chunkingStrategy: { type: String, default: "unknown" },
     query: { type: String, required: true },
     answer: { type: String, default: "" },
     retrievedChunkIds: { type: [String], default: [] },
+    citationVerification: {
+      confidence: { type: Number, default: 0 },
+      unsupportedClaims: { type: [String], default: [] },
+      missingCitations: { type: [String], default: [] },
+      hallucinatedCitations: { type: [String], default: [] },
+    },
     metrics: { type: MetricSchema, required: true },
   },
   { _id: false }

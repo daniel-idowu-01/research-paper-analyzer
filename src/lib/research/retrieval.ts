@@ -6,6 +6,7 @@ import type {
   RetrievalStrategy,
   Retriever,
 } from "./types";
+import { GraphRagRetriever } from "./graph";
 import { lexicalOverlap, tokenize } from "./text";
 
 function asRetrieved(
@@ -169,7 +170,7 @@ export function createRetriever(strategy?: RetrievalStrategy): Retriever {
     case "hybrid_rerank":
       return new HybridRerankRetriever();
     case "graph_rag":
-      return new HybridRetriever();
+      return new GraphRagRetriever(new HybridRetriever());
     case "hybrid":
     default:
       return new HybridRetriever();

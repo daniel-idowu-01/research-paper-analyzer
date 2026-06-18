@@ -18,6 +18,8 @@ type Run = {
   };
   outputs: Array<{
     documentId: string;
+    retrievalStrategy?: string;
+    chunkingStrategy?: string;
     metrics: Record<string, number>;
   }>;
   createdAt: string;
@@ -56,7 +58,13 @@ export default function ResearchDashboardPage() {
     [runs, retrieval, chunking, model]
   );
 
-  const outputs = filtered.flatMap((run) => run.outputs || []);
+  const outputs = filtered.flatMap((run) =>
+    (run.outputs || []).filter((output) => {
+      const retrievalOk = retrieval === "all" || output.retrievalStrategy === retrieval;
+      const chunkingOk = chunking === "all" || output.chunkingStrategy === chunking;
+      return retrievalOk && chunkingOk;
+    })
+  );
   const retrievalOptions = Array.from(
     new Set(runs.flatMap((run) => run.config.retrievalStrategies || []))
   );
@@ -150,23 +158,12 @@ export default function ResearchDashboardPage() {
               </thead>
               <tbody>
                 {filtered.map((run) => (
-                  <tr key={run._id} className="border-b last:border-0">
-                    <td className="py-3 font-medium">{run.name}</td>
-                    <td>{run.config.retrievalStrategies?.join(", ")}</td>
-                    <td>{run.config.chunkingStrategies?.join(", ")}</td>
-                    <td>{average(run.outputs, "precisionAtK").toFixed(3)}</td>
-                    <td>{average(run.outputs, "recallAtK").toFixed(3)}</td>
-                    <td>{average(run.outputs, "faithfulness").toFixed(3)}</td>
-                    <td>{average(run.outputs, "citationAccuracy").toFixed(3)}</td>
-                    <td>
-                      <Link
-                        className="text-cyan-300 hover:underline dark:text-cyan-300"
-                        href={`/api/research/experiments/${run._id}/report`}
-                      >
-                        Markdown
-                      </Link>
-                    </td>
-                  </tr>
+                  <ExperimentRow
+                    key={run._id}
+                    run={run}
+                    retrieval={retrieval}
+                    chunking={chunking}
+                  />
                 ))}
               </tbody>
             </table>
@@ -174,6 +171,42 @@ export default function ResearchDashboardPage() {
         </Card>
       </div>
     </main>
+  );
+}
+
+function ExperimentRow({
+  run,
+  retrieval,
+  chunking,
+}: {
+  run: Run;
+  retrieval: string;
+  chunking: string;
+}) {
+  const outputs = (run.outputs || []).filter((output) => {
+    const retrievalOk = retrieval === "all" || output.retrievalStrategy === retrieval;
+    const chunkingOk = chunking === "all" || output.chunkingStrategy === chunking;
+    return retrievalOk && chunkingOk;
+  });
+
+  return (
+    <tr className="border-b last:border-0">
+      <td className="py-3 font-medium">{run.name}</td>
+      <td>{retrieval === "all" ? run.config.retrievalStrategies?.join(", ") : retrieval}</td>
+      <td>{chunking === "all" ? run.config.chunkingStrategies?.join(", ") : chunking}</td>
+      <td>{average(outputs, "precisionAtK").toFixed(3)}</td>
+      <td>{average(outputs, "recallAtK").toFixed(3)}</td>
+      <td>{average(outputs, "faithfulness").toFixed(3)}</td>
+      <td>{average(outputs, "citationAccuracy").toFixed(3)}</td>
+      <td>
+        <Link
+          className="text-cyan-300 hover:underline dark:text-cyan-300"
+          href={`/api/research/experiments/${run._id}/report`}
+        >
+          Markdown
+        </Link>
+      </td>
+    </tr>
   );
 }
 

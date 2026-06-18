@@ -4,7 +4,6 @@ import Paper from "@/models/Paper";
 import { connectDB } from "@/lib/mongo";
 import { badRequest, notFound } from "@/lib/server/http";
 import { createChunkingStrategy, parseDocumentFromPaper } from "@/lib/research/chunking";
-import { GraphRagRetriever } from "@/lib/research/graph";
 import { createRetriever } from "@/lib/research/retrieval";
 import type { RetrievalStrategy } from "@/lib/research/types";
 
@@ -27,8 +26,7 @@ export async function POST(request: Request) {
 
     const document = parseDocumentFromPaper(paper.toObject());
     const chunks = createChunkingStrategy(chunkingStrategy).chunk(document);
-    const retriever =
-      retrievalStrategy === "graph_rag" ? new GraphRagRetriever() : createRetriever(retrievalStrategy);
+    const retriever = createRetriever(retrievalStrategy);
     const retrieved = await retriever.retrieve(query, {
       paperId,
       chunks,

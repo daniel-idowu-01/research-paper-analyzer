@@ -1,6 +1,7 @@
 import Paper from "@/models/Paper";
 import ExperimentRun from "@/models/ExperimentRun";
 import { createChunkingStrategy, parseDocumentFromPaper } from "./chunking";
+import { formatChunkCitation, verifyCitations } from "./citations";
 import { createEvaluationResult } from "./evaluation";
 import { createRetriever } from "./retrieval";
 import type {
@@ -12,9 +13,17 @@ import type {
 
 type ExperimentOutput = {
   documentId: string;
+  retrievalStrategy: RetrievalStrategy;
+  chunkingStrategy: ChunkingStrategyName;
   query: string;
   answer: string;
   retrievedChunkIds: string[];
+  citationVerification: {
+    confidence: number;
+    unsupportedClaims: string[];
+    missingCitations: string[];
+    hallucinatedCitations: string[];
+  };
   metrics: {
     precisionAtK: number;
     recallAtK: number;
@@ -79,7 +88,11 @@ export async function runExperiment(config: ExperimentConfig) {
               chunks,
               topK: config.topK || 5,
             });
-            const answer = retrieved.map((chunk) => chunk.text).join("\n\n").slice(0, 1200);
+            const answer = retrieved
+              .map((chunk) => `${chunk.text} ${formatChunkCitation(chunk)}`)
+              .join("\n\n")
+              .slice(0, 1200);
+            const citationVerification = verifyCitations(answer, retrieved);
             const relevantChunkIds = chunks
               .filter((chunk) => chunk.text.toLowerCase().includes(query.toLowerCase()))
               .map((chunk) => chunk.id);
@@ -90,13 +103,17 @@ export async function runExperiment(config: ExperimentConfig) {
               answer,
               expectedAnswer: plain.summary,
               latencyMs: Date.now() - start,
+              citationAccuracy: citationVerification.confidence,
             });
 
             outputs.push({
               documentId: document.id,
+              retrievalStrategy: retrieval,
+              chunkingStrategy: chunking,
               query,
               answer,
               retrievedChunkIds: retrieved.map((chunk) => chunk.id),
+              citationVerification,
               metrics: flattenMetrics(result),
             });
           }
