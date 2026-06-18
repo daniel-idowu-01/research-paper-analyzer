@@ -227,7 +227,6 @@ const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
             <Badge
               key={topic}
               variant="secondary"
-              className="bg-gray-100 dark:bg-gray-700"
             >
               {topic}
             </Badge>
@@ -245,7 +244,7 @@ const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
                 key={cluster.label}
                 className="rounded-2xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/80"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-400">
                   {cluster.label}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -253,7 +252,6 @@ const PaperDetailsCard = ({ paper }: { paper: IPaper }) => (
                     <Badge
                       key={`${cluster.label}-${topic}`}
                       variant="secondary"
-                      className="bg-slate-100 dark:bg-slate-800"
                     >
                       {topic}
                     </Badge>
@@ -794,7 +792,6 @@ export default function PaperPage() {
                     <Badge
                       key={area}
                       variant="secondary"
-                      className="bg-gray-100 dark:bg-gray-700"
                     >
                       {area}
                     </Badge>
