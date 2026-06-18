@@ -138,23 +138,7 @@
   }
 
   .dark body {
-    background-image:
-      radial-gradient(circle at top left, rgba(96, 228, 215, 0.18), transparent 24%),
-      radial-gradient(circle at 80% 20%, rgba(249, 185, 66, 0.18), transparent 18%),
-      linear-gradient(180deg, #090b14 0%, #111528 55%, #0a1020 100%);
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-size: cover;
-  }
-
-  .dark body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background-image: radial-gradient(circle at 30% 10%, rgba(255, 255, 255, 0.06), transparent 22%),
-      radial-gradient(circle at 80% 80%, rgba(249, 185, 66, 0.08), transparent 24%);
-    opacity: 0.9;
+    background-color: #0a0e1a;
   }
 
   img,

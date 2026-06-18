@@ -170,7 +170,7 @@ export default function Home() {
         <section className="relative flex flex-1 flex-col items-center justify-center gap-12 pt-8 pb-16 text-center">
           <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
           <div className="absolute right-0 top-24 h-60 w-60 rounded-full bg-amber-400/12 blur-3xl" />
-          <div className="hidden dark:block absolute inset-x-0 top-20 -z-10 h-[420px] bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.12),transparent_60%)]" />
+          <div className="hidden dark:block absolute inset-x-0 top-20 -z-10 h-[420px] bg-white/5" />
 
           <div className="relative z-10 flex w-full max-w-3xl flex-col items-center gap-6">
             <span className="inline-flex rounded-full border border-primary/25 bg-card px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary shadow-[0_10px_30px_-20px_rgba(96,228,215,0.7)]">
@@ -258,7 +258,7 @@ export default function Home() {
                       <div className="mt-8 w-full rounded-3xl border border-border bg-card p-4 text-left">
                         <p className="mb-2 text-sm text-muted-foreground">Uploading and analyzing your paper…</p>
                         <div className="h-2 overflow-hidden rounded-full bg-muted">
-                          <div className="h-full w-full animate-pulse rounded-full bg-gradient-to-r from-primary via-secondary to-destructive" />
+                          <div className="h-full w-full animate-pulse rounded-full bg-primary" />
                         </div>
                       </div>
                     )}
