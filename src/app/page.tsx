@@ -224,11 +224,7 @@ export default function Home() {
   return (
     <div className="min-h-screen overflow-hidden">
       <div className="container mx-auto flex min-h-screen flex-col px-4 py-10 sm:px-6 lg:px-8">
-        <section className="relative flex flex-1 flex-col items-center justify-center gap-12 pt-8 pb-16 text-center">
-          <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
-          <div className="absolute right-0 top-24 h-60 w-60 rounded-full bg-amber-400/12 blur-3xl" />
-          <div className="hidden dark:block absolute inset-x-0 top-20 -z-10 h-[420px] bg-white/5" />
-
+        <section className="landing-hero relative flex flex-1 flex-col items-center justify-center gap-12 bg-transparent pt-8 pb-16 text-center">
           <div className="relative z-10 flex w-full max-w-3xl flex-col items-center gap-6">
             <span className="inline-flex rounded-full border border-primary/25 bg-card px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-primary shadow-[0_10px_30px_-20px_rgba(96,228,215,0.7)]">
               AI-powered research synthesis
@@ -246,7 +242,6 @@ export default function Home() {
           <div className="relative z-10 w-full max-w-3xl">
             <Card className="overflow-hidden rounded-[32px] border border-border bg-card shadow-[0_35px_90px_-50px_rgba(15,23,42,0.55)] transition-all duration-300 hover:-translate-y-1">
               <div className="relative overflow-hidden px-8 py-8 sm:px-10 sm:py-10">
-                <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-primary/10 blur-3xl" />
                 <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
                   <div className=" text-start">
                     <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">
